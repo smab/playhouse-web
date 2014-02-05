@@ -2,7 +2,10 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
-import http.client 
+import http.client
+
+import games
+
 
 lampdest, lampport = "smab.csc.kth.se", 4711
 lampdest, lampport = "localhost", 8080 # For local testing 
@@ -17,8 +20,7 @@ headers = {
 # Don't forget to change any websockets also (e.g in index.html)  
 serverport = 8080 
 
-# Blue and red 
-playerColors = [46920, 0] 
+game = games.Paint(client)
 
 
 class MainHandler(tornado.web.RequestHandler): 
@@ -35,6 +37,7 @@ class MainHandler(tornado.web.RequestHandler):
 class CommunicationHandler(tornado.websocket.WebSocketHandler): 
     def open(self): 
         print("Client connected") 
+        game.on_connect(self)
 
     def on_message(self, message): 
         print("Recived message:", message)
@@ -42,30 +45,10 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
         # The message needs validation so that no 
         # cheating or DOS can happen
         if validate(message):
-            # On second thought, everything here should also be in 
-            # the game-specific code since the message from the client 
-            # is also game-specific 
-            coords, player = message.split(" ") 
-            x, y = coords.split("-") 
-            
-            json = {"x": int(x), "y": int(y)}
-
-            change = {}
-            change["on"] = True
-            change["hue"] = playerColors[int(player)]
-
-            json["change"] = change
-            
-            json = tornado.escape.json_encode([json]) 
-            print("json:", json)
-            
-            client.request("POST", "/lights", json, headers) 
-            #response = client.getresponse().read()  
-
-            # Print response 
-            #print(client.getresponse().read().decode())
+            game.on_message(self, message)
 
     def on_close(self): 
+        game.on_close(self)
         pass 
 
 # Perhaps put this in a separate module 
