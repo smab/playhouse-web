@@ -5,7 +5,7 @@ import tornado.websocket
 import http.client 
 
 dest = "smab.csc.kth.se"
-#dest = "localhost"
+dest = "localhost"
 port = 4711 
 client = http.client.HTTPConnection(dest, port)
 headers = {'Content-Type': 'application/json'}
@@ -19,7 +19,7 @@ class MainHandler(tornado.web.RequestHandler):
         print("POST: ", self.request.body) 
 
     def get(self):
-        self.render('index.html')     
+        self.render('../templates/index.html')     
 
 class CommunicationHandler(tornado.websocket.WebSocketHandler): 
     def open(self): 
