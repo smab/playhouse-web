@@ -4,22 +4,33 @@ import tornado.websocket
 
 import http.client 
 
-dest = "smab.csc.kth.se"
-dest = "localhost"
-port = 4711 
-client = http.client.HTTPConnection(dest, port)
-headers = {'Content-Type': 'application/json'}
+lampdest, lampport = "smab.csc.kth.se", 4711
+lampdest, lampport = "localhost", 8080 # For local testing 
+
+client = http.client.HTTPConnection(lampdest, lampport)
+headers = {
+    'Content-Type': 'application/json', 
+    'Accept': '*/*', 
+}
+
+# The port which this server listens on 
+# Don't forget to change any websockets also (e.g in index.html)  
+serverport = 8080 
 
 # Blue and red 
 playerColors = [46920, 0] 
+
 
 class MainHandler(tornado.web.RequestHandler): 
     def post(self):
         # For easy debugging, here you can respond like a lampserver 
         print("POST: ", self.request.body) 
+        self.set_header("Content-Type", "application/json")
+        self.write(tornado.escape.json_encode({"state": "success"})) 
 
     def get(self):
         self.render('../templates/index.html')     
+
 
 class CommunicationHandler(tornado.websocket.WebSocketHandler): 
     def open(self): 
@@ -49,9 +60,10 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
             print("json:", json)
             
             client.request("POST", "/lights", json, headers) 
+            #response = client.getresponse().read()  
 
             # Print response 
-            print(client.getresponse().read().decode())
+            #print(client.getresponse().read().decode())
 
     def on_close(self): 
         pass 
@@ -69,7 +81,7 @@ application = tornado.web.Application([
 ])
 
 if __name__ == "__main__":
-    application.listen(port)
+    application.listen(serverport)
     tornado.ioloop.IOLoop.instance().start()
 
 
