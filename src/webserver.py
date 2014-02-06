@@ -7,18 +7,19 @@ import http.client
 import games
 
 
+# The port which this server listens on 
+# Don't forget to change any websockets also (e.g in index.html)  
+serverport = 8080 
+
 lampdest, lampport = "smab.csc.kth.se", 4711
-lampdest, lampport = "localhost", 8080 # For local testing 
+lampdest, lampport = "localhost", 4711       # For testing with real server 
+lampdest, lampport = "localhost", serverport # For local testing 
 
 client = http.client.HTTPConnection(lampdest, lampport)
 headers = {
     'Content-Type': 'application/json', 
     'Accept': '*/*', 
 }
-
-# The port which this server listens on 
-# Don't forget to change any websockets also (e.g in index.html)  
-serverport = 8080 
 
 game = games.Paint(client)
 
@@ -41,20 +42,11 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message): 
         print("Recived message:", message)
-        
-        # The message needs validation so that no 
-        # cheating or DOS can happen
-        if validate(message):
-            game.on_message(self, message)
+        game.on_message(self, message)
 
     def on_close(self): 
         game.on_close(self)
         pass 
-
-# Perhaps put this in a separate module 
-# containing game-specific code? 
-def validate(msg): 
-    return True
 
 
 application = tornado.web.Application([

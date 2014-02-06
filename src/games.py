@@ -20,6 +20,9 @@ class Game:
     def on_close(self, handler):
         pass
 
+    def validate(self, msg): 
+        pass 
+
 
 class Paint(Game):
     playerColors = {}
@@ -37,35 +40,56 @@ class Paint(Game):
         print(self.client.getresponse().read().decode())
     
     def on_connect(self, handler):
-        self.playerColors[handler] = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
+        self.playerColors[handler] = (
+            random.randint(0,255), 
+            random.randint(0,255), 
+            random.randint(0,255)
+        )
         print("Player %s, color %s" % (handler, self.playerColors[handler]))
 
         for y in range(len(self.board)):
-            for x in range(len(self.board[x])):
+            for x in range(len(self.board[y])):
                 if self.board[y][x] != -1:
-                    handler.write_message(tornado.escape.json_encode({'x':x, 'y':y, 'color':self.board[y][x]}))
+                    handler.write_message(
+                        tornado.escape.json_encode(
+                            {'x':x, 'y':y, 'color':self.board[y][x]}
+                        )
+                    )
 
     def on_message(self, handler, message):
-        coords, _ = message.split(" ") 
-        x, y = coords.split("-") 
-        x = int(x)
-        y = int(y)
-        color = self.playerColors[handler]
-        
-        self.board[y][x] = color
-        for handler in self.playerColors:
-            handler.write_message(tornado.escape.json_encode({'x':x, 'y':y, 'color':color}))
+        if self.validate(message): 
+            coords, _ = message.split(" ") 
+            x, y = coords.split("-") 
+            x = int(x)
+            y = int(y)
+            color = self.playerColors[handler]
+            
+            self.board[y][x] = color
+            for handler in self.playerColors:
+                handler.write_message(
+                    tornado.escape.json_encode(
+                        {'x':x, 'y':y, 'color':color}
+                    )
+                )
 
-        json = {'x': x, 'y': y, 'change': {'rgb': color}}        
-        json = tornado.escape.json_encode([json]) 
-        print("json:", json)
-        
-        headers = {'Content-Type': 'application/json'}
-        self.client.request("POST", "/lights", json, headers) 
+            json = {'x': x, 'y': y, 'change': {'rgb': color}}        
+            json = tornado.escape.json_encode([json]) 
+            print("json:", json)
+            
+            headers = {'Content-Type': 'application/json'}
+            self.client.request("POST", "/lights", json, headers) 
 
-        # Print response 
-        print(self.client.getresponse().read().decode())
+            # Print response 
+            print(self.client.getresponse().read().decode())
 
     def on_close(self, handler):
         if handler in self.playerColors:
             del self.playerColors[handler]
+
+    def validate(self, msg): 
+        return True 
+
+
+
+
+
