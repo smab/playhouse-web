@@ -1,0 +1,16 @@
+{% extends "grid.html" %}
+
+{% block title %}Paint Demo{% end %}
+
+
+{% block click %}
+    // Send to server 
+    ws.send(JSON.stringify({ x: parseInt(coords[0]), y: parseInt(coords[1]) }));
+{% end %}
+
+
+{% block message %}
+    obj = JSON.parse(evt.data)
+    e = document.getElementById(obj.x + "-" + obj.y)
+    e.style.backgroundColor = "rgb("+obj.color[0]+","+obj.color[1]+","+obj.color[2]+")"
+{% end %}
