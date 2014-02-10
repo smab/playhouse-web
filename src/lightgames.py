@@ -26,6 +26,3 @@ class Game:
 
     def on_close(self, handler):
         pass
-
-    def validate(self, handler, msg): 
-        pass 
