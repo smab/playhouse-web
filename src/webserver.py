@@ -4,24 +4,26 @@ import tornado.websocket
 
 import http.client
 
-import games
+import lightgames
 
 
-# The port which this server listens on 
-# Don't forget to change any websockets also (e.g in index.html)  
-serverport = 8080 
-
-lampdest, lampport = "smab.csc.kth.se", 4711
-lampdest, lampport = "localhost", 4711       # For testing with real server 
-lampdest, lampport = "localhost", serverport # For local testing 
-
-client = http.client.HTTPConnection(lampdest, lampport)
+client = None
 headers = {
     'Content-Type': 'application/json', 
     'Accept': '*/*', 
 }
 
-game = games.Paint(client)
+config = {
+    'game_name': 'default',
+    'game_path': ['src/games'],
+
+    'lampdest': 'localhost',
+    'lampport': 4711,
+
+    'serverport': 8080
+}
+config['websocket_addr'] = 'localhost:%d' % config['serverport']
+game = None
 
 
 class MainHandler(tornado.web.RequestHandler): 
@@ -32,7 +34,9 @@ class MainHandler(tornado.web.RequestHandler):
         self.write(tornado.escape.json_encode({"state": "success"})) 
 
     def get(self):
-        self.render('../templates/index.html')     
+        template_vars = {'socket_addr': config['websocket_addr']}
+        template_vars.update(game.template_vars)
+        self.render(game.template_file, **template_vars)
 
 
 class CommunicationHandler(tornado.websocket.WebSocketHandler): 
@@ -49,15 +53,31 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
         pass 
 
 
+def initialize():
+    global config
+    global game
+
+    with open('config.json', 'r') as file:
+        cfg = tornado.escape.json_decode(file.read())
+
+    config.update(cfg)
+
+    print("Connecting to lamp server (%s:%d)" % (config['lampdest'], config['lampport']))
+    client = http.client.HTTPConnection(config['lampdest'], config['lampport'])
+
+    game = lightgames.load(config["game_name"], config["game_path"], client)
+    game.init()
+
+
 application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/websocket", CommunicationHandler), 
     (r"/lights", MainHandler), # For debugging 
-])
+], template_path='templates')
 
 if __name__ == "__main__":
-    application.listen(serverport)
+    initialize()
+
+    print("Starting web server (port %d)" % config['serverport'])
+    application.listen(config['serverport'])
     tornado.ioloop.IOLoop.instance().start()
-
-
-

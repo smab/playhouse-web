@@ -1,0 +1,60 @@
+<html> 
+    <head> 
+        <title>{% block title %}Grid{% end %}</title>
+        <style> 
+            table {
+                margin: 4em auto; 
+            }
+            td:hover {
+                background-color: #ddd;
+            }
+            td {
+                width: 64px; 
+                height: 64px; 
+                border: 1px solid #ccc; 
+                background-color: #f0f0f0;
+            }
+            {% block style %}
+            {% end %}
+        </style>
+        <script> 
+            window.onload = function() {
+                var ws = new WebSocket("ws://{{ socket_addr }}/websocket");
+                ws.onmessage = function (evt) {
+                    {% block message %}
+                    {% end %}
+                };
+
+                var table = document.getElementById("grid"); 
+                for(var i=0; i<{{ grid_y }}; i++) { 
+                    // Create tr 
+                    var tr = document.createElement("tr"); 
+                    for(var ii=0; ii<{{ grid_x }}; ii++) { 
+                        // Add td and function onclick 
+                        var td = document.createElement("td");
+                        td.id = ii + "-" + i; 
+                        td.onclick = function() { play(this); };  
+                        tr.appendChild(td); 
+                    }
+
+                    // Add tr to DOM 
+                    table.appendChild(tr); 
+                }
+
+                function play(e) {
+                    coords = e.id.split("-")
+
+                    {% block click %}
+                    {% end %}
+                }
+            }
+        </script> 
+    </head> 
+    <body>
+        {% block grid %}
+        <table id="grid"></table>
+        {% block postgrid %}
+        {% end %}
+        {% end %}
+    </body>
+</html> 
