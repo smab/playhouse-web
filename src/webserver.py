@@ -27,12 +27,6 @@ game = None
 
 
 class MainHandler(tornado.web.RequestHandler): 
-    def post(self):
-        # For easy debugging, here you can respond like a lampserver 
-        print("POST: ", self.request.body) 
-        self.set_header("Content-Type", "application/json")
-        self.write(tornado.escape.json_encode({"state": "success"})) 
-
     def get(self):
         template_vars = {'socket_addr': config['websocket_addr']}
         template_vars.update(game.template_vars)
@@ -45,7 +39,7 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
         game.on_connect(self)
 
     def on_message(self, message): 
-        print("Recived message:", message)
+        print("Received message:", message)
         game.on_message(self, message)
 
     def on_close(self): 
@@ -72,7 +66,6 @@ def initialize():
 application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/websocket", CommunicationHandler), 
-    (r"/lights", MainHandler), # For debugging 
 ], template_path='templates')
 
 if __name__ == "__main__":
