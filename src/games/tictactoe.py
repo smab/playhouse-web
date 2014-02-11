@@ -9,9 +9,10 @@ def create(client):
 
 
 def send_msg(handler, msg):
-    handler.write_message(
-        tornado.escape.json_encode(msg)
-    )
+    if handler != None:
+        handler.write_message(
+            tornado.escape.json_encode(msg)
+        )
 
 
 class TicTacToe(lightgames.Game):
@@ -109,7 +110,7 @@ class TicTacToe(lightgames.Game):
                 send_msg(opponentH, {'message':'Your turn!'})
 
                 color = self.colors[self.player]
-                json = {'x': x, 'y': y, 'change': {'hue': color}}        
+                json = {'x': x, 'y': y, 'change': {'sat':255, 'hue': color}}
                 json = tornado.escape.json_encode([json]) 
                 #print("json:", json)
 
