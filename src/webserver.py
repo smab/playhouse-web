@@ -5,6 +5,7 @@ import tornado.websocket
 import http.client
 
 import lightgames
+import queue
 
 
 client = None
@@ -24,6 +25,7 @@ config = {
 }
 config['websocket_addr'] = 'localhost:%d' % config['serverport']
 game = None
+queue = queue.Queue()
 
 
 class MainHandler(tornado.web.RequestHandler): 
@@ -35,15 +37,18 @@ class MainHandler(tornado.web.RequestHandler):
 
 class CommunicationHandler(tornado.websocket.WebSocketHandler): 
     def open(self): 
-        print("Client connected") 
+        print("Client connected")
         game.on_connect(self)
+        queue.on_connect(self)
 
     def on_message(self, message): 
         print("Received message:", message)
         game.on_message(self, message)
+        queue.on_message(self, message)
 
     def on_close(self): 
         game.on_close(self)
+        queue.on_close(self)
         pass 
 
 

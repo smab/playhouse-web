@@ -12,7 +12,7 @@ def send_msg(handler, msg):
 class Queue:
     def on_connect(self, handler):
         queue.append(handler)
-        send_msg(handler, {'message':'Your place in queue: %d' % self.size()})
+        send_msg(handler, {'queue':self.size()})
 
     def size(self):
         return len(queue)
@@ -25,7 +25,10 @@ class Queue:
         i = 0
         for queuer in queue:
             i += 1
-            send_msg(queuer, {'message':'Your place in queue: %d' % i})
+            send_msg(queuer, {'queue':i})
+
+    def on_message(self, handler, message):
+        pass
 
     def get_first(self):
         if self.size() > 0:
