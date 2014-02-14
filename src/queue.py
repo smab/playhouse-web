@@ -1,8 +1,6 @@
 import tornado.escape
 import collections
 
-queue = collections.deque()
-
 def send_msg(handler, msg):
     if handler != None:
         handler.write_message(
@@ -10,20 +8,23 @@ def send_msg(handler, msg):
         )
 
 class Queue:
+    def __init__(self):
+        self.queue = collections.deque()
+
     def on_connect(self, handler):
-        queue.append(handler)
+        self.queue.append(handler)
         send_msg(handler, {'queue':self.size()})
 
     def size(self):
-        return len(queue)
+        return len(self.queue)
 
     def on_close(self, handler):
-        queue.remove(handler)
+        self.queue.remove(handler)
         self.refresh()
 
     def refresh(self):
         i = 0
-        for queuer in queue:
+        for queuer in self.queue:
             i += 1
             send_msg(queuer, {'queue':i})
 
@@ -32,8 +33,11 @@ class Queue:
 
     def get_first(self):
         if self.size() > 0:
-            player = queue.popleft()
+            player = self.queue.popleft()
             self.refresh()
             return player
         else:
             return None
+
+    def clear(self):
+        self.queue.clear()
