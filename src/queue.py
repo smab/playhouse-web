@@ -32,6 +32,8 @@ class Queue:
 
     def get_first(self):
         if self.size() > 0:
-            return queue.popleft()
+            player = queue.popleft()
+            self.refresh()
+            return player
         else:
             return None
