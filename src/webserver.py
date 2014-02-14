@@ -36,10 +36,13 @@ class MainHandler(tornado.web.RequestHandler):
 
 
 class CommunicationHandler(tornado.websocket.WebSocketHandler): 
+    connections = []
+
     def open(self): 
-        print("Client connected")
+        print("Client connected (%s)" % self)
         game.on_connect(self)
         queue.on_connect(self)
+        self.connections += [self]
 
     def on_message(self, message): 
         print("Received message:", message)
@@ -47,13 +50,53 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
         queue.on_message(self, message)
 
     def on_close(self): 
+        print("Client disconnected (%s)" % self)
         game.on_close(self)
         queue.on_close(self)
-        pass 
+        self.connections.remove(self)
+
+
+class ConfigHandler(tornado.web.RequestHandler):
+    def post(self):
+        global config
+        global client
+        global game
+
+        load_game = False
+        cfg = tornado.escape.json_decode(self.request.body)
+        print("Config: %s" % cfg)
+
+        config.update(cfg)
+
+        if 'lampdest' in cfg or 'lampport' in cfg:
+            print("Connecting to lamp server (%s:%d)" % (config['lampdest'], config['lampport']))
+            client = http.client.HTTPConnection(config['lampdest'], config['lampport'])
+            load_game = True
+
+        if 'game_name' in cfg:
+            load_game = True
+
+        if load_game:
+            print("Changing or restarting game")
+            if game != None:
+                game.destroy()
+
+            for conn in CommunicationHandler.connections:
+                conn.close()
+
+            CommunicationHandler.connections = []
+
+            queue.clear()
+            game = lightgames.load(config["game_name"], config["game_path"], client)
+            game.init()
+
+        self.set_header("Content-Type", "application/json")
+        self.write(tornado.escape.json_encode({"state": "success"}))
 
 
 def initialize():
     global config
+    global client
     global game
 
     with open('config.json', 'r') as file:
@@ -71,6 +114,7 @@ def initialize():
 application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/websocket", CommunicationHandler), 
+    (r"/config", ConfigHandler),
 ], template_path='templates')
 
 if __name__ == "__main__":

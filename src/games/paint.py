@@ -17,10 +17,9 @@ class Paint(lightgames.Game):
         'grid_y': 10
     }
 
-    playerColors = {}
-
 
     def init(self):
+        self.playerColors = {}
         self.board = [[-1 for _ in range(self.template_vars['grid_x'])] 
             for _ in range(self.template_vars['grid_y'])]
 

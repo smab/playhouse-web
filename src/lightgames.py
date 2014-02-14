@@ -18,6 +18,9 @@ class Game:
     def init(self):
         pass
 
+    def destroy(self):
+        pass
+
     def on_connect(self, handler):
         pass
 

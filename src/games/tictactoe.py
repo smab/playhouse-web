@@ -64,6 +64,13 @@ class TicTacToe(lightgames.Game):
 
     def init(self):
         self.reset()
+
+    def destroy(self):
+        for h in self.connections:
+            send_msg(h, {'message':"The game got destroyed!"})
+
+        self.players = [None, None]
+        self.connections = []
     
     def on_connect(self, handler):
         self.connections += [handler]
