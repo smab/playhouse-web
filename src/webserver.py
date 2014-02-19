@@ -40,20 +40,21 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
 
     def open(self): 
         print("Client connected (%s)" % self)
-        game.on_connect(self)
         queue.on_connect(self)
+        game.on_connect(self)
         self.connections += [self]
 
     def on_message(self, message): 
         print("Received message:", message)
-        game.on_message(self, message)
         queue.on_message(self, message)
+        game.on_message(self, message)
 
     def on_close(self): 
         print("Client disconnected (%s)" % self)
-        game.on_close(self)
-        queue.on_close(self)
-        self.connections.remove(self)
+        if self in self.connections:
+            queue.on_close(self)
+            game.on_close(self)
+            self.connections.remove(self)
 
 
 class ConfigHandler(tornado.web.RequestHandler):
@@ -80,14 +81,14 @@ class ConfigHandler(tornado.web.RequestHandler):
             print("Changing or restarting game")
             if game != None:
                 game.destroy()
+            queue.clear()
 
             for conn in CommunicationHandler.connections:
                 conn.close()
-
             CommunicationHandler.connections = []
 
-            queue.clear()
             game = lightgames.load(config["game_name"], config["game_path"], client)
+            game.set_queue(queue)
             game.init()
 
         self.set_header("Content-Type", "application/json")
@@ -108,6 +109,7 @@ def initialize():
     client = http.client.HTTPConnection(config['lampdest'], config['lampport'])
 
     game = lightgames.load(config["game_name"], config["game_path"], client)
+    game.set_queue(queue)
     game.init()
 
 
@@ -115,7 +117,7 @@ application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/websocket", CommunicationHandler), 
     (r"/config", ConfigHandler),
-], template_path='templates')
+], template_path='templates', debug=True)
 
 if __name__ == "__main__":
     initialize()

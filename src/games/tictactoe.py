@@ -10,9 +10,7 @@ def create(client):
 
 def send_msg(handler, msg):
     if handler != None:
-        handler.write_message(
-            tornado.escape.json_encode(msg)
-        )
+        handler.write_message(msg)
 
 
 class TicTacToe(lightgames.Game):
@@ -26,8 +24,8 @@ class TicTacToe(lightgames.Game):
     colors = [0, 45000, 65000]
     button_colors = ["red", "blue", ""]
 
-    connections = []
-    players = [None, None]
+    connections = []        # connections to sync the board with
+    players = [None, None]  # current players
     player = 0
     board = None
 
@@ -41,6 +39,11 @@ class TicTacToe(lightgames.Game):
         self.client.request("POST", "/lights", tornado.escape.json_encode(buffer))
         print(self.client.getresponse().read().decode())
 
+        # stop syncing previous players
+        for h in self.players:
+            if h != None:
+                self.connections.remove(h)
+
         self.player = 0
         self.players = [None, None]
 
@@ -48,8 +51,28 @@ class TicTacToe(lightgames.Game):
                       [2, 2, 2],
                       [2, 2, 2]]
 
-        #for handler in self.connections:
-        #    self.sync(handler)
+        for handler in self.connections:
+            self.sync(handler)
+
+        # try to get two new players from queue
+        self.add_player(self.queue.get_first())
+        self.add_player(self.queue.get_first())
+
+    def add_player(self, handler):
+        print("Add player: %s" % handler)
+
+        player = -1
+        if handler != None:
+            if None in self.players:
+                player = self.players.index(None)
+                self.players[player] = handler
+
+            assert player != -1
+
+            print("Connection %s as player %d" % (handler, player))
+            send_msg(handler, {'message':'You are player %d' % (player+1)})
+
+        return player
 
     def sync(self, handler):
         print("Syncing %s" % handler)
@@ -57,9 +80,7 @@ class TicTacToe(lightgames.Game):
             for x in range(3):
                 button_color = self.button_colors[self.board[y][x]]
                 handler.write_message(
-                    tornado.escape.json_encode(
-                        {'x':x, 'y':y, 'color':button_color}
-                    )
+                    {'x':x, 'y':y, 'color':button_color}
                 )
 
     def init(self):
@@ -73,21 +94,17 @@ class TicTacToe(lightgames.Game):
         self.connections = []
     
     def on_connect(self, handler):
-        self.connections += [handler]
+        if handler not in self.connections:
+            self.connections += [handler]
 
-        player = -1
-        if self.players[0] == None:
-            self.players[0] = handler
-            player = 0
-        elif self.players[1] == None:
-            self.players[1] = handler
-            player = 1
+        spectator = True
+        if None in self.players:
+            top = self.queue.get_first()
+            self.add_player(top)
+            spectator = top != handler
 
-        print("Connection %s as player %d" % (handler, player))
-        if player == -1:
+        if spectator:
             send_msg(handler, {'message':'You are a spectator!'})
-        else:
-            send_msg(handler, {'message':'You are player %d' % (player+1)})
 
         # Sync board
         self.sync(handler)
@@ -96,14 +113,20 @@ class TicTacToe(lightgames.Game):
         playerH = self.players[self.player]
         opponentH = self.players[1-self.player]
 
-        if opponentH == handler:
-            print("Wrong player")
-            send_msg(handler, {'error':'Not your turn!'})
-        elif playerH != handler:
-            print("Spectator")
-            send_msg(handler, {'error':'You are not a player!'})
+        coords = tornado.escape.json_decode(message)
+        if 'action' not in coords or coords['action'] != 'gameaction':
+            # assume queueaction
+            self.on_connect(handler)
+            return
+
+        if playerH != handler:
+            if opponentH == handler:
+                print("Wrong player")
+                send_msg(handler, {'error':'Not your turn!'})
+            else:
+                print("Spectator")
+                send_msg(handler, {'error':'You are not a player!'})
         else: # playerH == handler
-            coords = tornado.escape.json_decode(message)
             x = coords['x']
             y = coords['y']
             button_color = self.button_colors[self.player]
@@ -160,7 +183,9 @@ class TicTacToe(lightgames.Game):
         if handler in self.connections:
             self.connections.remove(handler)
 
-        if self.players[0] == handler:
-            self.players[0] = None
-        elif self.players[1] == handler:
-            self.players[1] = None
+        if handler in self.players:
+            player = self.players.index(handler)
+            self.players[player] = None
+
+            # try to replace the player with one from the queue
+            self.add_player(self.queue.get_first())
