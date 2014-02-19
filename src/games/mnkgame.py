@@ -4,8 +4,8 @@ import lightgames
 
 
 def create(client):
-    print("Creating tic-tac-toe game")
-    return TicTacToe(client)
+    print("Creating m,n,k-game")
+    return MnkGame(client)
 
 
 def send_msg(handler, msg):
@@ -13,14 +13,15 @@ def send_msg(handler, msg):
         handler.write_message(msg)
 
 
-class TicTacToe(lightgames.Game):
-    template_file = "tictactoe.html"
+class MnkGame(lightgames.Game):
+    template_file = "mnkgame.html"
     template_vars = {
-        'module_name': 'Tic-Tac-Toe',
+        'module_name': 'm,n,k-game',
         'grid_x': 3,
         'grid_y': 3
     }
 
+    winning_req = 3
     colors = [0, 45000, 65000]
     button_colors = ["red", "blue", ""]
 
@@ -31,6 +32,12 @@ class TicTacToe(lightgames.Game):
 
     def reset(self):
         print("New game!")
+
+        if self.template_vars['grid_x'] == 3 and \
+           self.template_vars['grid_y'] == 3 and self.winning_req == 3:
+            self.template_vars['title'] = 'Tic-tac-toe'
+        else:
+            self.template_vars['title'] = '%d-in-a-row' % self.winning_req
 
         buffer = []
         for y in range(3):
@@ -46,23 +53,24 @@ class TicTacToe(lightgames.Game):
 
         self.player = 0
         self.players = [None, None]
-
-        self.board = [[2, 2, 2],
-                      [2, 2, 2],
-                      [2, 2, 2]]
-
-        for handler in self.connections:
-            self.sync(handler)
+        self.board = [[2 for _ in range(self.template_vars['grid_x'])]
+            for _ in range(self.template_vars['grid_y'])]
 
         # try to get two new players from queue
         self.add_player(self.queue.get_first())
         self.add_player(self.queue.get_first())
+
+        for handler in self.connections:
+            self.sync(handler)
 
     def add_player(self, handler):
         print("Add player: %s" % handler)
 
         player = -1
         if handler != None:
+            if handler not in self.connections:
+                self.connections += [handler]
+
             if None in self.players:
                 player = self.players.index(None)
                 self.players[player] = handler
@@ -76,8 +84,8 @@ class TicTacToe(lightgames.Game):
 
     def sync(self, handler):
         print("Syncing %s" % handler)
-        for y in range(3):
-            for x in range(3):
+        for y in range(len(self.board)):
+            for x in range(len(self.board[y])):
                 button_color = self.button_colors[self.board[y][x]]
                 handler.write_message(
                     {'x':x, 'y':y, 'color':button_color}
@@ -92,7 +100,7 @@ class TicTacToe(lightgames.Game):
 
         self.players = [None, None]
         self.connections = []
-    
+
     def on_connect(self, handler):
         if handler not in self.connections:
             self.connections += [handler]
@@ -116,7 +124,8 @@ class TicTacToe(lightgames.Game):
         coords = tornado.escape.json_decode(message)
         if 'action' not in coords or coords['action'] != 'gameaction':
             # assume queueaction
-            self.on_connect(handler)
+            if handler not in self.players:
+                self.on_connect(handler)
             return
 
         if playerH != handler:
@@ -130,7 +139,7 @@ class TicTacToe(lightgames.Game):
             x = coords['x']
             y = coords['y']
             button_color = self.button_colors[self.player]
-            
+
             if self.board[y][x] == 2:
                 self.board[y][x] = self.player
                 for h in self.connections:
@@ -141,23 +150,37 @@ class TicTacToe(lightgames.Game):
 
                 color = self.colors[self.player]
                 json = {'x': x, 'y': y, 'change': {'sat':255, 'hue': color}}
-                json = tornado.escape.json_encode([json]) 
+                json = tornado.escape.json_encode([json])
                 #print("json:", json)
 
                 headers = {'Content-Type': 'application/json'}
-                self.client.request("POST", "/lights", json, headers) 
+                self.client.request("POST", "/lights", json, headers)
 
-                # Print response 
+                # Print response
                 print(self.client.getresponse().read().decode())
 
                 winner_lamps = set()
-                for configuration in [[(y, 0), (y, 1), (y, 2)],
-                                      [(0, x), (1, x), (2, x)],
-                                      [(0, 0), (1, 1), (2, 2)],
-                                      [(0, 2), (1, 1), (2, 0)]]:
-                    if all(self.board[i][j] == self.player for i, j in configuration):
-                        winner_lamps.update(configuration)
-                
+
+                directions = [(0,1), (1,0), (1,1), (1,-1)]
+                for direction in directions:
+                    def search(cx, cy, direction):
+                        lamps = []
+                        for i in range(self.winning_req-1):
+                            cx += direction[0]
+                            cy += direction[1]
+                            if cx >= 0 and cy >= 0 and \
+                                cy < len(self.board) and cx < len(self.board[cy]) and \
+                                self.board[cy][cx] == self.player:
+                                lamps += [(cx, cy)]
+                            else:
+                                break
+                        return lamps
+
+                    lamps = [(x,y)] + search(x, y, direction) + \
+                            search(x, y, (-direction[0], -direction[1]))
+                    if len(lamps) >= self.winning_req:
+                        winner_lamps.update(lamps)
+
                 if len(winner_lamps) > 0:
                     send_msg(playerH, {'message':'You won!'})
                     send_msg(opponentH, {'message':'You lost!'})
@@ -173,7 +196,7 @@ class TicTacToe(lightgames.Game):
                         send_msg(h, {'message':"The game tied"})
                     self.reset()
                     return
-                
+
                 self.player = 1 - self.player
             else:
                 send_msg(playerH, {'error':'Invalid move!'})
