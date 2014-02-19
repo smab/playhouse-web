@@ -95,6 +95,19 @@ class ConfigHandler(tornado.web.RequestHandler):
         self.write(tornado.escape.json_encode({"state": "success"}))
 
 
+class GameConfigHandler(tornado.web.RequestHandler):
+    def post(self):
+        global game
+
+        cfg = tornado.escape.json_decode(self.request.body)
+        print("Config: %s" % cfg)
+
+        game.set_options(cfg)
+
+        self.set_header("Content-Type", "application/json")
+        self.write(tornado.escape.json_encode({"state": "success"}))
+
+
 def initialize():
     global config
     global client
@@ -117,6 +130,7 @@ application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/websocket", CommunicationHandler), 
     (r"/config", ConfigHandler),
+    (r"/config/game", GameConfigHandler),
 ], template_path='templates', debug=True)
 
 if __name__ == "__main__":

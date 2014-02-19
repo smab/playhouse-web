@@ -20,6 +20,11 @@ class MnkGame(lightgames.Game):
         'grid_x': 3,
         'grid_y': 3
     }
+    # note: concept/idea
+    options = {
+        'winner_req':('integer', 'Stones in a row required to win'),
+        'size':('(integer, integer)', 'Grid size')
+    }
 
     winning_req = 3
     colors = [0, 45000, 65000]
@@ -212,3 +217,11 @@ class MnkGame(lightgames.Game):
 
             # try to replace the player with one from the queue
             self.add_player(self.queue.get_first())
+
+
+    def set_options(self, config):
+        self.winning_req = config['winner_req']
+        self.template_vars['grid_y'] = config['size'][0]
+        self.template_vars['grid_x'] = config['size'][1]
+
+        self.reset()

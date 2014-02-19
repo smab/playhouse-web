@@ -33,3 +33,6 @@ class Game:
 
     def set_queue(self, queue):
         self.queue = queue
+
+    def set_options(self, config):
+        pass
