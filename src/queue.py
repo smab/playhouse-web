@@ -12,24 +12,37 @@ class Queue:
         self.queue = collections.deque()
 
     def on_connect(self, handler):
-        self.queue.append(handler)
-        send_msg(handler, {'queue':self.size()})
+        send_msg(handler, {'queuepos':0})
 
     def size(self):
         return len(self.queue)
 
     def on_close(self, handler):
-        self.queue.remove(handler)
-        self.refresh()
+        try:
+            self.queue.remove(handler)
+            self.refresh()
+        except ValueError:
+            pass
 
     def refresh(self):
         i = 0
         for queuer in self.queue:
             i += 1
-            send_msg(queuer, {'queue':i})
+            send_msg(queuer, {'queuepos':i})
 
     def on_message(self, handler, message):
-        pass
+        msg = tornado.escape.json_decode(message)
+        try:
+            action = msg['queueaction']
+            if action == 0:
+                self.queue.remove(handler)
+                self.refresh()
+                send_msg(handler, {'queuepos':0})
+            if action == 1:
+                self.queue.append(handler)
+                send_msg(handler, {'queuepos':self.size()})
+        except KeyError:
+            pass
 
     def get_first(self):
         if self.size() > 0:

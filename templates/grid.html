@@ -14,8 +14,20 @@
                 border: 1px solid #ccc; 
                 background-color: #f0f0f0;
             }
-            div#queuemsg {
+            div#queue {
                 text-align: center;
+                border-style: solid;
+                border-width: 1px;
+                border-color: black;
+                width: 200px;
+                margin: auto;
+                margin-top: 10px;
+                padding: 10px;
+                background-color: #FF66FF;
+            }
+            p#queuemsg {
+                margin: 2px;
+                color: black;
             }
             {% block style %}
             {% end %}
@@ -29,12 +41,24 @@
 
                     {% block queuemsg %}
 
-                    if (obj.queue != undefined) {
-                        q = document.getElementById("queuemsg")
-                        if(obj.queue > 0) {
-                           q.innerHTML = "Your place in queue: " + obj.queue;
+                    if (obj.queuepos != undefined) {
+                        qmsg = document.getElementById("queuemsg")
+                        qbtn = document.getElementById("queuebtn")
+                        if(obj.queuepos > 0) {
+                            qmsg.innerHTML = "Your place in queue: " + obj.queuepos;
+                            qbtn.value = "Leave queue";
+                            qbtn.onclick = function() {
+                                ws.send(JSON.stringify({ queueaction : 0 }));
+                            }
+                        } else {
+                            qmsg.innerHTML = "You are not in the queue";
+                            qbtn.value = "Join queue";
+                            qbtn.onclick = function() {
+                                ws.send(JSON.stringify({ queueaction : 1 }));
+                            }
                         }
                     }
+
                     {% end %}
                 };
 
@@ -70,7 +94,10 @@
         {% end %}
         {% end %}
         {% block queue %}
-        <div id="queuemsg"></div>
+        <div id="queue">
+            <p id="queuemsg">Connecting to queue...</p>
+            <input type=button id="queuebtn" value="Join queue" />
+        </div>
         {% end %}
     </body>
 </html> 
