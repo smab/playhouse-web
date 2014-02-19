@@ -48,9 +48,12 @@ class Queue:
         if self.size() > 0:
             player = self.queue.popleft()
             self.refresh()
+            send_msg(player, {'queuepos':0})
             return player
         else:
             return None
 
     def clear(self):
+        for queuer in self.queue:
+            send_msg(queuer, {'queuepos':0})
         self.queue.clear()
