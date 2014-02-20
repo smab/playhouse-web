@@ -6,14 +6,15 @@ import http.client
 
 import lightgames
 import queue
-
+import config as configinterface 
 
 client = None
 headers = {
     'Content-Type': 'application/json', 
-    'Accept': '*/*', 
 }
 
+# TODO Move to separate file, or fix so that 
+# the configinterface also can get this 
 config = {
     'game_name': 'default',
     'game_path': ['src/games'],
@@ -114,7 +115,7 @@ def initialize():
 application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/websocket", CommunicationHandler), 
-    (r"/config", ConfigHandler),
+    (r"/config", configinterface.ConfigHandler),
 ], template_path='templates')
 
 if __name__ == "__main__":
@@ -123,3 +124,6 @@ if __name__ == "__main__":
     print("Starting web server (port %d)" % config['serverport'])
     application.listen(config['serverport'])
     tornado.ioloop.IOLoop.instance().start()
+    
+
+
