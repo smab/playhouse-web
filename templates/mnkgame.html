@@ -1,0 +1,44 @@
+{% extends "grid.html" %}
+
+{% block title %}{{ title }}{% end %}
+
+
+{% block style %}
+	td.blue {
+		background-color: #66e;
+	}
+	td.red {
+		background-color: #e66;
+	}
+	div#message {
+		text-align: center;
+	}
+{% end %}
+
+
+{% block postgrid %}
+<div id="message">Connecting...</div>
+{% end %}
+
+
+{% block click %}
+	// Send to server
+	ws.send(JSON.stringify({ action: "gameaction", x: parseInt(coords[0]), y: parseInt(coords[1]) }));
+{% end %}
+
+
+{% block message %}
+	obj = JSON.parse(evt.data)
+
+	if (obj.error != undefined) {
+		alert(obj.error)
+	}
+	if (obj.message != undefined) {
+		e = document.getElementById("message")
+		e.innerHTML = obj.message;
+	}
+	if (obj.x != undefined) {
+		e = document.getElementById(obj.x + "-" + obj.y)
+		e.className = obj.color;
+	}
+{% end %}

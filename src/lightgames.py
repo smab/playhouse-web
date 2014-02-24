@@ -1,5 +1,6 @@
 import imp
 
+
 def load(name, path, client):
     file, pathname, description = imp.find_module(name, path)
     mod = imp.load_module(name, file, pathname, description)
@@ -28,4 +29,10 @@ class Game:
         pass
 
     def on_close(self, handler):
+        pass
+
+    def set_queue(self, queue):
+        self.queue = queue
+
+    def set_options(self, config):
         pass
