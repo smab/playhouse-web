@@ -22,3 +22,5 @@ if __name__ == "__main__":
     print("Starting dummy lamp server (port %d)" % config['lampport'])
     application.listen(config['lampport'])
     tornado.ioloop.IOLoop.instance().start()
+
+

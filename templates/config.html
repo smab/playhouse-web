@@ -72,9 +72,10 @@
                 width: 128px; 
                 height: 32px; 
 
+                margin: 0 4px; 
                 display: inline-block; 
             }
-            #buttons li button { width: 100%; height: 100%;}
+            #buttons li input { width: 100%; height: 100%;}
                 
         </style> 
         <script> 
@@ -129,12 +130,11 @@
         <div id="center"> 
             <ul id="menu"> 
                 <li><a class="active"href="">Bridges</a></li> 
-                <li><a href="">Games</a></li> 
-                <li><a href="">Virtual?</a></li> 
-                <li><a href="">Other stuff</a></li> 
+                <li><a href="">Settings</a></li> 
+                <li><a href="">Preview</a></li> 
             </ul> 
             <h1>Bridges</h1> 
-            <form action=""> 
+            <form action="/config" method="post">  
                 <table id="bridges"> 
                     <tr> 
                         <th>#</th> 
@@ -145,15 +145,15 @@
                         <th class="valid">valid_username</th> 
                         <th class="lights"># Lights</th> 
                     </tr> 
-                    {% for i, mac, ip, un, v, l in bridges %}
+                    {% for i, mac in enumerate(bridges) %}
                     <tr> 
-                        <td>{{ i }}</td> 
+                        <td>{{ i+1 }}</td> 
                         <td><input type="checkbox" name="select" value="{{ mac }}"></td> 
                         <td>{{ mac }}</td> 
-                        <td>{{ ip }}</td> 
-                        <td>{{ un }}</td> 
-                        <td>{{ v }}</td> 
-                        <td>{{ l }}</td> 
+                        <td>{{ bridges[mac]['ip'] }}</td> 
+                        <td>{{ bridges[mac]['username'] }}</td> 
+                        <td>{{ bridges[mac]['valid_username'] }}</td> 
+                        <td>{{ bridges[mac]['lights'] }}</td> 
                     </tr>
                     {% end %}
                     <!--tr>
@@ -219,10 +219,10 @@
                     </tr> 
                 </table> 
                 <ul id="buttons"> 
-                    <li><button type="button">Identify Selected</button> </li>
-                    <li><button type="button" onclick="addBridge()">Add Bridge</button></li> 
-                    <li><button type="button">Remove Selected</button></li> 
-                    <li><button type="button">Refresh List</button></li> 
+                    <li><input type="submit" value="Identify Selected"></li>
+                    <li><input type="submit" value="Add Bridge"></li> 
+                    <li><input type="submit" value="Remove Selected"></li> 
+                    <li><input type="submit" value="Refresh List"></li> 
                 </ul> 
             </form>
         <div>

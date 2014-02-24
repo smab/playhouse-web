@@ -11,8 +11,6 @@ def create(client):
 class Off(lightgames.Game):
     """A 'game' used to easily turn off the lights when not needed"""
     def reset(self):
-        print("New game!")
-
         buffer = []
         for y in range(3): # TODO Get these variables from the server 
             for x in range(3):
