@@ -8,6 +8,7 @@ def load(name, path, client):
     return mod.create(client)
 
 class Game:
+    config_file = "defaultconfig.html"
     template_file = "default.html"
     template_vars = {
         'module_name': '<name not set>'

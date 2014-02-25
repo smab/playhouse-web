@@ -58,24 +58,33 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
             self.connections.remove(self)
 
 
-class ConfigHandler(tornado.web.RequestHandler):
-    def post(self):
-        global config
-        global client
-        global game
+# TODO: Move to config.py?
+class GameConfigHandler(tornado.web.RequestHandler):
+    global config
 
-        load_game = False
-        cfg = tornado.escape.json_decode(self.request.body)
+    def get(self):
+        global game
+        template_vars = {
+            'config_file':game.config_file,
+            'game_name':config['game_name'],
+            'game_path':tornado.escape.json_encode(config['game_path']),
+        }
+        template_vars.update(game.template_vars)
+        template_vars['vars'] = template_vars;
+        self.render('gameconfig.html', **template_vars)
+
+    def post(self):
+        global game
+        cfg = {}
+        for key,val in self.request.arguments.items():
+            cfg[key] = self.get_argument(key)
+
         print("Config: %s" % cfg)
 
-        config.update(cfg)
+        load_game = False
 
-        if 'lampdest' in cfg or 'lampport' in cfg:
-            print("Connecting to lamp server (%s:%d)" % (config['lampdest'], config['lampport']))
-            client = http.client.HTTPConnection(config['lampdest'], config['lampport'])
-            load_game = True
-
-        if 'game_name' in cfg:
+        if 'game_name' in cfg and config['game_name']!=cfg['game_name']:
+            config['game_name'] = cfg['game_name']
             load_game = True
 
         if load_game:
@@ -91,23 +100,10 @@ class ConfigHandler(tornado.web.RequestHandler):
             game = lightgames.load(config["game_name"], config["game_path"], client)
             game.set_queue(queue)
             game.init()
+        else:
+            game.set_options(cfg)
 
-        self.set_header("Content-Type", "application/json")
-        self.write(tornado.escape.json_encode({"state": "success"}))
-
-
-class GameConfigHandler(tornado.web.RequestHandler):
-    def post(self):
-        global game
-
-        cfg = tornado.escape.json_decode(self.request.body)
-        print("Config: %s" % cfg)
-
-        game.set_options(cfg)
-
-        self.set_header("Content-Type", "application/json")
-        self.write(tornado.escape.json_encode({"state": "success"}))
-
+        self.redirect("game")
 
 def initialize():
     global config
@@ -131,7 +127,8 @@ application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/websocket", CommunicationHandler), 
     (r"/config", configinterface.ConfigHandler),
-], template_path='templates')
+    (r"/config/game", GameConfigHandler),
+], template_path='templates', debug=True)
 
 if __name__ == "__main__":
     initialize()
