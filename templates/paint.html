@@ -1,6 +1,13 @@
 {% extends "grid.html" %}
 
-{% block title %}Paint Demo{% end %}
+{% block title %}Paint{% end %}
+
+
+{% block style %}
+	td {
+		background-color: {{ color_empty }};
+	}
+{% end %}
 
 
 {% block click %}

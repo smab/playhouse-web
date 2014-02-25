@@ -14,11 +14,18 @@ def send_msg(handler, msg):
 
 
 class MnkGame(lightgames.Game):
+    config_file = "mnkconfig.html"
     template_file = "mnkgame.html"
     template_vars = {
         'module_name': 'm,n,k-game',
         'grid_x': 3,
-        'grid_y': 3
+        'grid_y': 3,
+        'cell_w': 64,
+        'cell_h': 64,
+        'winner_req': 3,
+        'color_1': '#66e',
+        'color_2': '#e66',
+        'color_empty': '#f0f0f0'
     }
     # note: concept/idea
     options = {
@@ -28,7 +35,7 @@ class MnkGame(lightgames.Game):
 
     winning_req = 3
     colors = [0, 45000, 65000]
-    button_colors = ["red", "blue", ""]
+    button_colors = ["player_1", "player_2", ""]
 
     connections = []        # connections to sync the board with
     players = [None, None]  # current players
@@ -220,8 +227,17 @@ class MnkGame(lightgames.Game):
 
 
     def set_options(self, config):
-        self.winning_req = config['winner_req']
-        self.template_vars['grid_y'] = config['size'][0]
-        self.template_vars['grid_x'] = config['size'][1]
+        m = 50;
+        self.template_vars['grid_y'] = max(2,min(m,int(config['grid_y'])))
+        self.template_vars['grid_x'] = max(2,min(m,int(config['grid_x'])))
+        self.template_vars['cell_w'] = max(2,min(500,int(config['cell_w'])))
+        self.template_vars['cell_h'] = max(2,min(500,int(config['cell_h'])))
+        self.template_vars['winner_req'] = min(max(2,int(config['winner_req'])),
+            max(self.template_vars['grid_x'],self.template_vars['grid_y']))
+        self.template_vars['color_1'] = config['color_1']
+        self.template_vars['color_2'] = config['color_2']
+        self.template_vars['color_empty'] = config['color_empty']
+
+        self.winning_req = self.template_vars['winner_req']
 
         self.reset()
