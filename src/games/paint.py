@@ -10,11 +10,15 @@ def create(client):
 
 
 class Paint(lightgames.Game):
+    config_file = "paintconfig.html"
     template_file = "paint.html"
     template_vars = {
         'module_name': 'Paint',
         'grid_x': 15,
-        'grid_y': 10
+        'grid_y': 10,
+        'cell_w': 64,
+        'cell_h': 64,
+        'color_empty': '#f0f0f0'
     }
 
 
@@ -48,33 +52,44 @@ class Paint(lightgames.Game):
                     )
 
     def on_message(self, handler, message):
-        if self.validate(message): 
-            coords = tornado.escape.json_decode(message)
-            x = coords['x']
-            y = coords['y']
-            color = self.playerColors[handler]
-            
-            self.board[y][x] = color
-            for handler in self.playerColors:
-                handler.write_message(
-                    tornado.escape.json_encode(
-                        {'x':x, 'y':y, 'color':color}
-                    )
+        coords = tornado.escape.json_decode(message)
+        x = coords['x']
+        y = coords['y']
+        color = self.playerColors[handler]
+
+        if x<0 or x>=self.template_vars['grid_x'] or \
+            y<0 or y>=self.template_vars['grid_y']:
+            print('error: out of bounds!')
+            return
+
+        self.board[y][x] = color
+        for handler in self.playerColors:
+            handler.write_message(
+                tornado.escape.json_encode(
+                    {'x':x, 'y':y, 'color':color}
                 )
+            )
 
-            json = {'x': x, 'y': y, 'change': {'rgb': color}}        
-            json = tornado.escape.json_encode([json]) 
-            print("json:", json)
-            
-            headers = {'Content-Type': 'application/json'}
-            self.client.request("POST", "/lights", json, headers) 
+        json = {'x': x, 'y': y, 'change': {'rgb': color}}
+        json = tornado.escape.json_encode([json])
+        print("json:", json)
 
-            # Print response 
-            print(self.client.getresponse().read().decode())
+        headers = {'Content-Type': 'application/json'}
+        self.client.request("POST", "/lights", json, headers)
+
+        # Print response
+        print(self.client.getresponse().read().decode())
 
     def on_close(self, handler):
         if handler in self.playerColors:
             del self.playerColors[handler]
 
-    def validate(self, msg): 
-        return True 
+    def set_options(self, config):
+        m = 50;
+        self.template_vars['grid_y'] = max(2,min(m,int(config['grid_y'])))
+        self.template_vars['grid_x'] = max(2,min(m,int(config['grid_x'])))
+        self.template_vars['cell_w'] = max(2,min(500,int(config['cell_w'])))
+        self.template_vars['cell_h'] = max(2,min(500,int(config['cell_h'])))
+        self.template_vars['color_empty'] = config['color_empty']
+
+        self.init()

@@ -4,11 +4,14 @@
 
 
 {% block style %}
-	td.blue {
-		background-color: #66e;
+	td.player_1 {
+		background-color: {{ color_1 }};
 	}
-	td.red {
-		background-color: #e66;
+	td.player_2 {
+		background-color: {{ color_2 }};
+	}
+	td {
+		background-color: {{ color_empty }};
 	}
 	div#message {
 		text-align: center;
