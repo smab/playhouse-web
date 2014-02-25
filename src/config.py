@@ -51,16 +51,22 @@ class ConfigHandler(tornado.web.RequestHandler):
         )
         self.client.request("GET", "/bridges"); 
 
-        self.response = tornado.escape.json_decode(
-            self.client.getresponse().read().decode() 
-        ) 
-        if self.response['state'] == 'success': 
-            self.data = self.response['bridges']
-            print("config, GET /bridges:", self.data) 
-            self.render('config.html', bridges=self.data) 
+        try: 
+            self.response = tornado.escape.json_decode(
+                self.client.getresponse().read().decode() 
+            ) 
+        except ValueError: 
+            print("ValueError: Did not get json from server when requesting /bridges") 
+            self.write("<p>Did not get json from server. Is the IP and port correct?</p>") 
         else: 
-            self.write("Error in " + str(self.response)) 
-
+            if 'state' in self.response and self.response['state'] == 'success': 
+                self.data = self.response['bridges']
+                print("config, GET /bridges:", self.data) 
+                self.render('config.html', bridges=self.data) 
+            else: 
+                self.write("<p>Unexpected answer from lamp-server.</p>")
+                self.write("<p>" + str(self.response) + "</p>") 
+                self.write("<p>Expected 'state':'success'</p>") 
 
     def post(self): 
         print('POST', self.request.body) 
