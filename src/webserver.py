@@ -131,7 +131,7 @@ application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/websocket", CommunicationHandler), 
     (r"/config", configinterface.ConfigHandler),
-], template_path='templates')
+], template_path='templates', debug=True)
 
 if __name__ == "__main__":
     initialize()
