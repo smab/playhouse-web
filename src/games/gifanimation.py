@@ -10,7 +10,7 @@ def create(client):
     return GifAnimation(client)
 
 class GifAnimation(lightgames.Game):
-    config_file = "gifanimconf.html"
+    config_file = "gifconfig.html"
     template_file = "gifanimation.html"
     template_vars = {
         'module_name': 'GIF Animation',
