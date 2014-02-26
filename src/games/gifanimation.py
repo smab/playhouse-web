@@ -39,7 +39,7 @@ class GifAnimation(lightgames.Game):
                 for y in range(0, height):
                     for x in range(0, width):
                         r, g, b = rgb_im.getpixel((x, y))
-                        buffer += {'x': x, 'y': y, 'change': {'rgb': (r,g,b)}}
+                        buffer += [{'x': x, 'y': y, 'change': {'rgb': (r,g,b)}}]
                         for handler in self.spectators:
                             handler.write_message(
                                 tornado.escape.json_encode(
