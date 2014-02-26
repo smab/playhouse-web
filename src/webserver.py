@@ -68,6 +68,7 @@ class GameConfigHandler(tornado.web.RequestHandler):
             'config_file':game.config_file,
             'game_name':config['game_name'],
             'game_path':tornado.escape.json_encode(config['game_path']),
+            'game_list':lightgames.get_games(config['game_path'])
         }
         template_vars.update(game.template_vars)
         template_vars['vars'] = template_vars;

@@ -1,4 +1,5 @@
 import imp
+import os
 
 
 def load(name, path, client):
@@ -6,6 +7,15 @@ def load(name, path, client):
     mod = imp.load_module(name, file, pathname, description)
 
     return mod.create(client)
+
+def get_games(paths):
+    games = []
+    for path in paths:
+        for file in os.listdir(path):
+            if file.endswith(".py"):
+                games += [file.split('.')[0]]
+
+    return games
 
 class Game:
     config_file = "defaultconfig.html"
