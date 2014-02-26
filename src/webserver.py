@@ -125,10 +125,11 @@ def initialize():
 
 
 application = tornado.web.Application([
-    (r"/", MainHandler),
-    (r"/websocket", CommunicationHandler), 
-    (r"/config", configinterface.ConfigHandler),
+    (r"/",            MainHandler),
+    (r"/websocket",   CommunicationHandler),
+    (r"/config",      configinterface.ConfigHandler),
     (r"/config/game", GameConfigHandler),
+    (r"/static/(.*)", tornado.web.StaticFileHandler, {'path': 'static'})
 ], template_path='templates', debug=True)
 
 if __name__ == "__main__":
@@ -137,6 +138,5 @@ if __name__ == "__main__":
     print("Starting web server (port %d)" % config['serverport'])
     application.listen(config['serverport'])
     tornado.ioloop.IOLoop.instance().start()
-    
 
 
