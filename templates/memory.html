@@ -1,0 +1,89 @@
+{% extends "grid.html" %}
+
+
+{% block style %}
+    body {
+      background: #066;
+    }
+
+    td {
+      position: relative;
+      width: 74px;
+      height: 74px;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      background-color: #333;
+    }
+    td::after {
+      display: block;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('/static/lamp.png');
+      content: "";
+    }
+
+    td.on {
+    }
+    td.off {
+    }
+
+    div#message {
+        text-align: center;
+    }
+
+    #grid {
+      padding: 0.3em;
+      background: #000;
+      /*
+      border-image: radial-gradient(30% 30%, #FFF 0%, #000 100%) 100 100 stretch;
+      border-width: 4px;
+      */
+      border-radius: 8px;
+      box-shadow: 0 0 16px #000;
+    }
+{% end %}
+
+
+{% block postgrid %}
+<div id="message">Connecting...</div>
+{% end %}
+
+
+{% block click %}
+    // Send to server
+    ws.send(JSON.stringify({ x: parseInt(coords[0], 10),
+                             y: parseInt(coords[1], 10) }))
+{% end %}
+
+
+{% block message %}
+    obj = JSON.parse(evt.data)
+
+    if (obj.error != undefined) {
+        alert(obj.error)
+    }
+    if (obj.message != undefined) {
+        e = document.getElementById("message")
+        e.innerHTML = obj.message
+    }
+    if (obj.x != undefined) {
+        e = document.getElementById(obj.x + "-" + obj.y)
+
+        if (obj.delay != null) {
+          setTimeout(updateCell.bind(null,obj), obj.delay)
+        } else {
+          updateCell(obj)
+        }
+    }
+
+    function updateCell(obj) {
+      var el = document.getElementById(obj.x + "-" + obj.y)
+
+      var color = 'hsl(' + Math.floor(obj.hue / 255) + ',100%,50%)'
+      el.style.backgroundColor = obj.power? color : ''
+      el.style.className       = obj.power? 'on'  : 'off'
+    }
+{% end %}
