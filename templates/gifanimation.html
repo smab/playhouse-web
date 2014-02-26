@@ -1,0 +1,27 @@
+{% extends "grid.html" %}
+
+{% block title %}GIF Animation{% end %}
+
+
+{% block style %}
+	td {
+		background-color: {{ color_empty }};
+	}
+{% end %}
+
+
+{% block message %}
+    obj = JSON.parse(evt.data)
+    if (obj.x != undefined) {
+        e = document.getElementById(obj.x + "-" + obj.y)
+        e.style.backgroundColor = "rgb("+obj.color[0]+","+obj.color[1]+","+obj.color[2]+")"
+    }
+{% end %}
+
+
+{% block queuemsg %}
+    // ignore
+{% end %}
+
+{% block queue %}
+{% end %}
