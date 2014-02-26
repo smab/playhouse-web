@@ -1,0 +1,38 @@
+<style>
+	.numberinput {
+		width: 30px;
+	}
+	.colorinput {
+		width: 70px;
+	}
+	.fill {
+		width: 10px;
+		display: inline-block;
+	}
+
+	{% block style %}{% end %}
+</style>
+
+{% block configbody %}
+	<h2>{% block gridsetname %}Grid{% end %}</h2>
+	<table>
+	<tr><td>
+		Grid size:
+		<div class="fill"></div>
+		<input name="grid_y" value="{{ grid_y }}" class="numberinput" style="text-align: right;" />
+		x
+		<input name="grid_x" value="{{ grid_x }}" class="numberinput" />
+	</td></tr>
+	<tr><td>
+		Cell size:
+		<div class="fill"></div>
+		<input name="cell_w" value="{{ cell_w }}" class="numberinput" style="text-align: right;" />
+		x
+		<input name="cell_h" value="{{ cell_h }}" class="numberinput" />
+	</td></tr>
+	{% block extragridsettings %}
+	{% end %}
+	</table>
+	{% block setting %}
+	{% end %}
+{% end %}
