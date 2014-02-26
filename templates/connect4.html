@@ -1,0 +1,140 @@
+{% extends "grid.html" %}
+
+{% block title %}
+Connect 4
+{% end %}
+
+{% block style %}
+    body {
+      background: #235;
+    }
+
+    td {
+      position: relative;
+      width: 74px;
+      height: 74px;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      background-color: #222;
+    }
+    td::after {
+      display: block;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('/static/lamp.png');
+      content: "";
+    }
+
+    td.shadow, td.shadow:hover {
+      background-color: #555 !important;
+    }
+
+    td.on {
+    }
+    td.off {
+    }
+
+    div#message {
+        text-align: center;
+    }
+
+    #grid {
+      padding: 0.3em;
+      background: #000;
+      /*
+      border-image: radial-gradient(30% 30%, #FFF 0%, #000 100%) 100 100 stretch;
+      border-width: 4px;
+      */
+      border-radius: 8px;
+      box-shadow: 0 0 16px #000;
+    }
+{% end %}
+
+
+{% block postgrid %}
+<div id="message">Connecting...</div>
+{% end %}
+
+
+{% block script %}
+    // Since there can't be any gaps in a connect-4 board, it's enough to keep
+    // track of a heightmap of the game field when it comes to figuring out
+    // where a newly-placed piece will land.  The code for this could be
+    // prettier, but this'll do for now...
+    var heights   = [],
+        maxHeight = Infinity
+
+    var shadowEl   = null,
+        lastColumn = -1
+
+    function updateShadow() {
+        var x = lastColumn,
+            y = (heights[x] || maxHeight) - 1
+
+        var el = y < 0? null : document.getElementById(x + "-" + y)
+
+        if (shadowEl != null) shadowEl.className = shadowEl.className.replace(/ shadow/, '')
+        if (el != null) el.className += ' shadow'
+        shadowEl = el
+    }
+
+    window.addEventListener('load', function () {
+        maxHeight = document.querySelectorAll('#grid > tr').length
+
+        var tds = Array.prototype.slice.call(document.querySelectorAll('#grid td'))
+        tds.forEach(function (td) {
+            td.addEventListener('mouseover', function () {
+                lastColumn = parseInt(this.id.split("-")[0], 10)
+                updateShadow()
+            }, false)
+        })
+    }, false)
+{% end %}
+
+
+{% block click %}
+    // Send to server
+    var x = parseInt(coords[0], 10)
+    ws.send(JSON.stringify({ x: x,
+                             y: (heights[x] || maxHeight) - 1 }))
+{% end %}
+
+
+{% block message %}
+    obj = JSON.parse(evt.data)
+
+    if (obj.error != undefined) {
+        alert(obj.error)
+    }
+    if (obj.message != undefined) {
+        e = document.getElementById("message")
+        e.innerHTML = obj.message
+    }
+
+    if (obj.x != undefined) {
+        e = document.getElementById(obj.x + "-" + obj.y)
+
+        if (obj.delay != null) {
+          setTimeout(updateCell.bind(null,obj), obj.delay)
+        } else {
+          updateCell(obj)
+        }
+    }
+
+    function updateCell(obj) {
+      var el = document.getElementById(obj.x + "-" + obj.y)
+
+      if (obj.power) {
+          heights[obj.x] = Math.min(heights[obj.x] || maxHeight, obj.y)
+          if (heights[obj.x] == 0) heights[obj.x] = -1  // indicates full column
+          updateShadow()
+      }
+
+      var color = 'hsl(' + Math.floor(obj.hue / 255) + ',100%,50%)'
+      el.style.backgroundColor = obj.power? color : ''
+      el.style.className       = obj.power? 'on'  : 'off'
+    }
+{% end %}
