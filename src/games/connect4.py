@@ -33,7 +33,7 @@ class Connect4(lightgames.Game):
 
     def reset(self):
         print("New game!")
-        self.send_lamp_all({ 'sat':0, 'hue':0, 'bri':0 })
+        self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0 })
 
         self.player  = 0
         self.players = [None, None]
