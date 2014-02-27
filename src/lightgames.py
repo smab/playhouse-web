@@ -38,7 +38,7 @@ class Game:
         print(self.client.getresponse().read().decode())
 
     def send_lamp_all(self, change):
-        json    = tornado.escape.json_encode({ 'change': change })
+        json    = tornado.escape.json_encode(change)
         headers = {'Content-Type': 'application/json'}
         self.client.request("POST", "/lights/all", json, headers)
         # Print response

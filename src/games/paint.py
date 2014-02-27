@@ -27,7 +27,7 @@ class Paint(lightgames.Game):
         self.board = [[-1 for _ in range(self.template_vars['grid_x'])] 
             for _ in range(self.template_vars['grid_y'])]
 
-        self.send_lamp_all({ 'sat':0, 'hue':0, 'bri':0 })
+        self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0 })
 
     def on_connect(self, handler):
         self.playerColors[handler] = (

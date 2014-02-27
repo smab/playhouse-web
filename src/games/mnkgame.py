@@ -45,7 +45,7 @@ class MnkGame(lightgames.Game):
     def reset(self):
         print("New game!")
 
-        self.send_lamp_all({ 'sat':0, 'hue':0, 'bri':0 })
+        self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0 })
 
         if self.template_vars['grid_x'] == 3 and \
            self.template_vars['grid_y'] == 3 and self.winning_req == 3:
