@@ -47,7 +47,7 @@ class GifAnimation(lightgames.Game):
                                 )
                             )
 
-                buffer = tornado.escape.json_encode([buffer])
+                buffer = tornado.escape.json_encode(buffer)
                 headers = {'Content-Type': 'application/json'}
                 self.client.request("POST", "/lights", buffer, headers)
 
