@@ -39,23 +39,9 @@ class Memory(lightgames.Game):
     board = None
 
 
-    def send_lamp(self, x, y, change):
-        json    = tornado.escape.json_encode([ { 'x': x, 'y':y, 'change': change } ])
-        headers = {'Content-Type': 'application/json'}
-        self.client.request("POST", "/lights", json, headers)
-        # Print response
-        print(self.client.getresponse().read().decode())
-
     def reset(self):
         print("New game!")
-
-        # Reset all lamps
-        buffer = []
-        for y in range(self.height):
-            for x in range(self.width):
-                buffer += [{'x':x, 'y':y, 'change':{'sat':0, 'hue':0, 'bri':0}}]
-        self.client.request("POST", "/lights", tornado.escape.json_encode(buffer))
-        print(self.client.getresponse().read().decode())
+        self.send_lamp_all({ 'sat':0, 'hue':0, 'bri':0 })
 
         # Reset game state
         self.player = 0
@@ -74,9 +60,6 @@ class Memory(lightgames.Game):
             (x2,y2) = coords.pop()
             self.board[y1][x1] = -hue
             self.board[y2][x2] = -hue
-
-        #for handler in self.connections:
-        #    self.sync(handler)
 
     def sync(self, handler):
         print("Syncing %s" % handler)
@@ -141,19 +124,9 @@ class Memory(lightgames.Game):
                     self.board[y][x] *= -1
                     self.active_tiles.append((x,y))
 
+                    self.send_lamp(x, y, {'sat': 255, 'hue': self.board[y][x]})
                     for h in self.connections:
                         send_msg(h, {'x':x, 'y':y, 'hue':self.board[y][x], 'power':True})
-
-                    self.send_lamp(x, y, {'sat': 255, 'hue': self.board[y][x]})
-
-                  # hue = self.board[y][x]
-                  # json = {'x': x, 'y': y, 'change': {'sat':255, 'hue':hue}}
-                  # json = tornado.escape.json_encode([json])
-                  # headers = {'Content-Type': 'application/json'}
-                  # self.client.request("POST", "/lights", json, headers)
-
-                  # # Print response
-                  # print(self.client.getresponse().read().decode())
 
                     # Each player toggles two tiles per turn
                     if len(self.active_tiles) == 2:

@@ -18,56 +18,34 @@ class Connect4(lightgames.Game):
     template_vars = {
         'module_name': 'Connect 4',
         'title':       'Connect 4',
-        'grid_x': 9,
-        'grid_y': 7,
-        'cell_w': 74,
-        'cell_h': 74,
+        'grid_x':  7, 'grid_y':  6,
+        'cell_w': 74, 'cell_h': 74,
     }
 
     width, height = template_vars['grid_x'], template_vars['grid_y']
 
-    colors = [0, 50000, 65000]
+    colors      = [0, 50000, 65000]
 
     connections = []
-    players = [None, None]
-    player = 0
-    board = None
-
-
-    def send_lamp(self, x, y, change):
-        json    = tornado.escape.json_encode([ { 'x': x, 'y':y, 'change': change } ])
-        headers = {'Content-Type': 'application/json'}
-        self.client.request("POST", "/lights", json, headers)
-        # Print response
-        print(self.client.getresponse().read().decode())
+    players     = [None, None]
+    player      = 0
+    board       = None
 
     def reset(self):
         print("New game!")
+        self.send_lamp_all({ 'sat':0, 'hue':0, 'bri':0 })
 
-        buffer = []
-        for y in range(7):
-            for x in range(9):
-                buffer += [{'x':x, 'y':y, 'change':{'sat':0, 'hue':0, 'bri':0}}]
-        self.client.request("POST", "/lights", tornado.escape.json_encode(buffer))
-        print(self.client.getresponse().read().decode())
-
-        self.player = 0
+        self.player  = 0
         self.players = [None, None]
-
-        self.board = [[2 for x in range(9)] for y in range(7)]
+        self.board   = [[2 for x in range(self.width)] for y in range(self.height)]
 
     def sync(self, handler):
         print("Syncing %s" % handler)
-        for y in range(7):
-            for x in range(9):
+        for y in range(self.height):
+            for x in range(self.width):
                 hue     = self.colors[self.board[y][x]]
                 powered = self.board[y][x] != 2
-
-                handler.write_message(
-                    tornado.escape.json_encode(
-                        {'x':x, 'y':y, 'hue':hue, 'power':powered}
-                    )
-                )
+                send_msg(handler, {'x':x, 'y':y, 'hue':hue, 'power':powered})
 
     def init(self):
         self.reset()

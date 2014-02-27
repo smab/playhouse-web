@@ -1,5 +1,6 @@
 import imp
 import os
+import tornado.escape
 
 
 def load(name, path, client):
@@ -24,8 +25,25 @@ class Game:
         'module_name': '<name not set>'
     }
 
+
     def __init__(self, client):
         self.client = client
+
+
+    def send_lamp(self, x, y, change):
+        json    = tornado.escape.json_encode([ { 'x': x, 'y':y, 'change': change } ])
+        headers = {'Content-Type': 'application/json'}
+        self.client.request("POST", "/lights", json, headers)
+        # Print response
+        print(self.client.getresponse().read().decode())
+
+    def send_lamp_all(self, change):
+        json    = tornado.escape.json_encode({ 'change': change })
+        headers = {'Content-Type': 'application/json'}
+        self.client.request("POST", "/lights/all", json, headers)
+        # Print response
+        print(self.client.getresponse().read().decode())
+
 
     def init(self):
         pass

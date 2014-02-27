@@ -45,18 +45,13 @@ class MnkGame(lightgames.Game):
     def reset(self):
         print("New game!")
 
+        self.send_lamp_all({ 'sat':0, 'hue':0, 'bri':0 })
+
         if self.template_vars['grid_x'] == 3 and \
            self.template_vars['grid_y'] == 3 and self.winning_req == 3:
             self.template_vars['title'] = 'Tic-tac-toe'
         else:
             self.template_vars['title'] = '%d-in-a-row' % self.winning_req
-
-        buffer = []
-        for y in range(3):
-            for x in range(3):
-                buffer += [{'x':x, 'y':y, 'change':{'sat':0, 'hue':0, 'bri':0}}]
-        self.client.request("POST", "/lights", tornado.escape.json_encode(buffer))
-        print(self.client.getresponse().read().decode())
 
         # stop syncing previous players
         for h in self.players:
@@ -161,15 +156,7 @@ class MnkGame(lightgames.Game):
                 send_msg(opponentH, {'message':'Your turn!'})
 
                 color = self.colors[self.player]
-                json = {'x': x, 'y': y, 'change': {'sat':255, 'hue': color}}
-                json = tornado.escape.json_encode([json])
-                #print("json:", json)
-
-                headers = {'Content-Type': 'application/json'}
-                self.client.request("POST", "/lights", json, headers)
-
-                # Print response
-                print(self.client.getresponse().read().decode())
+                self.send_lamp(x, y, { 'sat': 255, 'hue': color })
 
                 winner_lamps = set()
 

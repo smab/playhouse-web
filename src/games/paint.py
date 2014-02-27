@@ -27,13 +27,8 @@ class Paint(lightgames.Game):
         self.board = [[-1 for _ in range(self.template_vars['grid_x'])] 
             for _ in range(self.template_vars['grid_y'])]
 
-        buffer = []
-        for y in range(3):
-            for x in range(3):
-                buffer += [{'x':x, 'y':y, 'change':{'sat':0, 'hue':0, 'bri':0}}]
-        self.client.request("POST", "/lights", tornado.escape.json_encode(buffer))
-        print(self.client.getresponse().read().decode())
-    
+        self.send_lamp_all({ 'sat':0, 'hue':0, 'bri':0 })
+
     def on_connect(self, handler):
         self.playerColors[handler] = (
             random.randint(0,255), 
@@ -70,15 +65,7 @@ class Paint(lightgames.Game):
                 )
             )
 
-        json = {'x': x, 'y': y, 'change': {'rgb': color}}
-        json = tornado.escape.json_encode([json])
-        print("json:", json)
-
-        headers = {'Content-Type': 'application/json'}
-        self.client.request("POST", "/lights", json, headers)
-
-        # Print response
-        print(self.client.getresponse().read().decode())
+        self.send_lamp(x, y, { 'rgb': color })
 
     def on_close(self, handler):
         if handler in self.playerColors:
