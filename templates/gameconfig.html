@@ -1,117 +1,33 @@
-<html>
-    <head>
-        <title>Configure Playhouse!</title>
+{% extends configbase.html %}
 
-        <style type="text/css">
-            #center {
-                /*width: 1280px; */
-                width: 900px;
-                margin: 2em auto;
-            }
 
-            #menu { text-align: center; padding: 0; }
-            #menu li {
-                width: 132px;
-                height: 48px;
-                line-height: 48px;
+{% block menu_settings %}active{% end %}
 
-                display: inline-block;
-                text-align: center;
-                background-color: #9CF;
-                border: 2px solid #666;
-            }
-            #menu li a:hover { background-color: #CEF; }
-            #menu li a {
-                display: block;
-                text-decoration: none;
-            }
-            #menu li a.active {
-                background-color: #69F;
-                text-decoration: underline;
-                font-weight: bold;
-            }
 
-            h1 { color: #444; margin: 1em 0 0.5em 2em; }
-            h2 { color: #444; }
+{% block configbody %}
+    <h1>Settings</h1>
+    <form action="/config/game" method="post">
+        <h2>Game Choice</h2>
+        <table>
+        <tr>
+            <td>Current Game: </td>
+            <td>
+                <select name="game_name" value="{{ game_name }}">
+                {% for name in game_list %}
+                    <option value="{{ name }}" {% if name==game_name %}selected{% end %}>{{ name }}</option>
+                {% end %}
+                </select>
+            </td>
+        </tr><tr>
+            <td>Game Paths: </td>
+            <td><input name="game_path" value="{{ game_path }}" /></td>
+        </tr>
+        </table>
 
-            table {
-                margin: 0 auto;
-                margin-bottom: 2.5em;
+        {% module Template(config_file, **vars) %}
 
-                color: #444;
-                font-family: "monospace";
-                border-spacing: 0;
-                text-align: center;
-                border: 2px solid #666;
-            }
-
-            table tr:hover {
-                background-color:#CEF!important;
-            }
-            table tr:nth-child(odd) {
-                background-color: #9CF;
-            }
-            table tr {
-                font-size: 14px;
-            }
-
-            table td {
-                padding: 8px 10px;
-                font-size: 11px;
-            }
-            table th {
-                color: white;
-                background-color: #666;
-                padding: 8px 16px;
-            }
-
-            table .ip { width: 125px; font-size: 11px; line-height:16px;}
-            table .username { width: 215px; font-size: 11px; line-height:16px;}
-
-            #buttons { text-align: center; padding: 0; }
-            #buttons li {
-                width: 128px;
-                height: 32px;
-
-                margin: 0 4px;
-                display: inline-block;
-            }
-            #buttons li input { width: 100%; height: 100%;}
-
-        </style>
-    </head>
-    <body>
-        <div id="center">
-            <ul id="menu">
-                <li><a href="/config">Bridges</a></li>
-                <li><a class="active" href="/config/game">Settings</a></li>
-                <li><a href="">Preview</a></li>
-            </ul>
-            <h1>Settings</h1>
-            <form action="/config/game" method="post">
-                <h2>Game Choice</h2>
-                <table>
-                <tr>
-                    <td>Current Game: </td>
-                    <td>
-                        <select name="game_name" value="{{ game_name }}">
-                        {% for name in game_list %}
-                            <option value="{{ name }}" {% if name==game_name %}selected{% end %}>{{ name }}</option>
-                        {% end %}
-                        </select>
-                    </td>
-                </tr><tr>
-                    <td>Game Paths: </td>
-                    <td><input name="game_path" value="{{ game_path }}" /></td>
-                </tr>
-                </table>
-
-                {% module Template(config_file, **vars) %}
-
-                <ul id="buttons">
-                    <li><input type="submit" value="Save Settings"></li>
-                </ul>
-            </form>
-        <div>
-    </body>
-</html>
+        <ul id="buttons">
+            <li><input type="submit" value="Save Settings"></li>
+        </ul>
+    </form>
+{% end %}

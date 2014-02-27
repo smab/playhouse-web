@@ -1,230 +1,101 @@
-<html> 
-    <head> 
-        <title>Configure Playhouse!</title> 
+{% extends configbase.html %}
 
-        <style type="text/css"> 
-            #center { 
-                /*width: 1280px; */
-                width: 900px; 
-                margin: 2em auto;  
-            } 
 
-            #menu { text-align: center; padding: 0; }
-            #menu li {
-                width: 132px; 
-                height: 48px; 
-                line-height: 48px; 
+{% block menu_bridges %}active{% end %}
 
-                display: inline-block; 
-                text-align: center; 
-                background-color: #9CF; 
-                border: 2px solid #666; 
-            }
-            #menu li a:hover { background-color: #CEF; } 
-            #menu li a {
-                display: block; 
-                text-decoration: none; 
-            }
-            #menu li a.active {
-                background-color: #69F; 
-                text-decoration: underline; 
-                font-weight: bold; 
-            }
 
-            h1 { color: #444; margin: 1em 0 0.5em 2em; } 
-            
-            table {
-                margin: 0 auto; 
-                margin-bottom: 2.5em; 
+{% block configbody %}
+    <h1>Bridges</h1> 
+    <form action="/config" method="post"> 
+        <table id="bridges"> 
+            <tr> 
+                <th>#</th> 
+                <th>Select</th> 
+                <th class="mac">MAC</th> 
+                <th class="">IP</th>
+                <th class="">Username</th> 
+                <th class="valid">valid_username</th> 
+                <th class="lights"># Lights</th> 
+            </tr> 
+            {% for i, mac in enumerate(bridges) %}
+            <tr> 
+                <td>{{ i+1 }}</td> 
+                <td><input type="checkbox" name="select" value="{{ mac }}"></td> 
+                <td>{{ mac }}</td> 
+                <td>{{ bridges[mac]['ip'] }}</td> 
+                <td>{{ bridges[mac]['username'] }}</td> 
+                <td>{{ bridges[mac]['valid_username'] }}</td> 
+                <td>{{ bridges[mac]['lights'] }}</td> 
+            </tr>
+            {% end %}
+            <!--tr>
+                <td>1</td> 
+                <td>
+                    <input type="checkbox" name="select" 
+                    value="A">
+                </td>
+                <td>001788182e78</td> 
+                <td>130.237.228.58:80</td> 
+                <td>a0e48e11876b8971eb694151aba16ab</td>
+                <td>true</td>
+                <td>3</td> 
+            </tr--> 
+            <!--tr>
+                <td>2</td> 
+                <td>
+                    <input type="checkbox" name="select" 
+                    value="">
+                </td>
+                <td>001788182e78</td> 
+                <td>130.237.228.58:80</td> 
+                <td>a0e48e11876b8971eb694151aba16ab</td>
+                <td>true</td>
+                <td>3</td> 
+            </tr> 
+            <tr>
+                <td>3</td> 
+                <td>
+                    <input type="checkbox" name="select" 
+                    value="">
+                </td>
+                <td>001788182e78</td> 
+                <td>130.237.228.58:80</td> 
+                <td>a0e48e11876b8971eb694151aba16ab</td>
+                <td>true</td>
+                <td>3</td> 
+            </tr> 
+            <tr>
+                <td>4</td> 
+                <td>
+                    <input type="checkbox" name="select" 
+                    value="">
+                </td>
+                <td>001788182e78</td> 
+                <td>130.237.228.58:80</td> 
+                <td>a0e48e11876b8971eb694151aba16ab</td>
+                <td>true</td>
+                <td>3</td> 
+            </tr--> 
+            <tr>
+                <td>-</td> 
+                <td>-</td>
+                <td>-</td> 
+                <td>
+                    <input type="text" class="ip" name="ip" placeholder="IP Address">
+                </td> 
+                <td>
+                    <input type="text" class="username" name="username" placeholder="Username">
+                </td>
+                <td>-</td>
+                <td>-</td> 
+            </tr> 
+        </table> 
+        <ul id="buttons"> 
+            <li><input type="submit" value="Identify Selected"></li>
+            <li><input type="submit" value="Add Bridge"></li> 
+            <li><input type="submit" value="Remove Selected"></li> 
+            <li><input type="submit" value="Refresh List"></li> 
+        </ul> 
+    </form>
 
-                color: #444; 
-                font-family: "monospace"; 
-                border-spacing: 0; 
-                text-align: center; 
-                border: 2px solid #666; 
-            }
-
-            table tr:hover {
-                background-color:#CEF!important; 
-            }
-            table tr:nth-child(odd) {
-                background-color: #9CF; 
-            }
-            table tr { 
-                font-size: 14px; 
-            }
-            
-            table td {
-                padding: 8px 10px; 
-                font-size: 11px; 
-            }
-            table th { 
-                color: white; 
-                background-color: #666; 
-                padding: 8px 16px;   
-            }
-
-            table .ip { width: 125px; font-size: 11px; line-height:16px;}
-            table .username { width: 215px; font-size: 11px; line-height:16px;}
-
-            #buttons { text-align: center; padding: 0; } 
-            #buttons li {
-                width: 128px; 
-                height: 32px; 
-
-                margin: 0 4px; 
-                display: inline-block; 
-            }
-            #buttons li input { width: 100%; height: 100%;}
-                
-        </style> 
-        <script> 
-            function wrapTd(e) {
-                var td = document.createElement('td'); 
-                td.appendChild(e); 
-                return td; 
-            }
-            function addBridge() {
-                var bridges = document.getElementById('bridges'); 
-                var tr = document.createElement('tr'); 
-                
-                var no = document.createElement('td'); 
-                no.innerHTML = '-'; 
-                tr.appendChild(no); 
-
-                var select = document.createElement('input'); 
-                select.type = 'checkbox'; 
-                select.name = 'checkbox'; 
-                tr.appendChild(wrapTd(select)); 
-
-                var mac = document.createElement('td'); 
-                mac.innerHTML = '-'; 
-                tr.appendChild(mac); 
-
-                var ip = document.createElement('input'); 
-                ip.className = 'ip'; 
-                ip.type = 'text'; 
-                ip.name = 'ip'; 
-                tr.appendChild(wrapTd(ip)); 
-                
-                var username = document.createElement('input'); 
-                username.className = 'username'; 
-                username.type = 'text'; 
-                username.name = 'username'; 
-                tr.appendChild(wrapTd(username)); 
-
-                var valid = document.createElement('td'); 
-                valid.innerHTML = '-'; 
-                tr.appendChild(valid); 
-
-                var lights = document.createElement('td'); 
-                lights.innerHTML = '-'; 
-                tr.appendChild(lights); 
-
-                bridges.appendChild(tr); 
-                ip.focus(); 
-            }
-        </script> 
-    </head> 
-    <body> 
-        <div id="center"> 
-            <ul id="menu"> 
-                <li><a class="active" href="">Bridges</a></li> 
-                <li><a href="/config/game">Settings</a></li> 
-                <li><a href="">Preview</a></li> 
-            </ul> 
-            <h1>Bridges</h1> 
-            <form action="/config" method="post">  
-                <table id="bridges"> 
-                    <tr> 
-                        <th>#</th> 
-                        <th>Select</th> 
-                        <th class="mac">MAC</th> 
-                        <th class="">IP</th>
-                        <th class="">Username</th> 
-                        <th class="valid">valid_username</th> 
-                        <th class="lights"># Lights</th> 
-                    </tr> 
-                    {% for i, mac in enumerate(bridges) %}
-                    <tr> 
-                        <td>{{ i+1 }}</td> 
-                        <td><input type="checkbox" name="select" value="{{ mac }}"></td> 
-                        <td>{{ mac }}</td> 
-                        <td>{{ bridges[mac]['ip'] }}</td> 
-                        <td>{{ bridges[mac]['username'] }}</td> 
-                        <td>{{ bridges[mac]['valid_username'] }}</td> 
-                        <td>{{ bridges[mac]['lights'] }}</td> 
-                    </tr>
-                    {% end %}
-                    <!--tr>
-                        <td>1</td> 
-                        <td>
-                            <input type="checkbox" name="select" 
-                            value="A">
-                        </td>
-                        <td>001788182e78</td> 
-                        <td>130.237.228.58:80</td> 
-                        <td>a0e48e11876b8971eb694151aba16ab</td>
-                        <td>true</td>
-                        <td>3</td> 
-                    </tr--> 
-                    <!--tr>
-                        <td>2</td>  
-                        <td>
-                            <input type="checkbox" name="select" 
-                            value="">
-                        </td>
-                        <td>001788182e78</td> 
-                        <td>130.237.228.58:80</td> 
-                        <td>a0e48e11876b8971eb694151aba16ab</td>
-                        <td>true</td>
-                        <td>3</td> 
-                    </tr> 
-                    <tr>
-                        <td>3</td> 
-                        <td>
-                            <input type="checkbox" name="select" 
-                            value="">
-                        </td>
-                        <td>001788182e78</td> 
-                        <td>130.237.228.58:80</td> 
-                        <td>a0e48e11876b8971eb694151aba16ab</td>
-                        <td>true</td>
-                        <td>3</td> 
-                    </tr> 
-                    <tr>
-                        <td>4</td> 
-                        <td>
-                            <input type="checkbox" name="select" 
-                            value="">
-                        </td>
-                        <td>001788182e78</td> 
-                        <td>130.237.228.58:80</td> 
-                        <td>a0e48e11876b8971eb694151aba16ab</td>
-                        <td>true</td>
-                        <td>3</td> 
-                    </tr--> 
-                    <tr>
-                        <td>-</td> 
-                        <td>-</td>
-                        <td>-</td> 
-                        <td>
-                            <input type="text" class="ip" name="ip" placeholder="IP Address">
-                        </td> 
-                        <td>
-                            <input type="text" class="username" name="username" placeholder="Username">
-                        </td>
-                        <td>-</td>
-                        <td>-</td> 
-                    </tr> 
-                </table> 
-                <ul id="buttons"> 
-                    <li><input type="submit" value="Identify Selected"></li>
-                    <li><input type="submit" value="Add Bridge"></li> 
-                    <li><input type="submit" value="Remove Selected"></li> 
-                    <li><input type="submit" value="Refresh List"></li> 
-                </ul> 
-            </form>
-        <div>
-    </body> 
-</html> 
+{% end %}
