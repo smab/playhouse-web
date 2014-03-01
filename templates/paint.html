@@ -4,14 +4,14 @@
 
 
 {% block style %}
-	td {
-		background-color: {{ color_empty }};
-	}
+    td {
+        background-color: {{ color_empty }};
+    }
 {% end %}
 
 
 {% block click %}
-    // Send to server 
+    // Send to server
     ws.send(JSON.stringify({ x: parseInt(coords[0]), y: parseInt(coords[1]) }));
 {% end %}
 

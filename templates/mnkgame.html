@@ -4,18 +4,18 @@
 
 
 {% block style %}
-	td.player_1 {
-		background-color: {{ color_1 }};
-	}
-	td.player_2 {
-		background-color: {{ color_2 }};
-	}
-	td {
-		background-color: {{ color_empty }};
-	}
-	div#message {
-		text-align: center;
-	}
+    td.player_1 {
+        background-color: {{ color_1 }};
+    }
+    td.player_2 {
+        background-color: {{ color_2 }};
+    }
+    td {
+        background-color: {{ color_empty }};
+    }
+    div#message {
+        text-align: center;
+    }
 {% end %}
 
 
@@ -25,23 +25,23 @@
 
 
 {% block click %}
-	// Send to server
-	ws.send(JSON.stringify({ action: "gameaction", x: parseInt(coords[0]), y: parseInt(coords[1]) }));
+    // Send to server
+    ws.send(JSON.stringify({ action: "gameaction", x: parseInt(coords[0]), y: parseInt(coords[1]) }));
 {% end %}
 
 
 {% block message %}
-	obj = JSON.parse(evt.data)
+    obj = JSON.parse(evt.data)
 
-	if (obj.error != undefined) {
-		alert(obj.error)
-	}
-	if (obj.message != undefined) {
-		e = document.getElementById("message")
-		e.innerHTML = obj.message;
-	}
-	if (obj.x != undefined) {
-		e = document.getElementById(obj.x + "-" + obj.y)
-		e.className = obj.color;
-	}
+    if (obj.error != undefined) {
+        alert(obj.error)
+    }
+    if (obj.message != undefined) {
+        e = document.getElementById("message")
+        e.innerHTML = obj.message;
+    }
+    if (obj.x != undefined) {
+        e = document.getElementById(obj.x + "-" + obj.y)
+        e.className = obj.color;
+    }
 {% end %}

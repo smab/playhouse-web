@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<html> 
-    <head> 
+<html>
+    <head>
         <title>{% block title %}Grid{% end %}</title>
-        <style> 
+        <style>
             table {
-                margin: 4em auto; 
+                margin: 4em auto;
             }
             td:hover {
                 background-color: #ddd;
@@ -13,7 +13,7 @@
             td {
                 width: {{ cell_w }}px;
                 height: {{ cell_h }}px;
-                border: 1px solid #ccc; 
+                border: 1px solid #ccc;
                 background-color: #f0f0f0;
             }
             div#queue {
@@ -34,7 +34,7 @@
             {% block style %}
             {% end %}
         </style>
-        <script> 
+        <script>
             window.onload = function() {
                 var ws = new WebSocket("ws://{{ socket_addr }}/websocket");
                 ws.onmessage = function (evt) {
@@ -64,20 +64,20 @@
                     {% end %}
                 };
 
-                var table = document.getElementById("grid"); 
-                for(var i=0; i<{{ grid_y }}; i++) { 
-                    // Create tr 
-                    var tr = document.createElement("tr"); 
-                    for(var ii=0; ii<{{ grid_x }}; ii++) { 
-                        // Add td and function onclick 
+                var table = document.getElementById("grid");
+                for(var i=0; i<{{ grid_y }}; i++) {
+                    // Create tr
+                    var tr = document.createElement("tr");
+                    for(var ii=0; ii<{{ grid_x }}; ii++) {
+                        // Add td and function onclick
                         var td = document.createElement("td");
-                        td.id = ii + "-" + i; 
-                        td.onclick = function() { play(this); };  
-                        tr.appendChild(td); 
+                        td.id = ii + "-" + i;
+                        td.onclick = function() { play(this); };
+                        tr.appendChild(td);
                     }
 
-                    // Add tr to DOM 
-                    table.appendChild(tr); 
+                    // Add tr to DOM
+                    table.appendChild(tr);
                 }
 
                 function play(e) {
@@ -105,4 +105,4 @@
         </div>
         {% end %}
     </body>
-</html> 
+</html>
