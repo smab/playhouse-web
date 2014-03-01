@@ -32,9 +32,10 @@ class Game:
     template_file = "default.html"
     template_vars = {
         'module_name': '<name not set>',
-        'cell_w':      74,
-        'cell_h':      74,
-        'color_empty': "#222"
+        'cell_w':      64,
+        'cell_h':      64,
+        'color_empty': "#222",
+        'color_hover': "#999"
     }
 
 

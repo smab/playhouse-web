@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block style %}
-    td.shadow, td.shadow:hover {
+    #grid .shadow, #grid .shadow:hover {
         background-color: #555 !important;
     }
 {% end %}
@@ -32,9 +32,9 @@
     window.addEventListener('load', function () {
         maxHeight = document.querySelectorAll('#grid > tr').length
 
-        var tds = Array.prototype.slice.call(document.querySelectorAll('#grid td'))
-        tds.forEach(function (td) {
-            td.addEventListener('mouseover', function () {
+        var tiles = Array.prototype.slice.call(document.querySelectorAll('#grid .tile'))
+        tiles.forEach(function (tile) {
+            tile.addEventListener('mouseover', function () {
                 lastColumn = parseInt(this.id.split("-")[0], 10)
                 updateShadow()
             }, false)
@@ -52,16 +52,6 @@
 
 
 {% block message %}
-    obj = JSON.parse(evt.data)
-
-    if (obj.error != undefined) {
-        alert(obj.error)
-    }
-    if (obj.message != undefined) {
-        e = document.getElementById("message")
-        e.innerHTML = obj.message
-    }
-
     if (obj.x != undefined) {
         e = document.getElementById(obj.x + "-" + obj.y)
 

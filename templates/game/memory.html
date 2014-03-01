@@ -9,15 +9,6 @@
 
 
 {% block message %}
-    obj = JSON.parse(evt.data)
-
-    if (obj.error != undefined) {
-        alert(obj.error)
-    }
-    if (obj.message != undefined) {
-        e = document.getElementById("message")
-        e.innerHTML = obj.message
-    }
     if (obj.x != undefined) {
         e = document.getElementById(obj.x + "-" + obj.y)
 

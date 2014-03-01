@@ -2,9 +2,8 @@
 
 
 {% block style %}
-    #grid td.player_1 { background-color: {{ color_1 }};     }
-    #grid td.player_2 { background-color: {{ color_2 }};     }
-    #grid td          { background-color: {{ color_empty }}; }
+    #grid img.player_1 { background-color: {{ color_1 }}; }
+    #grid img.player_2 { background-color: {{ color_2 }}; }
 {% end %}
 
 
@@ -16,15 +15,6 @@
 
 
 {% block message %}
-    obj = JSON.parse(evt.data)
-
-    if (obj.error != undefined) {
-        alert(obj.error)
-    }
-    if (obj.message != undefined) {
-        e = document.getElementById("message")
-        e.innerHTML = obj.message;
-    }
     if (obj.x != undefined) {
         e = document.getElementById(obj.x + "-" + obj.y)
         e.className = obj.color;

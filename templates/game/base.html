@@ -5,19 +5,37 @@
         <title>{{ title }}</title>
         <style>
             body {
+              margin: 0;
+              padding: 0;
               background: #235;
             }
 
-            div#message {
+            .box {
+                border-radius: 8px;
+                box-shadow: 0 0 16px #000;
+            }
+
+            #message {
+                margin: 0;
+                padding: 0.4em;
                 text-align: center;
+                box-shadow: 0 0 8px #222;
+                font-family: sans-serif;
+                background: rgba(255,255,255,0.3);
+            }
+
+            #message.type-message {
+                /* no overriding necessary */
+            }
+            #message.type-error {
+                font-weight: bold;
+                background: rgba(255,0,0,0.6);
             }
 
             /*** Grid ************************************/
             #grid {
-                margin: 4em auto;
+                margin: 3em auto;
                 padding: 0.4em;
-                border-radius: 8px;
-                box-shadow: 0 0 16px #000;
             }
 
             #grid td {
@@ -28,19 +46,14 @@
                 width: {{ cell_w }}px;
                 height: {{ cell_h }}px;
             }
-            #grid td::after {
-                display: block;
-                top: 0;
-                left: 0;
+            #grid td > img {
                 width: 100%;
                 height: 100%;
-                content: "";
             }
 
             #grid           { background: #000;                    }
-            #grid td::after { background: url('/static/lamp.png'); }
-            #grid td        { background-color: #222;              }
-            #grid td:hover  { background-color: #999;              }
+            #grid img       { background-color: {{ color_empty }}; }
+            #grid img:hover { background-color: {{ color_hover }}; }
 
 
             /*** Queue ***********************************/
@@ -53,7 +66,7 @@
                 margin: auto;
                 margin-top: 10px;
                 padding: 10px;
-                background-color: #FF66FF;
+                background-color: rgba(255,255,255,0.3);
             }
             p#queuemsg {
                 margin: 2px;
@@ -63,11 +76,25 @@
             {% end %}
         </style>
         <script>
+            function setMessage(msg, type) {
+                var el = document.getElementById('message')
+                el.className = el.className.replace(/ ?type-\w+/g, '')
+                el.className += ' type-' + type
+                el.innerHTML = msg
+                el.removeChild(el.firstChild)
+                el.appendChild(document.createTextNode(String(msg)))
+            }
+
             window.onload = function() {
                 var wsHost = document.location.hostname + ":" + 8080,
                     ws     = new WebSocket("ws://{}/websocket".replace(/{}/, wsHost))
 
                 ws.onmessage = function (evt) {
+                    var obj = JSON.parse(evt.data)
+
+                    if      (obj.error)   setMessage(obj.error,   'error')
+                    else if (obj.message) setMessage(obj.message, 'message')
+
                     {% block message %}
                     {% end %}
 
@@ -101,17 +128,22 @@
                     for(var ii=0; ii<{{ grid_x }}; ii++) {
                         // Add td and function onclick
                         var td = document.createElement("td");
-                        td.id = ii + "-" + i;
-                        td.onclick = function() { play(this); };
                         tr.appendChild(td);
+
+                        var img = document.createElement('img')
+                        img.src = '/static/lamp.png'
+                        img.id  = ii + '-' + i
+                        img.className += ' tile'
+                        img.onclick = play
+                        td.appendChild(img)
                     }
 
                     // Add tr to DOM
                     table.appendChild(tr);
                 }
 
-                function play(e) {
-                    coords = e.id.split("-")
+                function play() {
+                    coords = this.id.split("-")
 
                     function reply(response) {
                         ws.send(JSON.stringify(extend({ gameaction: true }, response)))
@@ -133,16 +165,16 @@
     </head>
     <body>
         {% block grid %}
-        <table id="grid"></table>
-
         <div id="message">Connecting...</div>
+
+        <table id="grid" class="box"></table>
 
         {% block postgrid %}
         {% end %}
 
         {% end %}
         {% block queue %}
-        <div id="queue">
+        <div id="queue" class="box">
             <p id="queuemsg">Connecting to queue...</p>
             <input type=button id="queuebtn" value="Join queue" />
         </div>
