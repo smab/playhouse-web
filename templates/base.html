@@ -36,7 +36,9 @@
         </style>
         <script>
             window.onload = function() {
-                var ws = new WebSocket("ws://{{ socket_addr }}/websocket");
+                var wsHost = document.location.hostname + ":" + 8080,
+                    ws     = new WebSocket("ws://{}/websocket".replace(/{}/, wsHost))
+
                 ws.onmessage = function (evt) {
                     {% block message %}
                     {% end %}
