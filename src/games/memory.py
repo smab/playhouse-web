@@ -1,18 +1,13 @@
-import tornado.escape
 import random
 import itertools
 
 import lightgames
+from lightgames import send_msg
 
 
 def create(client):
     print("Creating memory game")
     return Memory(client)
-
-
-def send_msg(handler, msg):
-    if handler != None:
-        handler.write_message(tornado.escape.json_encode(msg))
 
 
 class Memory(lightgames.Game):
@@ -102,8 +97,6 @@ class Memory(lightgames.Game):
     def on_message(self, handler, message):
         playerH   = self.players[self.player]
         opponentH = self.players[1 - self.player]
-
-        message = tornado.escape.json_decode(message)
 
         if 'x' in message:
             if opponentH == handler:

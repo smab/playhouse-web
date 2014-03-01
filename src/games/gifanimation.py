@@ -38,18 +38,9 @@ class GifAnimation(lightgames.Game):
                         r, g, b = rgb_im.getpixel((x, y))
                         buffer += [{'x': x, 'y': y, 'change': {'rgb': (r,g,b)}}]
                         for handler in self.spectators:
-                            handler.write_message(
-                                tornado.escape.json_encode(
-                                    {'x':x, 'y':y, 'color':(r,g,b)}
-                                )
-                            )
+                            lightgames.send_msg(handler, {'x':x, 'y':y, 'color':(r,g,b)})
 
-                buffer = tornado.escape.json_encode(buffer)
-                headers = {'Content-Type': 'application/json'}
-                self.client.request("POST", "/lights", buffer, headers)
-
-                # Print response
-                print(self.client.getresponse().read().decode())
+                self.send_lamp_multi(buffer)
                 time.sleep(dur/1000.0)
         except IOError:
             print("Couldn't open image")

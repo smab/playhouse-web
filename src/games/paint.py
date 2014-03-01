@@ -43,8 +43,7 @@ class Paint(lightgames.Game):
                         )
                     )
 
-    def on_message(self, handler, message):
-        coords = tornado.escape.json_decode(message)
+    def on_message(self, handler, coords):
         x = coords['x']
         y = coords['y']
         color = self.playerColors[handler]

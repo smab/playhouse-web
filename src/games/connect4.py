@@ -1,16 +1,9 @@
-import tornado.escape
-
 import lightgames
 
 
 def create(client):
     print("Creating connect-4 game")
     return Connect4(client)
-
-
-def send_msg(handler, msg):
-    if handler != None:
-        handler.write_message(tornado.escape.json_encode(msg))
 
 
 class Connect4(lightgames.Game):
@@ -44,14 +37,14 @@ class Connect4(lightgames.Game):
             for x in range(self.width):
                 hue     = self.colors[self.board[y][x]]
                 powered = self.board[y][x] != 2
-                send_msg(handler, {'x':x, 'y':y, 'hue':hue, 'power':powered})
+                lightgames.send_msg(handler, {'x':x, 'y':y, 'hue':hue, 'power':powered})
 
     def init(self):
         self.reset()
 
     def destroy(self):
         for h in self.connections:
-            send_msg(h, {'message':"The game got destroyed!"})
+            lightgames.send_msg(h, {'message':"The game got destroyed!"})
 
         self.players = [None, None]
         self.connections = []
@@ -69,9 +62,9 @@ class Connect4(lightgames.Game):
 
         print("Connection %s as player %d" % (handler, player))
         if player == -1:
-            send_msg(handler, {'message':'You are a spectator!'})
+            lightgames.send_msg(handler, {'message':'You are a spectator!'})
         else:
-            send_msg(handler, {'message':'You are player %d' % (player+1)})
+            lightgames.send_msg(handler, {'message':'You are player %d' % (player+1)})
 
         # Sync board
         self.sync(handler)
@@ -80,16 +73,14 @@ class Connect4(lightgames.Game):
         playerH   = self.players[self.player]
         opponentH = self.players[1 - self.player]
 
-        message = tornado.escape.json_decode(message)
-
         if 'x' in message:
             if opponentH == handler:
                 print("Wrong player")
-                send_msg(handler, {'error':'Not your turn!'})
+                lightgames.send_msg(handler, {'error':'Not your turn!'})
 
             elif playerH != handler:
                 print("Spectator")
-                send_msg(handler, {'error':'You are not a player!'})
+                lightgames.send_msg(handler, {'error':'You are not a player!'})
 
             else: # playerH == handler
                 x, y = message['x'], message['y']
@@ -114,10 +105,10 @@ class Connect4(lightgames.Game):
 
                     self.send_lamp(x, y, {'sat': 255, 'hue': hue})
                     for h in self.connections:
-                        send_msg(h, {'x':x, 'y':y, 'hue':hue, 'power':True})
+                        lightgames.send_msg(h, {'x':x, 'y':y, 'hue':hue, 'power':True})
 
-                    send_msg(playerH, {'message':'Waiting on other player...'})
-                    send_msg(opponentH, {'message':'Your turn!'})
+                    lightgames.send_msg(playerH, {'message':'Waiting on other player...'})
+                    lightgames.send_msg(opponentH, {'message':'Your turn!'})
 
                     # Check if this move caused a win
                     winner_lamps = set()
@@ -130,11 +121,11 @@ class Connect4(lightgames.Game):
                             winner_lamps.update(rights)
 
                     if len(winner_lamps) > 0:
-                        send_msg(playerH, {'message':'You won!'})
-                        send_msg(opponentH, {'message':'You lost!'})
+                        lightgames.send_msg(playerH, {'message':'You won!'})
+                        lightgames.send_msg(opponentH, {'message':'You lost!'})
                         for h in self.connections:
                             if h != playerH and h != opponentH:
-                                send_msg(h, {'message':"Player %d won" % (self.player+1)})
+                                lightgames.send_msg(h, {'message':"Player %d won" % (self.player+1)})
                         print("Player %d wins!" % self.player)
                         self.reset()
                         return
@@ -143,14 +134,14 @@ class Connect4(lightgames.Game):
                     if all(all(i != 2 for i in j) for j in self.board):
                         print("The game tied")
                         for h in self.connections:
-                            send_msg(h, {'message':"The game tied"})
+                            lightgames.send_msg(h, {'message':"The game tied"})
                         self.reset()
                         return
 
                     self.player = 1 - self.player
 
                 else:
-                    send_msg(playerH, {'error':'Invalid move!'})
+                    lightgames.send_msg(playerH, {'error':'Invalid move!'})
 
 
     def on_close(self, handler):

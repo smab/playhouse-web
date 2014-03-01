@@ -41,21 +41,22 @@ class MainHandler(tornado.web.RequestHandler):
         self.render(game.template_file, **template_vars)
 
 
-class CommunicationHandler(tornado.websocket.WebSocketHandler): 
+class CommunicationHandler(tornado.websocket.WebSocketHandler):
     connections = []
 
-    def open(self): 
+    def open(self):
         print("Client connected (%s)" % self)
         queue.on_connect(self)
         game.on_connect(self)
         self.connections += [self]
 
-    def on_message(self, message): 
+    def on_message(self, message):
         print("Received message:", message)
-        queue.on_message(self, message)
-        game.on_message(self, message)
+        obj = tornado.escape.json_decode(message)
+        queue.on_message(self, obj)
+        game.on_message(self, obj)
 
-    def on_close(self): 
+    def on_close(self):
         print("Client disconnected (%s)" % self)
         if self in self.connections:
             queue.on_close(self)
