@@ -120,9 +120,14 @@ class GameConfigHandler(RequestHandler):
 
     @tornado.web.authenticated
     def post(self):
+        backup = manager.config.copy()
+
         cfg = {}
         for key,val in self.request.arguments.items():
             cfg[key] = self.get_argument(key)
+
+        if 'game_path' in cfg:
+            cfg['game_path'] = tornado.escape.json_decode(cfg['game_path'])
 
         print("Config: %s" % cfg)
 
@@ -130,15 +135,20 @@ class GameConfigHandler(RequestHandler):
 
         load_game = False
 
-        if 'game_name' in cfg and manager.config['game_name']!=cfg['game_name']:
-            manager.config['game_name'] = cfg['game_name']
+        if self.update_config(manager.config, cfg, 'game_name') or \
+            self.update_config(manager.config, cfg, 'game_path'):
             load_game = True
 
         status = "message"
         if load_game:
             print("Changing or restarting game")
-            manager.load_game()
-            msg = "Game changed"
+            try:
+                manager.load_game()
+                msg = "Game changed"
+            except Exception as e:
+                manager.config = backup
+                msg = "Loading failed: %s" % e
+                status = "error"
         else:
             ret = manager.game.set_options(cfg)
             if ret == None:
@@ -148,3 +158,9 @@ class GameConfigHandler(RequestHandler):
                 msg = ret
 
         self.redirect("game?status=%s&msg=%s" % (status, msg))
+
+    def update_config(self, cur_cfg, new_cfg, key):
+        if key in new_cfg and cur_cfg[key] != new_cfg[key]:
+            cur_cfg[key] = new_cfg[key]
+            return True
+        return False
