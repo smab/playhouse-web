@@ -8,6 +8,10 @@
               background: #235;
             }
 
+            div#message {
+                text-align: center;
+            }
+
             /*** Grid ************************************/
             #grid {
                 margin: 4em auto;
@@ -121,6 +125,8 @@
     <body>
         {% block grid %}
         <table id="grid"></table>
+
+        <div id="message">Connecting...</div>
 
         {% block postgrid %}
         {% end %}

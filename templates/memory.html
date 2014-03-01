@@ -1,18 +1,6 @@
 {% extends "base.html" %}
 
 
-{% block style %}
-    div#message {
-        text-align: center;
-    }
-{% end %}
-
-
-{% block postgrid %}
-<div id="message">Connecting...</div>
-{% end %}
-
-
 {% block click %}
     // Send to server
     ws.send(JSON.stringify({ x: parseInt(coords[0], 10),

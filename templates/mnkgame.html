@@ -4,23 +4,9 @@
 
 
 {% block style %}
-    td.player_1 {
-        background-color: {{ color_1 }};
-    }
-    td.player_2 {
-        background-color: {{ color_2 }};
-    }
-    td {
-        background-color: {{ color_empty }};
-    }
-    div#message {
-        text-align: center;
-    }
-{% end %}
-
-
-{% block postgrid %}
-<div id="message">Connecting...</div>
+    #grid td.player_1 { background-color: {{ color_1 }};     }
+    #grid td.player_2 { background-color: {{ color_2 }};     }
+    #grid td          { background-color: {{ color_empty }}; }
 {% end %}
 
 
