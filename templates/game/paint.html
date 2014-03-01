@@ -1,13 +1,6 @@
 {% extends "base.html" %}
 
 
-{% block style %}
-    td {
-        background-color: {{ color_empty }};
-    }
-{% end %}
-
-
 {% block click %}
     // Send to server
     reply({ x: parseInt(coords[0], 10),
@@ -21,6 +14,10 @@
         e = document.getElementById(obj.x + "-" + obj.y)
         e.style.backgroundColor = "rgb("+obj.color[0]+","+obj.color[1]+","+obj.color[2]+")"
     }
+{% end %}
+
+
+{% block message-area %}
 {% end %}
 
 

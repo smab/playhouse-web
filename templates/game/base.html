@@ -165,7 +165,9 @@
     </head>
     <body>
         {% block grid %}
-        <div id="message">Connecting...</div>
+            {% block message-area %}
+            <div id="message">Connecting...</div>
+            {% end %}
 
         <table id="grid" class="box"></table>
 
