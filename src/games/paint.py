@@ -16,8 +16,8 @@ class Paint(lightgames.Game):
         'module_name': 'Paint',
         'grid_x': 15,
         'grid_y': 10,
-        'cell_w': 64,
-        'cell_h': 64,
+        'cell_w': 74,
+        'cell_h': 74,
         'color_empty': '#f0f0f0'
     }
 

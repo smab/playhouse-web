@@ -2,20 +2,44 @@
 
 <html>
     <head>
-        <title>{% block title %}Grid{% end %}</title>
+        <title>{% block title %}Base{% end %}</title>
         <style>
-            table {
+            body {
+              background: #235;
+            }
+
+            /*** Grid ************************************/
+            #grid {
                 margin: 4em auto;
+                padding: 0.4em;
+                border-radius: 8px;
+                box-shadow: 0 0 16px #000;
             }
-            td:hover {
-                background-color: #ddd;
-            }
-            td {
+
+            #grid td {
+                position: relative;
+                margin: 0;
+                padding: 0;
+
                 width: {{ cell_w }}px;
                 height: {{ cell_h }}px;
-                border: 1px solid #ccc;
-                background-color: #f0f0f0;
             }
+            #grid td::after {
+                display: block;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                content: "";
+            }
+
+            #grid           { background: #000;                    }
+            #grid td::after { background: url('/static/lamp.png'); }
+            #grid td        { background-color: #222;              }
+            #grid td:hover  { background-color: #999;              }
+
+
+            /*** Queue ***********************************/
             div#queue {
                 text-align: center;
                 border-style: solid;
@@ -97,8 +121,10 @@
     <body>
         {% block grid %}
         <table id="grid"></table>
+
         {% block postgrid %}
         {% end %}
+
         {% end %}
         {% block queue %}
         <div id="queue">
