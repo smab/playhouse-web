@@ -1,0 +1,13 @@
+{% extends config_base.html %}
+
+
+{% block configbody %}
+    <h1>Login</h1>
+    <form action="/config/login?next={{ next }}" method="post">
+        <input type="hidden" name="user" value="test" />
+
+        <ul id="buttons">
+            <li><input type="submit" value="Login"></li>
+        </ul>
+    </form>
+{% end %}

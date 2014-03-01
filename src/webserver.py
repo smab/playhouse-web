@@ -3,6 +3,7 @@ import tornado.web
 import tornado.websocket
 
 import http.client
+import uuid
 
 import lightgames
 import manager
@@ -65,8 +66,12 @@ application = tornado.web.Application([
     (r"/config",         configinterface.ConfigHandler),
     (r"/config/bridges", configinterface.BridgeConfigHandler),
     (r"/config/game",    configinterface.GameConfigHandler),
+    (r"/config/login",   configinterface.ConfigLoginHandler),
     (r"/static/(.*)",    tornado.web.StaticFileHandler, {'path': 'static'})
-], template_path='templates', debug=True)
+], template_path='templates',
+   cookie_secret=str(uuid.uuid4()),
+   login_url="login",
+   debug=True)
 
 if __name__ == "__main__":
     initialize()

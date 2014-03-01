@@ -32,14 +32,40 @@ response = {
 }
 
 
+class RequestHandler(tornado.web.RequestHandler):
+    def get_current_user(self):
+        user_json = self.get_secure_cookie("user")
+        if user_json:
+            return tornado.escape.json_decode(user_json)
+        else:
+            return None
+
+
 class ConfigHandler(tornado.web.RequestHandler):
     def get(self):
         self.redirect("config/bridges")
 
 
-class BridgeConfigHandler(tornado.web.RequestHandler):
+class ConfigLoginHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.render('config_login.html', next=self.get_argument("next", "/config"))
+
+    def post(self):
+        self.set_current_user("test")
+        self.redirect(self.get_argument("next"))
+
+    def set_current_user(self, user):
+        if user:
+            print("User %s logged in" % user)
+            self.set_secure_cookie("user", tornado.escape.json_encode(user), expires_days=None)
+        else:
+            self.clear_cookie("user")
+
+
+class BridgeConfigHandler(RequestHandler):
     client = None
     #response = response # To use the example
+    @tornado.web.authenticated
     def get(self):
         self.client = http.client.HTTPConnection(
             manager.config['lampdest'], manager.config['lampport']
@@ -63,6 +89,7 @@ class BridgeConfigHandler(tornado.web.RequestHandler):
                 self.write("<p>" + str(self.response) + "</p>")
                 self.write("<p>Expected 'state':'success'</p>")
 
+    @tornado.web.authenticated
     def post(self):
         print('POST', self.request.body)
 
@@ -71,7 +98,8 @@ class BridgeConfigHandler(tornado.web.RequestHandler):
         self.redirect("bridges")
 
 
-class GameConfigHandler(tornado.web.RequestHandler):
+class GameConfigHandler(RequestHandler):
+    @tornado.web.authenticated
     def get(self):
         template_vars = {
             'config_file': manager.game.config_file,
@@ -88,6 +116,7 @@ class GameConfigHandler(tornado.web.RequestHandler):
         template_vars['vars'] = template_vars;
         self.render('config_game.html', **template_vars)
 
+    @tornado.web.authenticated
     def post(self):
         cfg = {}
         for key,val in self.request.arguments.items():
