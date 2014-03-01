@@ -10,7 +10,8 @@
 
 {% block click %}
     // Send to server
-    ws.send(JSON.stringify({ action: "gameaction", x: parseInt(coords[0]), y: parseInt(coords[1]) }));
+    reply({ x: parseInt(coords[0], 10),
+            y: parseInt(coords[1], 10) })
 {% end %}
 
 

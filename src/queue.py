@@ -25,16 +25,23 @@ class Queue:
             i += 1
             lightgames.send_msg(queuer, {'queuepos':i})
 
+    enqueue_callback = None
+
     def on_message(self, handler, msg):
         try:
             action = msg['queueaction']
+
             if action == 0:
                 self.queue.remove(handler)
                 self.refresh()
                 lightgames.send_msg(handler, {'queuepos':0})
+
             if action == 1:
                 self.queue.append(handler)
                 lightgames.send_msg(handler, {'queuepos':self.size()})
+                if self.enqueue_callback != None:
+                    self.enqueue_callback(handler)
+
         except KeyError:
             pass
 

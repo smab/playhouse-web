@@ -69,6 +69,9 @@ class Game:
     def on_connect(self, handler):
         pass
 
+    def on_enqueue(self, handler):
+        pass
+
     def on_message(self, handler, message):
         pass
 
@@ -77,6 +80,7 @@ class Game:
 
     def set_queue(self, queue):
         self.queue = queue
+        queue.enqueue_callback = self.on_enqueue
 
     def set_options(self, config):
         pass

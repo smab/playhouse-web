@@ -46,8 +46,8 @@
 {% block click %}
     // Send to server
     var x = parseInt(coords[0], 10)
-    ws.send(JSON.stringify({ x: x,
-                             y: (heights[x] || maxHeight) - 1 }))
+    reply({ x: x,
+            y: (heights[x] || maxHeight) - 1 })
 {% end %}
 
 

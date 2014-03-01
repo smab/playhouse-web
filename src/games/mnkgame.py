@@ -114,15 +114,13 @@ class MnkGame(lightgames.Game):
         # Sync board
         self.sync(handler)
 
+    def on_enqueue(self, handler):
+        if handler not in self.players:
+            self.on_connect(handler)
+
     def on_message(self, handler, coords):
         playerH = self.players[self.player]
         opponentH = self.players[1-self.player]
-
-        if 'action' not in coords or coords['action'] != 'gameaction':
-            # assume queueaction
-            if handler not in self.players:
-                self.on_connect(handler)
-            return
 
         if playerH != handler:
             if opponentH == handler:

@@ -53,8 +53,10 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         print("Received message:", message)
         obj = tornado.escape.json_decode(message)
-        queue.on_message(self, obj)
-        game.on_message(self, obj)
+
+        if   'queueaction' in obj: queue.on_message(self, obj)
+        elif 'gameaction'  in obj: game.on_message(self, obj)
+        else: print("## warn: no receiver for message!")
 
     def on_close(self):
         print("Client disconnected (%s)" % self)

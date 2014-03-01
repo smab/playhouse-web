@@ -113,8 +113,17 @@
                 function play(e) {
                     coords = e.id.split("-")
 
+                    function reply(response) {
+                        ws.send(JSON.stringify(extend({ gameaction: true }, response)))
+                    }
+
                     {% block click %}
                     {% end %}
+
+                    function extend(target, source) {
+                        for (var k in source) target[k] = source[k]
+                        return target
+                    }
                 }
             }
 
