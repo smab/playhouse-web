@@ -20,7 +20,6 @@ connections = []
 
 def load_game():
     global game
-    global client
     global connections
 
     if game != None:

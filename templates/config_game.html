@@ -4,7 +4,30 @@
 {% block menu_settings %}active{% end %}
 
 
+{% block configstyle %}
+    #message {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        width: 100%;
+        padding: 0.4em 0;
+        text-align: center;
+        box-shadow: 0 0 8px #222;
+        font-family: sans-serif;
+        background: rgba(255,255,255,0.3);
+    }
+    #message.type-error {
+        font-weight: bold;
+        background: rgba(255,0,0,0.6);
+    }
+{% end %}
+
+
 {% block configbody %}
+    {% if status != "" %}
+        <div id="message" class="type-{{ status }}">{{ message }}</div>
+    {% end %}
     <h1>Settings</h1>
     <form enctype="multipart/form-data" action="/config/game" method="post">
         <h2>Game Choice</h2>

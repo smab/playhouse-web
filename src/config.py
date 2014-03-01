@@ -105,7 +105,9 @@ class GameConfigHandler(RequestHandler):
             'config_file': manager.game.config_file,
             'game_name':   manager.config['game_name'],
             'game_path':   tornado.escape.json_encode(manager.config['game_path']),
-            'game_list':   lightgames.get_games(manager.config['game_path'])
+            'game_list':   lightgames.get_games(manager.config['game_path']),
+            'status':      self.get_argument("status", ""),
+            'message':     self.get_argument("msg", "")
         }
 
         template_vars.update(lightgames.Game.template_vars)  # Game defaults
@@ -132,15 +134,17 @@ class GameConfigHandler(RequestHandler):
             manager.config['game_name'] = cfg['game_name']
             load_game = True
 
+        status = "message"
         if load_game:
             print("Changing or restarting game")
             manager.load_game()
-            status = "Game changed!"
+            msg = "Game changed"
         else:
             ret = manager.game.set_options(cfg)
             if ret == None:
-                status = "Settings saved!"
+                msg = "Settings saved"
             else:
-                status = ret
+                status = "error"
+                msg = ret
 
-        self.redirect("game?status=%s" % status)
+        self.redirect("game?status=%s&msg=%s" % (status, msg))
