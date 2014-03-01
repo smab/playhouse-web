@@ -38,7 +38,7 @@ class MainHandler(tornado.web.RequestHandler):
         if 'title' not in template_vars:
             template_vars['title'] = template_vars.get('module_name', "Untitled game")
 
-        self.render(game.template_file, **template_vars)
+        self.render('game/' + game.template_file, **template_vars)
 
 
 class CommunicationHandler(tornado.websocket.WebSocketHandler):

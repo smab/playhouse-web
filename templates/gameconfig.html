@@ -24,7 +24,7 @@
         </tr>
         </table>
 
-        {% module Template(config_file, **vars) %}
+        {% module Template("config/" + config_file, **vars) %}
 
         <ul id="buttons">
             <li><input type="submit" value="Save Settings"></li>
