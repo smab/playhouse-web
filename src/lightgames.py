@@ -22,7 +22,10 @@ class Game:
     config_file = "defaultconfig.html"
     template_file = "default.html"
     template_vars = {
-        'module_name': '<name not set>'
+        'module_name': '<name not set>',
+        'cell_w':      74,
+        'cell_h':      74,
+        'color_empty': "#222"
     }
 
 

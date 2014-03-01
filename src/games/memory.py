@@ -19,11 +19,8 @@ class Memory(lightgames.Game):
     template_file = "memory.html"
     template_vars = {
         'module_name': 'Memory',
-        'title':       'Memory',
         'grid_x':      6,
         'grid_y':      4,
-        'cell_w':      74,
-        'cell_h':      74,
     }
 
     width, height = template_vars['grid_x'], template_vars['grid_y']

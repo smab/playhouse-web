@@ -20,12 +20,9 @@ class MnkGame(lightgames.Game):
         'module_name': 'm,n,k-game',
         'grid_x': 3,
         'grid_y': 3,
-        'cell_w': 74,
-        'cell_h': 74,
         'winner_req': 3,
         'color_1': '#33f',
         'color_2': '#f33',
-        'color_empty': '#222'
     }
     # note: concept/idea
     options = {

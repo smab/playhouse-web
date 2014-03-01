@@ -17,9 +17,8 @@ class Connect4(lightgames.Game):
     template_file = "connect4.html"
     template_vars = {
         'module_name': 'Connect 4',
-        'title':       'Connect 4',
-        'grid_x':  7, 'grid_y':  6,
-        'cell_w': 74, 'cell_h': 74,
+        'grid_x':  7,
+        'grid_y':  6,
     }
 
     width, height = template_vars['grid_x'], template_vars['grid_y']

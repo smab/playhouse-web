@@ -16,9 +16,6 @@ class GifAnimation(lightgames.Game):
         'module_name': 'GIF Animation',
         'grid_x': 3,
         'grid_y': 3,
-        'cell_w': 64,
-        'cell_h': 64,
-        'color_empty': '#f0f0f0'
     }
 
     def init(self):

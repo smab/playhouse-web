@@ -31,8 +31,13 @@ queue = queue.Queue()
 
 class MainHandler(tornado.web.RequestHandler): 
     def get(self):
-        template_vars = {'socket_addr': config['websocket_addr']}
+        template_vars = { 'socket_addr': config['websocket_addr'] }
+
+        template_vars.update(lightgames.Game.template_vars)  # Game defaults
         template_vars.update(game.template_vars)
+        if 'title' not in template_vars:
+            template_vars['title'] = template_vars.get('module_name', "Untitled game")
+
         self.render(game.template_file, **template_vars)
 
 
@@ -65,12 +70,17 @@ class GameConfigHandler(tornado.web.RequestHandler):
     def get(self):
         global game
         template_vars = {
-            'config_file':game.config_file,
-            'game_name':config['game_name'],
-            'game_path':tornado.escape.json_encode(config['game_path']),
-            'game_list':lightgames.get_games(config['game_path'])
+            'config_file': game.config_file,
+            'game_name':   config['game_name'],
+            'game_path':   tornado.escape.json_encode(config['game_path']),
+            'game_list':   lightgames.get_games(config['game_path'])
         }
+
+        template_vars.update(lightgames.Game.template_vars)  # Game defaults
         template_vars.update(game.template_vars)
+        if 'title' not in template_vars:
+            template_vars['title'] = template_vars.get('module_name', "Untitled game")
+
         template_vars['vars'] = template_vars;
         self.render('gameconfig.html', **template_vars)
 
