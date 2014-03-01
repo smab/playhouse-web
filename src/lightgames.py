@@ -42,46 +42,59 @@ class Game:
     def __init__(self, client):
         self.client = client
 
+    def set_queue(self, queue):
+        self.queue = queue
+        queue.enqueue_callback = self.on_enqueue
 
-    def send_lamp(self, x, y, change):
-        self.send_lamp_multi([ { 'x': x, 'y': y, 'change': change } ])
-
-    def send_lamp_all(self, change):
-        json    = tornado.escape.json_encode(change)
-        headers = {'Content-Type': 'application/json'}
-        self.client.request("POST", "/lights/all", json, headers)
-        # Print response
-        print(self.client.getresponse().read().decode())
 
     def send_lamp_multi(self, changes):
+        """ Update a set of lamps according to the given operations """
         json    = tornado.escape.json_encode(changes)
         headers = {'Content-Type': 'application/json'}
         self.client.request("POST", "/lights", json, headers)
         # Print response
         print(self.client.getresponse().read().decode())
 
+    def send_lamp(self, x, y, change):
+        """ Convenience function for updating a single lamp """
+        self.send_lamp_multi([ { 'x': x, 'y': y, 'change': change } ])
+
+    def send_lamp_all(self, change):
+        """ Update all lamps with the given lamp operation """
+        json    = tornado.escape.json_encode(change)
+        headers = {'Content-Type': 'application/json'}
+        self.client.request("POST", "/lights/all", json, headers)
+        # Print response
+        print(self.client.getresponse().read().decode())
+
 
     def init(self):
+        """ Game initialization routine """
         pass
 
     def destroy(self):
+        """
+        Game cleanup routine.  After `destroy()` is called, this instance will
+        never be re-used again for future games.
+        """
         pass
 
+    def set_options(self, config):
+        pass
+
+
     def on_connect(self, handler):
+        """ Event: a client has connected """
         pass
 
     def on_enqueue(self, handler):
-        pass
-
-    def on_message(self, handler, message):
+        """ Event: a client has been enqueued """
         pass
 
     def on_close(self, handler):
+        """ Event: a client has disconnected """
         pass
 
-    def set_queue(self, queue):
-        self.queue = queue
-        queue.enqueue_callback = self.on_enqueue
-
-    def set_options(self, config):
+    def on_message(self, handler, message):
+        """ Event: a game message from a client was received """
         pass
