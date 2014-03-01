@@ -1,4 +1,4 @@
-{% extends configbase.html %}
+{% extends config_base.html %}
 
 
 {% block menu_bridges %}active{% end %}
@@ -6,7 +6,7 @@
 
 {% block configbody %}
     <h1>Bridges</h1>
-    <form action="/config" method="post">
+    <form action="/config/bridges" method="post">
         <table id="bridges">
             <tr>
                 <th>#</th>
@@ -28,54 +28,6 @@
                 <td>{{ bridges[mac]['lights'] }}</td>
             </tr>
             {% end %}
-            <!--tr>
-                <td>1</td>
-                <td>
-                    <input type="checkbox" name="select"
-                    value="A">
-                </td>
-                <td>001788182e78</td>
-                <td>130.237.228.58:80</td>
-                <td>a0e48e11876b8971eb694151aba16ab</td>
-                <td>true</td>
-                <td>3</td>
-            </tr-->
-            <!--tr>
-                <td>2</td>
-                <td>
-                    <input type="checkbox" name="select"
-                    value="">
-                </td>
-                <td>001788182e78</td>
-                <td>130.237.228.58:80</td>
-                <td>a0e48e11876b8971eb694151aba16ab</td>
-                <td>true</td>
-                <td>3</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>
-                    <input type="checkbox" name="select"
-                    value="">
-                </td>
-                <td>001788182e78</td>
-                <td>130.237.228.58:80</td>
-                <td>a0e48e11876b8971eb694151aba16ab</td>
-                <td>true</td>
-                <td>3</td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>
-                    <input type="checkbox" name="select"
-                    value="">
-                </td>
-                <td>001788182e78</td>
-                <td>130.237.228.58:80</td>
-                <td>a0e48e11876b8971eb694151aba16ab</td>
-                <td>true</td>
-                <td>3</td>
-            </tr-->
             <tr>
                 <td>-</td>
                 <td>-</td>
@@ -97,5 +49,4 @@
             <li><input type="submit" value="Refresh List"></li>
         </ul>
     </form>
-
 {% end %}

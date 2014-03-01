@@ -23,6 +23,7 @@
                 border: 2px solid #666;
             }
             #menu li a:hover { background-color: #CEF; }
+            #menu li a, #menu li a:visited { color: #333; }
             #menu li a {
                 display: block;
                 text-decoration: none;
@@ -139,7 +140,7 @@
     <body>
         <div id="center">
             <ul id="menu">
-                <li><a class="{% block menu_bridges %}{% end%}" href="/config">Bridges</a></li>
+                <li><a class="{% block menu_bridges %}{% end%}" href="/config/bridges">Bridges</a></li>
                 <li><a class="{% block menu_settings %}{% end%}" href="/config/game">Settings</a></li>
                 <li><a class="{% block menu_preview %}{% end%}" href="">Preview</a></li>
             </ul>
