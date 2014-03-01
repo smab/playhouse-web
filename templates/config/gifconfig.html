@@ -1,5 +1,20 @@
 {% extends "baseconfig.html" %}
 
 
-{% block extragridsettings %}
+{% block gridsize %}
+{% end %}
+
+
+{% block setting %}
+    <h2>Animation</h2>
+    <table>
+        <tr>
+            <td>Current Animation:</td>
+            <td> {{ animation_file }}</td>
+        </tr>
+        <tr>
+            <td>New Animation: </td>
+            <td><input type="file" name="animation_file" value="" accept="image/gif" /></td>
+        </tr>
+    </table>
 {% end %}

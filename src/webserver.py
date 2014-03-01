@@ -95,6 +95,8 @@ class GameConfigHandler(tornado.web.RequestHandler):
 
         print("Config: %s" % cfg)
 
+        cfg['files'] = self.request.files
+
         load_game = False
 
         if 'game_name' in cfg and config['game_name']!=cfg['game_name']:
@@ -114,10 +116,15 @@ class GameConfigHandler(tornado.web.RequestHandler):
             game = lightgames.load(config["game_name"], config["game_path"], client)
             game.set_queue(queue)
             game.init()
+            status = "Game changed!"
         else:
-            game.set_options(cfg)
+            ret = game.set_options(cfg)
+            if ret == None:
+                status = "Settings saved!"
+            else:
+                status = ret
 
-        self.redirect("game")
+        self.redirect("game?status=%s" % status)
 
 def initialize():
     global config

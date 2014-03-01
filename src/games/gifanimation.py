@@ -1,7 +1,6 @@
-import tornado.escape
-
 from PIL import Image
 import time
+import io
 
 import lightgames
 
@@ -16,16 +15,18 @@ class GifAnimation(lightgames.Game):
         'module_name': 'GIF Animation',
         'grid_x': 3,
         'grid_y': 3,
+        'animation_file': 'animations/test2.gif',
     }
 
     def init(self):
         self.spectators = []
 
+        self.data = open(self.template_vars['animation_file'], 'rb').read()
 
     def on_connect(self, handler):
         self.spectators.append(handler)
         try:
-            gif = Image.open("animations/test2.gif")
+            gif = Image.open(io.BytesIO(self.data))
             (width, height) = gif.size
             i = 0
             for frame in ImageSequence(gif):
@@ -47,6 +48,19 @@ class GifAnimation(lightgames.Game):
 
     def on_close(self, handler):
         self.spectators.remove(handler)
+
+    def set_options(self, config):
+        self.template_vars['cell_w'] = max(2,min(500,int(config['cell_w'])))
+        self.template_vars['cell_h'] = max(2,min(500,int(config['cell_h'])))
+
+        files = config['files']
+        if 'animation_file' in files:
+            fileinfo = files['animation_file'][0]
+            if fileinfo['content_type'] != 'image/gif':
+                return "Incorrect content type: %s" % fileinfo['content_type']
+
+            self.data = fileinfo['body']
+            self.template_vars['animation_file'] = fileinfo['filename']
 
 
 class ImageSequence:
