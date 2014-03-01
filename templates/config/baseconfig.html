@@ -16,6 +16,7 @@
 {% block configbody %}
     <h2>{% block gridsetname %}Grid{% end %}</h2>
     <table>
+    {% block gridsize %}
     <tr><td>
         Grid size:
         <div class="fill"></div>
@@ -23,6 +24,8 @@
         x
         <input name="grid_x" value="{{ grid_x }}" class="numberinput" />
     </td></tr>
+    {% end %}
+    {% block cellsize %}
     <tr><td>
         Cell size:
         <div class="fill"></div>
@@ -30,6 +33,7 @@
         x
         <input name="cell_h" value="{{ cell_h }}" class="numberinput" />
     </td></tr>
+    {% end %}
     {% block extragridsettings %}
     {% end %}
     </table>
