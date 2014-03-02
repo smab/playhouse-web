@@ -22,6 +22,8 @@ def load_game():
     global game
     global connections
 
+    new_game = lightgames.load(config["game_name"], config["game_path"], client)
+
     if game != None:
         game.destroy()
     queue.clear()
@@ -30,6 +32,6 @@ def load_game():
         conn.close()
     connections = []
 
-    game = lightgames.load(config["game_name"], config["game_path"], client)
+    game = new_game
     game.set_queue(queue)
     game.init()

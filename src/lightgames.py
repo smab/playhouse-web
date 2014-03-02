@@ -12,9 +12,12 @@ def load(name, path, client):
 def get_games(paths):
     games = []
     for path in paths:
-        for file in os.listdir(path):
-            if file.endswith(".py"):
-                games += [file.split('.')[0]]
+        try:
+            for file in os.listdir(path):
+                if file.endswith(".py"):
+                    games += [file.split('.')[0]]
+        except FileNotFoundError:
+            pass
 
     return games
 
