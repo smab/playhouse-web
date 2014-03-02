@@ -64,9 +64,10 @@ application = tornado.web.Application([
     (r"/",               MainHandler),
     (r"/websocket",      CommunicationHandler),
     (r"/config",         configinterface.ConfigHandler),
-    (r"/config/bridges", configinterface.BridgeConfigHandler),
-    (r"/config/game",    configinterface.GameConfigHandler),
     (r"/config/login",   configinterface.ConfigLoginHandler),
+    ("/config/setup",    configinterface.SetupConfigHandler), 
+    (r"/config/game",    configinterface.GameConfigHandler),
+    (r"/config/bridges", configinterface.BridgeConfigHandler),
     (r"/static/(.*)",    tornado.web.StaticFileHandler, {'path': 'static'})
 ], template_path='templates',
    cookie_secret=str(uuid.uuid4()),

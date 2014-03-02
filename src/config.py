@@ -43,7 +43,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
 class ConfigHandler(tornado.web.RequestHandler):
     def get(self):
-        self.redirect("config/bridges")
+        self.redirect("config/setup")
 
 
 class ConfigLoginHandler(tornado.web.RequestHandler):
@@ -61,6 +61,11 @@ class ConfigLoginHandler(tornado.web.RequestHandler):
         else:
             self.clear_cookie("user")
 
+# TODO 
+class SetupConfigHandler(RequestHandler): 
+    @tornado.web.authenticated 
+    def get(self): 
+        self.render("config_setup.html") 
 
 class BridgeConfigHandler(RequestHandler):
     client = None

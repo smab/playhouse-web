@@ -3,6 +3,48 @@
 
 {% block menu_bridges %}active{% end %}
 
+{% block config_script %}
+    function addBridge() {
+        var bridges = document.getElementById('bridges');
+        var tr = document.createElement('tr');
+
+        var no = document.createElement('td');
+        no.innerHTML = '-';
+        tr.appendChild(no);
+
+        var select = document.createElement('input');
+        select.type = 'checkbox';
+        select.name = 'checkbox';
+        tr.appendChild(wrapTd(select));
+
+        var mac = document.createElement('td');
+        mac.innerHTML = '-';
+        tr.appendChild(mac);
+
+        var ip = document.createElement('input');
+        ip.className = 'ip';
+        ip.type = 'text';
+        ip.name = 'ip';
+        tr.appendChild(wrapTd(ip));
+
+        var username = document.createElement('input');
+        username.className = 'username';
+        username.type = 'text';
+        username.name = 'username';
+        tr.appendChild(wrapTd(username));
+
+        var valid = document.createElement('td');
+        valid.innerHTML = '-';
+        tr.appendChild(valid);
+
+        var lights = document.createElement('td');
+        lights.innerHTML = '-';
+        tr.appendChild(lights);
+
+        bridges.appendChild(tr);
+        ip.focus();
+    }
+{% end %}
 
 {% block configbody %}
     <h1>Bridges</h1>
@@ -50,3 +92,5 @@
         </ul>
     </form>
 {% end %}
+
+

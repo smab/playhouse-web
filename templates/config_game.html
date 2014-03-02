@@ -1,7 +1,7 @@
 {% extends config_base.html %}
 
 
-{% block menu_settings %}active{% end %}
+{% block menu_game %}active{% end %}
 
 
 {% block configstyle %}
@@ -28,9 +28,8 @@
     {% if status != "" %}
         <div id="message" class="type-{{ status }}">{{ message }}</div>
     {% end %}
-    <h1>Settings</h1>
     <form enctype="multipart/form-data" action="/config/game" method="post">
-        <h2>Game Choice</h2>
+        <h1>Game Choice</h1>
         <table>
         <tr>
             <td>Current Game: </td>
