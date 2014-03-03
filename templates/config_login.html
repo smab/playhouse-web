@@ -2,6 +2,7 @@
 
 
 {% block configbody %}
+<div id="settings"> 
     <h1>Login</h1>
     <form action="/config/login?next={{ next }}" method="post">
         <input type="hidden" name="user" value="test" />
@@ -10,4 +11,5 @@
             <li><input type="submit" value="Login"></li>
         </ul>
     </form>
+</div> 
 {% end %}
