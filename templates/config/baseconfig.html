@@ -5,10 +5,6 @@
     .colorinput {
         width: 70px;
     }
-    .fill {
-        width: 10px;
-        display: inline-block;
-    }
 
     {% block style %}{% end %}
 </style>
@@ -18,8 +14,7 @@
     <table>
     {% block gridsize %}
     <tr><td>
-        Grid size:
-        <div class="fill"></div>
+        <span class="fill">Grid size:</span>
         <input name="grid_y" value="{{ grid_y }}" class="numberinput" style="text-align: right;" />
         x
         <input name="grid_x" value="{{ grid_x }}" class="numberinput" />
@@ -27,8 +22,7 @@
     {% end %}
     {% block cellsize %}
     <tr><td>
-        Cell size:
-        <div class="fill"></div>
+        <span class="fill">Cell size:</span>
         <input name="cell_w" value="{{ cell_w }}" class="numberinput" style="text-align: right;" />
         x
         <input name="cell_h" value="{{ cell_h }}" class="numberinput" />

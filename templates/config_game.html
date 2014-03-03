@@ -5,24 +5,12 @@
 
 
 {% block configstyle %}
-    #message {
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        right: 0px;
-        width: 100%;
-        padding: 0.4em 0;
-        text-align: center;
-        box-shadow: 0 0 8px #222;
-        font-family: sans-serif;
-        background: rgba(255,255,255,0.3);
-    }
-    #message.type-error {
-        font-weight: bold;
-        background: rgba(255,0,0,0.6);
-    }
     .hidden {
         display: none;
+    }
+
+    #name {
+        width: 100%;
     }
 {% end %}
 
@@ -49,6 +37,7 @@
 
 
 {% block configbody %}
+<div id="settings">
     {% if status != "" %}
         <div id="message" class="type-{{ status }}">{{ message }}</div>
     {% end %}
@@ -56,7 +45,7 @@
         <h1>Game Choice</h1>
         <table>
         <tr>
-            <td>Current Game: </td>
+            <td>Current game: </td>
             <td>
                 <select id="name" name="game_name" value="{{ game_name }}" onchange="onnamechange(this)">
                 {% for name in game_list %}
@@ -65,17 +54,21 @@
                 </select>
             </td>
         </tr><tr>
-            <td>Game Paths: </td>
+            <td>Game paths: </td>
             <td><input id="path" name="game_path" value="{{ game_path }}" onchange="onpathchange(this)" /></td>
         </tr>
         </table>
 
         <div id="gameconfig">
-        {% module Template("config/" + config_file, **vars) %}
+            <h1>Game Settings</h1>
+            <div class="subsection">
+            {% module Template("config/" + config_file, **vars) %}
+            </div>
         </div>
 
         <ul id="buttons">
             <li><input type="submit" id="savebutton" value="Save Settings"></li>
         </ul>
     </form>
+</div>
 {% end %}

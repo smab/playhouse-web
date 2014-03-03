@@ -5,17 +5,86 @@
 
 
 {% block configstyle %}
+    .numberinput {
+        width: 2em;
+    }
+    .portinput {
+        width: 3em;
+    }
+    .fill {
+        padding-right: 10px;
+    }
+
+    .content {
+        margin: 0.5em auto 2em auto;
+        font-family: "sans-serif";
+        display: table;
+    }
+    .row {
+        display: table-row;
+    }
+    .cell {
+        display: table-cell;
+    }
+
+    #stream {
+        width: 400px;
+        height: 80px;
+    }
 {% end %}
 
 
 {% block configbody %}
+    {% if status != "" %}
+        <div id="message" class="type-{{ status }}">{{ message }}</div>
+    {% end %}
+
     <h1>Setup</h1>
-    <ul> 
-        <li>Ip och port till lampserver</li>
-        <li>Ip som webserver ska lyssna på, default 80</li>
-        <li>Kanske saker med websocket?</li>
-        <li>Länk till livestream, eller kanske t.o.m ett embeddblock</li>
-        <li>Grid_x, grid_y</li>
-        <li>Mer?</li>
-    </ul>
+
+    <div id="settings">
+    <form action="/config/setup" method="post">
+        <div class="subsection">
+            <h2>Building</h2>
+
+            <div class="content">
+                <span class="fill">Grid size:</span>
+                <input name="grid_y" value="3" class="numberinput" style="text-align: right;" />
+                x
+                <input name="grid_x" value="3" class="numberinput" />
+            </div>
+        </div>
+        <div class="subsection">
+            <h2>Connections</h2>
+
+            <div class="content">
+                <div class="row">
+                    <div class="cell fill">Lampserver:</div>
+                    <div class="cell">
+                        <input name="ip" value="{{ config('lampdest') }}" />
+                        :
+                        <input name="port" value="{{ config('lampport') }}" class="portinput" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="cell fill">Webserver port:</div>
+                    <input name="port" value="{{ config('serverport') }}" class="cell portinput" />
+                </div>
+            </div>
+        </div>
+        <div class="subsection">
+            <h2>Streaming</h2>
+
+            <div class="content">
+                <div>Embed code:</div>
+                <textarea type="text" id="stream" name="livestream_code">
+                    {{ config('stream_embedcode') }}
+                </textarea>
+            </div>
+        </div>
+
+        <ul id="buttons">
+            <li><input type="submit" id="savebutton" value="Save Setup"></li>
+        </ul>
+    </form>
+    </div>
 {% end %}

@@ -9,7 +9,9 @@ config = {
     'lampdest': 'localhost',
     'lampport': 4711,
 
-    'serverport': 8080
+    'serverport': 8080,
+
+    'stream_embedcode':''
 }
 client = None
 game = None
