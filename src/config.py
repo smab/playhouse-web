@@ -1,6 +1,8 @@
+import tornado.ioloop
 import tornado.web
 
 import http.client
+import time 
 
 import lightgames
 import manager
@@ -67,39 +69,127 @@ class SetupConfigHandler(RequestHandler):
     def get(self): 
         self.render("config_setup.html") 
 
+
 class BridgeConfigHandler(RequestHandler):
-    client = None
-    #response = response # To use the example
+    bridges = None 
     @tornado.web.authenticated
     def get(self):
-        self.client = http.client.HTTPConnection(
-            manager.config['lampdest'], manager.config['lampport']
-        )
-        self.client.request("GET", "/bridges");
-
-        try:
-            self.response = tornado.escape.json_decode(
-                self.client.getresponse().read().decode()
+        if BridgeConfigHandler.bridges == None: 
+            client = http.client.HTTPConnection(
+                manager.config['lampdest'], manager.config['lampport']
             )
-        except ValueError:
-            print("ValueError: Did not get json from server when requesting /bridges")
-            self.write("<p>Did not get json from server. Is the IP and port correct?</p>")
-        else:
-            if 'state' in self.response and self.response['state'] == 'success':
-                self.data = self.response['bridges']
-                print("config, GET /bridges:", self.data)
-                self.render('config_bridges.html', bridges=self.data)
+            print("BridgeConfig GET /bridges")
+            client.request("GET", "/bridges");
+
+            json = client.getresponse().read().decode()
+            try:
+                response = tornado.escape.json_decode(json)
+            except ValueError:
+                print("ValueError: Did not get json from server when requesting /bridges")
+                print(json) 
+                self.write("<p>Did not get json from server. Is the IP and port correct? Check the output in console</p>")
             else:
-                self.write("<p>Unexpected answer from lamp-server.</p>")
-                self.write("<p>" + str(self.response) + "</p>")
-                self.write("<p>Expected 'state':'success'</p>")
+                if response['state'] == 'success':
+                    data = response['bridges']
+                    print("BridgeConfig response:", data)
+                    BridgeConfigHandler.bridges = data 
+                    self.render('config_bridges.html', bridges=data)
+                else:
+                    self.write("<p>Unexpected answer from lamp-server.</p>")
+                    self.write("<p>" + str(response) + "</p>")
+                    self.write("<p>Expected 'state':'success'</p>")
+        else: 
+            self.render('config_bridges.html', bridges=BridgeConfigHandler.bridges) 
 
     @tornado.web.authenticated
     def post(self):
-        print('POST', self.request.body)
+        print('POST', self.request.arguments)
+        client = http.client.HTTPConnection(
+            manager.config['lampdest'], manager.config['lampport']
+        )
+        headers = {'Content-Type': 'application/json'}
 
-        # TODO: Stuff here. Do the changes the user requests
+        data = self.request.arguments 
+        if 'identify' in data and 'select' in data:
+            request = {'alert': 'select'}
+            request = tornado.escape.json_encode(request) 
+            for mac in data['select']: 
+                print("Identify POST:", "/bridges/"+mac.decode('utf-8')+"/lights/all", request) 
+                client.request("POST", "/bridges/"+mac.decode('utf-8')+"/lights/all", request, headers)
+                time.sleep(1.5) 
 
+                response = client.getresponse().read().decode() 
+                print('Identify response:', response) 
+
+                response = tornado.escape.json_decode(response) 
+                if response['state'] != 'success': 
+                    print('Error when blinking', mac, response) 
+
+        elif 'add' in data: 
+            data['ip'] = data['ip'][0].strip().decode() 
+            data['username'] = data['username'][0].strip().decode() 
+            if data['ip'] != '': 
+                request = {'ip': data['ip']}
+                if data['username'] != '': 
+                    request['username'] = data['username'] 
+
+                print('Add bridge:', request)
+                json = tornado.escape.json_encode(request) 
+                client.request("POST", "/bridges/add", json, headers) 
+
+                response = client.getresponse().read().decode() 
+                response = tornado.escape.json_decode(response)
+                if response['state'] == 'success': 
+                    BridgeConfigHandler.bridges.update(response['bridges']) 
+                    print('Added bridge:', response['bridges']) 
+                else: 
+                    print("ERROR!", response) 
+            else: 
+                print('No IP specified') 
+
+        elif 'remove' in data and 'select' in data: 
+            for mac in data['select']: 
+                print('Remove bridge', mac.decode()) 
+                client.request("DELETE", "/bridges/"+mac.decode(), {}, headers)
+                time.sleep(1.5) 
+
+                response = client.getresponse().read().decode() 
+                print('Remove response:', response) 
+
+                response = tornado.escape.json_decode(response) 
+                if response['state'] == 'success': 
+                    del BridgeConfigHandler.bridges[mac.decode()]
+                else: 
+                    print('Could not remove bridge.')
+                    print(response['errorcode'], response['errormessage']) 
+
+        # Set bridges to None, to force it to get them in get() 
+        elif 'refresh' in data: 
+            BridgeConfigHandler.bridges = None 
+
+        elif 'search' in data: 
+            print('Search') 
+            client.request('GET', '/bridges/search', {}, headers) 
+
+            response = client.getresponse().read().decode() 
+            print(response) 
+            response = tornado.escape.json_decode(response) 
+            if response['state'] == 'success': 
+                time.sleep(20)  
+                client.request('GET', '/bridges/search/result', {}, headers) 
+
+                response = client.getresponse().read().decode() 
+                response = tornado.escape.json_decode(response) 
+                print('BridgeConfig search response', response) 
+                if response['state'] == 'success': 
+                    BridgeConfigHandler.bridges.update(response['bridges']) 
+                else: 
+                    print(response['errorcode'], response['errormessage']) 
+            else: 
+                print(response['errorcode'], response['errormessage']) 
+        else: 
+            print('Unknown request. What did you do?') 
+            
         self.redirect("bridges")
 
 
