@@ -16,7 +16,7 @@ headers = {
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        template_vars = {}
+        template_vars = { 'stream_embedcode': manager.config['stream_embedcode'] }
         template_vars.update(lightgames.Game.template_vars)  # Game defaults
         template_vars.update(manager.game.template_vars)
         if 'title' not in template_vars:

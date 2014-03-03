@@ -61,11 +61,30 @@ class ConfigLoginHandler(tornado.web.RequestHandler):
         else:
             self.clear_cookie("user")
 
-# TODO 
+
 class SetupConfigHandler(RequestHandler): 
     @tornado.web.authenticated 
     def get(self): 
-        self.render("config_setup.html") 
+        def config(key):
+            if key in manager.config:
+                return manager.config[key]
+            return None
+
+        template_vars = {
+            'config':  config,
+            'status':  self.get_argument("status", ""),
+            'message': self.get_argument("msg", "")
+        }
+        self.render("config_setup.html", **template_vars)
+
+    @tornado.web.authenticated
+    def post(self):
+        print('POST', self.request.body)
+
+        # TODO: Stuff here. Do the changes the user requests
+
+        self.redirect("setup?status=%s&msg=%s" % ("error", "Saving not implemented"))
+
 
 class BridgeConfigHandler(RequestHandler):
     client = None
