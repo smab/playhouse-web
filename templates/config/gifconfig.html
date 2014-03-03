@@ -18,8 +18,16 @@
         </tr>
         <tr>
             <td>Play animation:</td>
-            <td>On <input type="radio" name="playgif" value="on" />
-                Off <input type="radio" name="playgif" value="off" /></td>
+            <td>
+                <label style="padding-right:10px">
+                    <input type="radio" name="playgif" value="on" {% if  playgif %}checked{% end %} />
+                    On
+                </label>
+                <label>
+                    <input type="radio" name="playgif" value="off" {% if not playgif %}checked{% end %} />
+                    Off
+                </label>
+            </td>
         </tr>
     </table>
 {% end %}

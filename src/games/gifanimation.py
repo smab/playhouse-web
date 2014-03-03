@@ -18,6 +18,7 @@ class GifAnimation(lightgames.Game):
         'grid_x': 3,
         'grid_y': 3,
         'animation_file': 'animations/test2.gif',
+        'playgif': False
     }
 
     def init(self):
@@ -76,6 +77,7 @@ class GifAnimation(lightgames.Game):
                 self.play_animation()
             elif config['playgif'] == 'off':
                 self.play = False
+            self.template_vars['playgif'] = self.play
 
 
 class ImageSequence:
