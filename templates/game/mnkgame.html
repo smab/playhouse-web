@@ -14,9 +14,15 @@
 {% end %}
 
 
+{% block script %}
+    var state = 'spectating'
+{% end %}
+
 {% block message %}
-    if (obj.x != undefined) {
-        e = document.getElementById(obj.x + "-" + obj.y)
-        e.className = obj.color;
+    if (obj.state != null) state = obj.state
+
+    if (obj.x != null && state != 'gameover') {
+        var el = document.getElementById(obj.x + "-" + obj.y)
+        el.className = obj.color;
     }
 {% end %}

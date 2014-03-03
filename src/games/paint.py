@@ -1,4 +1,3 @@
-import tornado.escape
 import random
 
 import lightgames
@@ -19,17 +18,17 @@ class Paint(lightgames.Game):
     }
 
 
-    def init(self):
+    def reset(self):
         self.playerColors = {}
         self.board = [[-1 for _ in range(self.template_vars['grid_x'])] 
             for _ in range(self.template_vars['grid_y'])]
 
-        self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0 })
+        self.reset_lamp_all()
 
     def on_connect(self, handler):
         self.playerColors[handler] = (
-            random.randint(0,255), 
-            random.randint(0,255), 
+            random.randint(0,255),
+            random.randint(0,255),
             random.randint(0,255)
         )
         print("Connection %s, color %s" % (handler, self.playerColors[handler]))
@@ -37,11 +36,7 @@ class Paint(lightgames.Game):
         for y in range(len(self.board)):
             for x in range(len(self.board[y])):
                 if self.board[y][x] != -1:
-                    handler.write_message(
-                        tornado.escape.json_encode(
-                            {'x':x, 'y':y, 'color':self.board[y][x]}
-                        )
-                    )
+                    lightgames.send_msg(handler, {'x':x, 'y':y, 'color':self.board[y][x]})
 
     def on_message(self, handler, coords):
         x = coords['x']
@@ -55,11 +50,7 @@ class Paint(lightgames.Game):
 
         self.board[y][x] = color
         for handler in self.playerColors:
-            handler.write_message(
-                tornado.escape.json_encode(
-                    {'x':x, 'y':y, 'color':color}
-                )
-            )
+            lightgames.send_msg(handler, {'x':x, 'y':y, 'color':color})
 
         self.send_lamp(x, y, { 'rgb': color })
 
@@ -75,4 +66,4 @@ class Paint(lightgames.Game):
         self.template_vars['cell_h'] = max(2,min(500,int(config['cell_h'])))
         self.template_vars['color_empty'] = config['color_empty']
 
-        self.init()
+        self.reset()

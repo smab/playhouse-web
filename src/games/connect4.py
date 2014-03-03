@@ -10,26 +10,24 @@ class Connect4(lightgames.Game):
     template_file = "connect4.html"
     template_vars = {
         'module_name': 'Connect 4',
-        'grid_x':  7,
-        'grid_y':  6,
+        'grid_x':      7,
+        'grid_y':      6,
     }
 
     width, height = template_vars['grid_x'], template_vars['grid_y']
 
-    colors      = [0, 50000, 65000]
-
-    connections = []
-    players     = [None, None]
-    player      = 0
-    board       = None
+    colors = [0, 50000, 65000]
 
     def reset(self):
         print("New game!")
-        self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0 })
 
         self.player  = 0
         self.players = [None, None]
         self.board   = [[2 for x in range(self.width)] for y in range(self.height)]
+
+        self.try_get_new_players(2)
+        self.sync_all()
+        self.reset_lamp_all()
 
     def sync(self, handler):
         print("Syncing %s" % handler)
@@ -39,118 +37,72 @@ class Connect4(lightgames.Game):
                 powered = self.board[y][x] != 2
                 lightgames.send_msg(handler, {'x':x, 'y':y, 'hue':hue, 'power':powered})
 
-    def init(self):
-        self.reset()
-
-    def destroy(self):
-        for h in self.connections:
-            lightgames.send_msg(h, {'message':"The game got destroyed!"})
-
-        self.players = [None, None]
-        self.connections = []
-
-    def on_connect(self, handler):
-        self.connections += [handler]
-
-        player = -1
-        if self.players[0] == None:
-            self.players[0] = handler
-            player = 0
-        elif self.players[1] == None:
-            self.players[1] = handler
-            player = 1
-
-        print("Connection %s as player %d" % (handler, player))
-        if player == -1:
-            lightgames.send_msg(handler, {'message':'You are a spectator!'})
-        else:
-            lightgames.send_msg(handler, {'message':'You are player %d' % (player+1)})
-
-        # Sync board
-        self.sync(handler)
-
     def on_message(self, handler, message):
         playerH   = self.players[self.player]
         opponentH = self.players[1 - self.player]
 
-        if 'x' in message:
-            if opponentH == handler:
-                print("Wrong player")
-                lightgames.send_msg(handler, {'error':'Not your turn!'})
+        if playerH != handler:
+            lightgames.reply_wrong_player(self, handler)
+            return
 
-            elif playerH != handler:
-                print("Spectator")
-                lightgames.send_msg(handler, {'error':'You are not a player!'})
+        # playerH == handler
+        x, y = message['x'], message['y']
+        hue  = self.colors[self.player]
 
-            else: # playerH == handler
-                x, y = message['x'], message['y']
-                hue = self.colors[self.player]
+        def grab_ray(pos, delta):
+            x, y   = pos
+            dx, dy = delta
+            res    = set()
 
-                def grab_ray(pos, delta):
-                    x, y   = pos
-                    dx, dy = delta
-                    res    = set()
+            def within_bounds(x,y):
+                return 0 <= x < self.width and 0 <= y < self.height
 
-                    def within_bounds(x,y):
-                        return 0 <= x < self.width and 0 <= y < self.height
+            while within_bounds(x,y) and self.board[y][x] == self.player:
+                res.add((x,y))
+                x,y = x + dx, y + dy
 
-                    while within_bounds(x,y) and self.board[y][x] == self.player:
-                        res.add((x,y))
-                        x,y = x + dx, y + dy
-                    return res
+            return res
 
-                if self.board[y][x] == 2 and (y == self.height - 1 or
-                                              self.board[y + 1][x] != 2):
-                    self.board[y][x] = self.player
+        if self.board[y][x] == 2 and (y == self.height - 1 or
+                                        self.board[y + 1][x] != 2):
+            self.board[y][x] = self.player
 
-                    self.send_lamp(x, y, {'sat': 255, 'hue': hue})
-                    for h in self.connections:
-                        lightgames.send_msg(h, {'x':x, 'y':y, 'hue':hue, 'power':True})
+            self.send_lamp(x, y, {'sat': 255, 'hue': hue})
+            lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hue':hue, 'power':True})
 
-                    lightgames.send_msg(playerH, {'message':'Waiting on other player...'})
-                    lightgames.send_msg(opponentH, {'message':'Your turn!'})
+            lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
+            lightgames.send_msg(opponentH, {'message':'Your turn!'})
 
-                    # Check if this move caused a win
-                    winner_lamps = set()
-                    for (dx,dy) in [(0, 1), (1, 0), (1, 1), (1, -1)]:
-                        lefts  = grab_ray((x,y), ( dx, dy))
-                        rights = grab_ray((x,y), (-dx,-dy))
+            # Check if this move caused a win
+            winner_lamps = set()
+            for (dx,dy) in [(0, 1), (1, 0), (1, 1), (1, -1)]:
+                lefts  = grab_ray((x,y), ( dx, dy))
+                rights = grab_ray((x,y), (-dx,-dy))
 
-                        if len(lefts) + len(rights) - 1 >= 4:
-                            winner_lamps.update(lefts)
-                            winner_lamps.update(rights)
+                if len(lefts) + len(rights) - 1 >= 4:
+                    winner_lamps.update(lefts)
+                    winner_lamps.update(rights)
 
-                    if len(winner_lamps) > 0:
-                        lightgames.send_msg(playerH, {'message':'You won!'})
-                        lightgames.send_msg(opponentH, {'message':'You lost!'})
-                        for h in self.connections:
-                            if h != playerH and h != opponentH:
-                                lightgames.send_msg(h, {'message':"Player %d won" % (self.player+1)})
-                        print("Player %d wins!" % self.player)
-                        self.reset()
-                        return
+            if len(winner_lamps) > 0:
+                lightgames.send_msg(playerH,                {'message':'You won!'})
+                lightgames.send_msg(opponentH,              {'message':'You lost!'})
+                lightgames.send_msgs(self.get_spectators(), {'message':"Player %d won" % (self.player+1)})
 
-                    # Check for full board
-                    if all(all(i != 2 for i in j) for j in self.board):
-                        print("The game tied")
-                        for h in self.connections:
-                            lightgames.send_msg(h, {'message':"The game tied"})
-                        self.reset()
-                        return
+                print("Player %d wins!" % self.player)
+                self.reset()
+                return
 
-                    self.player = 1 - self.player
+            # Check for full board
+            if all(all(i != 2 for i in j) for j in self.board):
+                print("The game tied")
+                lightgames.send_msgs(self.connections, {'message':"The game tied"})
+                self.reset()
+                return
 
-                else:
-                    lightgames.send_msg(playerH, {'error':'Invalid move!'})
+            # Switch player
+            self.player = 1 - self.player
 
-
-    def on_close(self, handler):
-        if handler in self.connections:
-            self.connections.remove(handler)
-
-        if self.players[0] == handler:
-            self.players[0] = None
-        elif self.players[1] == handler:
-            self.players[1] = None
+        else:
+            lightgames.send_msg(playerH, {'error':'Invalid move!'})
 
 # vim: set sw=4:

@@ -19,12 +19,13 @@ class GifAnimation(lightgames.Game):
     }
 
     def init(self):
-        self.spectators = []
+      # self.spectators = []
 
         self.data = open(self.template_vars['animation_file'], 'rb').read()
 
     def on_connect(self, handler):
-        self.spectators.append(handler)
+      # self.spectators.append(handler)
+        lightgames.Game.on_connect(self, handler)
         try:
             gif = Image.open(io.BytesIO(self.data))
             (width, height) = gif.size
@@ -38,16 +39,18 @@ class GifAnimation(lightgames.Game):
                     for x in range(0, width):
                         r, g, b = rgb_im.getpixel((x, y))
                         buffer += [{'x': x, 'y': y, 'change': {'rgb': (r,g,b)}}]
-                        for handler in self.spectators:
-                            lightgames.send_msg(handler, {'x':x, 'y':y, 'color':(r,g,b)})
+                        lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'color':(r,g,b)})
+                      # for handler in self.spectators:
+                      #     lightgames.send_msg(handler, {'x':x, 'y':y, 'color':(r,g,b)})
 
                 self.send_lamp_multi(buffer)
                 time.sleep(dur/1000.0)
+
         except IOError:
             print("Couldn't open image")
 
-    def on_close(self, handler):
-        self.spectators.remove(handler)
+  # def on_close(self, handler):
+  #     self.spectators.remove(handler)
 
     def set_options(self, config):
         self.template_vars['cell_w'] = max(2,min(500,int(config['cell_w'])))

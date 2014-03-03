@@ -11,207 +11,143 @@ class MnkGame(lightgames.Game):
     template_file = "mnkgame.html"
     template_vars = {
         'module_name': 'm,n,k-game',
-        'grid_x': 3,
-        'grid_y': 3,
-        'winner_req': 3,
-        'color_1': '#33f',
-        'color_2': '#f33',
+        'title':       'Tic-tac-toe',
+        'grid_x':      3,
+        'grid_y':      3,
+        'winner_req':  3,
+        'color_1':    '#33F',
+        'color_2':    '#F33',
     }
     # note: concept/idea
     options = {
-        'winner_req':('integer', 'Stones in a row required to win'),
-        'size':('(integer, integer)', 'Grid size')
+        'winner_req': ('integer',            'Stones in a row required to win'),
+        'size':       ('(integer, integer)', 'Grid size')
     }
 
-    winning_req = 3
-    colors = [0, 45000, 65000]
-    button_colors = ["player_1", "player_2", ""]
-
-    connections = []        # connections to sync the board with
-    players = [None, None]  # current players
-    player = 0
-    board = None
+    winning_req   = 3
+    colors        = [         0,      45000, 65000]
+    button_colors = ["player_1", "player_2",    ""]
 
     def reset(self):
         print("New game!")
 
-        self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0 })
-
-        if self.template_vars['grid_x'] == 3 and \
-           self.template_vars['grid_y'] == 3 and self.winning_req == 3:
-            self.template_vars['title'] = 'Tic-tac-toe'
-        else:
-            self.template_vars['title'] = '%d-in-a-row' % self.winning_req
-
-        # stop syncing previous players
-        for h in self.players:
-            if h != None:
-                self.connections.remove(h)
-
-        self.player = 0
+        self.player  = 0
         self.players = [None, None]
-        self.board = [[2 for _ in range(self.template_vars['grid_x'])]
-            for _ in range(self.template_vars['grid_y'])]
+        self.board   = [[2 for _ in range(self.template_vars['grid_x'])]
+                           for _ in range(self.template_vars['grid_y'])]
 
-        # try to get two new players from queue
-        self.add_player(self.queue.get_first())
-        self.add_player(self.queue.get_first())
-
-        for handler in self.connections:
-            self.sync(handler)
-
-    def add_player(self, handler):
-        print("Add player: %s" % handler)
-
-        player = -1
-        if handler != None:
-            if handler not in self.connections:
-                self.connections += [handler]
-
-            if None in self.players:
-                player = self.players.index(None)
-                self.players[player] = handler
-
-            assert player != -1
-
-            print("Connection %s as player %d" % (handler, player))
-            lightgames.send_msg(handler, {'message':'You are player %d' % (player+1)})
-
-        return player
+        self.try_get_new_players(2)
+        self.sync_all()
+        self.reset_lamp_all()
 
     def sync(self, handler):
         print("Syncing %s" % handler)
         for y in range(len(self.board)):
             for x in range(len(self.board[y])):
                 button_color = self.button_colors[self.board[y][x]]
-                handler.write_message(
-                    {'x':x, 'y':y, 'color':button_color}
-                )
+                lightgames.send_msg(handler, {'x':x, 'y':y, 'color':button_color})
 
-    def init(self):
-        self.reset()
+    def search_winner_lamps(self, x, y):
+        def search(cx, cy, dx, dy):
+            lamps = []
+            for i in range(self.winning_req-1):
+                cx += dx
+                cy += dy
+                if cx >= 0 and cy >= 0 and \
+                    cy < len(self.board) and cx < len(self.board[cy]) and \
+                    self.board[cy][cx] == self.player:
+                    lamps += [(cx, cy)]
+                else:
+                    break
+            return lamps
 
-    def destroy(self):
-        for h in self.connections:
-            lightgames.send_msg(h, {'message':"The game got destroyed!"})
+        winner_lamps = set()
 
-        self.players = [None, None]
-        self.connections = []
+        directions = [(0,1), (1,0), (1,1), (1,-1)]
+        for (dx,dy) in directions:
+            lamps = [(x,y)] + search(x, y,  dx,  dy) \
+                            + search(x, y, -dx, -dy)
 
-    def on_connect(self, handler):
-        if handler not in self.connections:
-            self.connections += [handler]
+            if len(lamps) >= self.winning_req:
+                winner_lamps.update(lamps)
 
-        spectator = True
-        if None in self.players:
-            top = self.queue.get_first()
-            self.add_player(top)
-            spectator = top != handler
+        return winner_lamps
 
-        if spectator:
-            lightgames.send_msg(handler, {'message':'You are a spectator!'})
-
-        # Sync board
-        self.sync(handler)
-
-    def on_enqueue(self, handler):
-        if handler not in self.players:
-            self.on_connect(handler)
 
     def on_message(self, handler, coords):
-        playerH = self.players[self.player]
-        opponentH = self.players[1-self.player]
+        playerH   = self.players[self.player]
+        opponentH = self.players[1 - self.player]
 
         if playerH != handler:
-            if opponentH == handler:
-                print("Wrong player")
-                lightgames.send_msg(handler, {'error':'Not your turn!'})
-            else:
-                print("Spectator")
-                lightgames.send_msg(handler, {'error':'You are not a player!'})
-        else: # playerH == handler
-            x = coords['x']
-            y = coords['y']
-            button_color = self.button_colors[self.player]
+            lightgames.reply_wrong_player(self, handler)
+            return
 
-            if self.board[y][x] == 2:
-                self.board[y][x] = self.player
-                for h in self.connections:
-                    lightgames.send_msg(h, {'x':x, 'y':y, 'color':button_color})
+        # playerH == handler
+        x, y = coords['x'], coords['y']
+        button_color = self.button_colors[self.player]
 
-                lightgames.send_msg(playerH, {'message':'Waiting on other player...'})
-                lightgames.send_msg(opponentH, {'message':'Your turn!'})
+        if self.board[y][x] != 2:
+            # Tile already occupied
+            lightgames.send_msg(playerH, {'error':'Invalid move!'})
 
-                color = self.colors[self.player]
-                self.send_lamp(x, y, { 'sat': 255, 'hue': color })
+        else:
+            # Tile unoccupied; perform the move
+            self.board[y][x] = self.player
+            lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'color':button_color})
 
-                winner_lamps = set()
+            lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
+            lightgames.send_msg(opponentH, {'message':'Your turn!'})
 
-                directions = [(0,1), (1,0), (1,1), (1,-1)]
-                for direction in directions:
-                    def search(cx, cy, direction):
-                        lamps = []
-                        for i in range(self.winning_req-1):
-                            cx += direction[0]
-                            cy += direction[1]
-                            if cx >= 0 and cy >= 0 and \
-                                cy < len(self.board) and cx < len(self.board[cy]) and \
-                                self.board[cy][cx] == self.player:
-                                lamps += [(cx, cy)]
-                            else:
-                                break
-                        return lamps
+            self.send_lamp(x, y, {'sat':255, 'hue':self.colors[self.player]})
 
-                    lamps = [(x,y)] + search(x, y, direction) + \
-                            search(x, y, (-direction[0], -direction[1]))
-                    if len(lamps) >= self.winning_req:
-                        winner_lamps.update(lamps)
+            # Check whether this was a winning move for the current player
+            winner_lamps = self.search_winner_lamps(x, y)
+            if len(winner_lamps) > 0:
+                lightgames.send_msg(playerH,                {'state': 'gameover', 'message': 'You won!'})
+                lightgames.send_msg(opponentH,              {'state': 'gameover', 'message': 'You lost!'})
+                lightgames.send_msgs(self.get_spectators(), {'message': "Player %d won" % (self.player+1)})
 
-                if len(winner_lamps) > 0:
-                    lightgames.send_msg(playerH, {'message':'You won!'})
-                    lightgames.send_msg(opponentH, {'message':'You lost!'})
-                    for h in self.connections:
-                        if h != playerH and h != opponentH:
-                            lightgames.send_msg(h, {'message':"Player %d won" % (self.player+1)})
-                    print("Player %d wins!" % self.player)
-                    self.reset()
-                    return
-                if all(all(i != 2 for i in j) for j in self.board):
-                    print("The game tied")
-                    for h in self.connections:
-                        lightgames.send_msg(h, {'message':"The game tied"})
-                    self.reset()
-                    return
+                print("Player %d wins!" % self.player)
+                self.reset()
+                return
 
-                self.player = 1 - self.player
-            else:
-                lightgames.send_msg(playerH, {'error':'Invalid move!'})
+            # Check if the board is full
+            if all(all(i != 2 for i in j) for j in self.board):
+                print("The game tied")
+                lightgames.send_msgs(self.connections, {'message':"The game tied"})
+                self.reset()
+                return
 
-
-    def on_close(self, handler):
-        if handler in self.connections:
-            self.connections.remove(handler)
-
-        if handler in self.players:
-            player = self.players.index(handler)
-            self.players[player] = None
-
-            # try to replace the player with one from the queue
-            self.add_player(self.queue.get_first())
+            # Switch player
+            self.player = 1 - self.player
 
 
     def set_options(self, config):
-        m = 50;
-        self.template_vars['grid_y'] = max(2,min(m,int(config['grid_y'])))
-        self.template_vars['grid_x'] = max(2,min(m,int(config['grid_x'])))
-        self.template_vars['cell_w'] = max(2,min(500,int(config['cell_w'])))
-        self.template_vars['cell_h'] = max(2,min(500,int(config['cell_h'])))
-        self.template_vars['winner_req'] = min(max(2,int(config['winner_req'])),
-            max(self.template_vars['grid_x'],self.template_vars['grid_y']))
-        self.template_vars['color_1'] = config['color_1']
-        self.template_vars['color_2'] = config['color_2']
-        self.template_vars['color_empty'] = config['color_empty']
+        def clamp(low, x, high):
+            return max(low, min(high, x))
 
-        self.winning_req = self.template_vars['winner_req']
+        m = 50
+        vars = self.template_vars
+        vars['grid_y']      = clamp(2, int(config['grid_y']),            m)
+        vars['grid_x']      = clamp(2, int(config['grid_x']),            m)
+        vars['cell_w']      = clamp(2, int(config['cell_w']),          500)
+        vars['cell_h']      = clamp(2, int(config['cell_h']),          500)
+
+        # Make sure that it's not possible to configure completely impossible
+        # games.
+        grid_max = max(vars['grid_x'], vars['grid_x'])
+        vars['winner_req']  = clamp(2, int(config['winner_req']), grid_max)
+
+        vars['color_1']     = config['color_1']
+        vars['color_2']     = config['color_2']
+        vars['color_empty'] = config['color_empty']
+
+        self.winning_req = vars['winner_req']
+
+        # Update title
+        is_tic_tac_toe = (vars['grid_x'] == 3 and vars['grid_y'] == 3 
+                                              and self.winning_req == 3)
+        vars['title'] = 'Tic-tac-toe' if is_tic_tac_toe \
+                                      else '%d-in-a-row' % self.winning_req
 
         self.reset()

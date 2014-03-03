@@ -14,8 +14,3 @@ class Off(lightgames.Game):
     def reset(self):
         self.send_lamp_all({ "on": False })
 
-    def init(self):
-        self.reset()
-
-
-
