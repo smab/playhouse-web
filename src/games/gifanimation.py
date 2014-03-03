@@ -17,7 +17,7 @@ class GifAnimation(lightgames.Game):
         'module_name': 'GIF Animation',
         'grid_x': 3,
         'grid_y': 3,
-        'animation_file': 'animations/test2.gif',
+        'animation_file': 'animations/test3x3.gif',
         'playgif': False
     }
 
@@ -34,8 +34,12 @@ class GifAnimation(lightgames.Game):
             try:
                 gif = Image.open(io.BytesIO(self.data))
                 (width, height) = gif.size
+                self.template_vars['grid_x'] = width
+                self.template_vars['grid_y'] = height
                 i = 0
                 for frame in ImageSequence(gif):
+                    if self.play == False:
+                        break
                     i = i+1
                     rgb_im = gif.convert("RGB")
                     dur = gif.info['duration']
@@ -51,6 +55,8 @@ class GifAnimation(lightgames.Game):
                     yield gen.Task(IOLoop.instance().add_timeout, time.time() + (dur/1000.0))
             except IOError:
                 print("Couldn't open image")
+
+        self.send_lamp_all({ 'on': False })
 
 
     def on_connect(self, handler):
