@@ -25,6 +25,9 @@ class Connect4(lightgames.Game):
         self.players = [None, None]
         self.board   = [[2 for x in range(self.width)] for y in range(self.height)]
 
+        for h in self.connections:
+            lightgames.send_msg(h, {'gamestate': 'reset'})
+
         self.try_get_new_players(2)
         self.sync_all()
         self.reset_lamp_all()

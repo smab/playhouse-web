@@ -52,6 +52,11 @@
 
 
 {% block message %}
+    switch (obj.gamestate) {
+        case 'reset':
+           heights = []
+    }
+
     if (obj.x != undefined) {
         e = document.getElementById(obj.x + "-" + obj.y)
 
