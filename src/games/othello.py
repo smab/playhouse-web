@@ -42,6 +42,25 @@ class Othello(lightgames.Game):
                 button_color = self.button_colors[self.board[y][x]]
                 lightgames.send_msg(handler, {'x':x, 'y':y, 'color':button_color})
 
+    def game_over(self):
+        scores = [0, 0, 0]
+        for y in range(len(self.board)):
+            for x in range(len(self.board[y])):
+                player = self.board[y][x]
+                scores[player] += 1
+
+        winner = -1
+        if   scores[0] > scores[1]: winner = 0
+        elif scores[0] < scores[1]: winner = 1
+
+        print("Game over; winner: %d" % winner)
+        if winner == -1:
+            lightgames.send_msgs(self.connections, {'message':"The game tied"})
+        else:
+            lightgames.send_msgs(self.connections, {'message':"Player %d won!" % (winner + 1)})
+
+        self.reset()
+
     def on_message(self, handler, coords):
         def search(x, y, dx, dy, pred):
             val = self.board[y][x]
@@ -58,10 +77,26 @@ class Othello(lightgames.Game):
                 y += dy
             return lamps
 
-        playerH   = self.players[self.player]
-        opponentH = self.players[1 - self.player]
+        def get_surrounding_beams(x,y, beam_val, terminal_val):
+            beams = []
+            for (dx,dy) in [(-1,-1), ( 0,-1), (+1,-1),
+                            (-1, 0),          (+1, 0),
+                            (-1,+1), ( 0,+1), (+1,+1)]:
+                beam = search(x,y, dx,dy, lambda t: t == beam_val)
+                if len(beam) > 0:
+                    (lx,ly) = beam[-1]
+                    lx += dx
+                    ly += dy
+                    if 0 <= ly < len(self.board)     and \
+                       0 <= lx < len(self.board[ly]) and \
+                       self.board[ly][lx] == terminal_val:
+                        beams += [ beam ]
+            return beams
 
-        opponent = 1 - self.player
+        opponent  = 1 - self.player
+
+        playerH   = self.players[self.player]
+        opponentH = self.players[opponent]
 
         if playerH != handler:
             lightgames.reply_wrong_player(self, handler)
@@ -71,19 +106,7 @@ class Othello(lightgames.Game):
         x, y = coords['x'], coords['y']
         button_color = self.button_colors[self.player]
 
-        beams = []
-        for (dx,dy) in [(-1,-1), ( 0,-1), (+1,-1),
-                        (-1, 0),          (+1, 0),
-                        (-1,+1), ( 0,+1), (+1,+1)]:
-            beam = search(x,y, dx,dy, lambda t: t == opponent)
-            if len(beam) > 0:
-                (lx,ly) = beam[-1]
-                lx += dx
-                ly += dy
-                if 0 <= ly < len(self.board) and \
-                   0 <= lx < len(self.board[ly]) and \
-                   self.board[ly][lx] == self.player:
-                    beams += [ beam ]
+        beams = get_surrounding_beams(x,y, opponent, self.player)
 
         if self.board[y][x] != 2 or len(beams) == 0:
             # Tile already occupied, or toggles no bricks
@@ -101,29 +124,38 @@ class Othello(lightgames.Game):
                     lightgames.send_msgs(self.connections, {'x':px, 'y':py, 'color':button_color})
                     self.send_lamp(px, py, {'sat':255, 'hue':self.colors[self.player]})
 
-            lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
-            lightgames.send_msg(opponentH, {'message':'Your turn!'})
-
             # Check if the board is full
             if all(all(i != 2 for i in j) for j in self.board):
-                scores = [0, 0]
-                for y in range(len(self.board)):
-                    for x in range(len(self.board[y])):
-                        player = self.board[y][x]
-                        scores[player] += 1
-
-                winner = -1
-                if   self.scores[0] > self.scores[1]: winner = 0
-                elif self.scores[0] < self.scores[1]: winner = 1
-
-                print("Game over; winner: %d" % winner)
-                if winner == -1:
-                    lightgames.send_msgs(self.connections, {'message':"The game tied"})
-                else:
-                    lightgames.send_msgs(self.connections, {'message':"Player %d won!" % (winner + 1)})
-
-                self.reset()
+                self.game_over()
                 return
 
-            # Switch player
-            self.player = 1 - self.player
+            # Check for if either player is out of legal moves
+            def has_any_legal_moves(player):
+                def has_legal_move_at(x,y, player):
+                    if self.board[y][x] == 2 and \
+                       len(get_surrounding_beams(x,y, 1 - player, player)) > 0:
+                        print("%d has move at (%s,%s)" % (player, x, y))
+
+                    return self.board[y][x] == 2 and \
+                           len(get_surrounding_beams(x,y, 1 - player, player)) > 0
+
+                return any(has_legal_move_at(vx,vy, player) \
+                             for vx in range(len(self.board[0])) \
+                             for vy in range(len(self.board)))
+
+            if has_any_legal_moves(opponent):
+                # Opponent has a play; switch player have the opponent play
+                self.player = opponent
+                lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
+                lightgames.send_msg(opponentH, {'message':'Your turn!'})
+                return
+
+            # Opponent has to force-pass.
+            # TODO: this should be indicated in the frontend somehow
+            if has_any_legal_moves(self.player):
+                lightgames.send_msg(playerH,   {'message':'Opponent has to pass; your turn again!'})
+                lightgames.send_msg(opponentH, {'message':'Out of valid moves! You have to pass.'})
+                return
+
+            # Neither player has any legal move; game over
+            self.game_over()
