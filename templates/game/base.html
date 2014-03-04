@@ -3,169 +3,30 @@
 <html>
     <head>
         <title>{{ title }}</title>
+        <link rel="stylesheet" type="text/css" href="/static/game-base.css" />
         <style>
-            body {
-              margin: 0;
-              padding: 0;
-              background: #235;
-            }
-
-            .box {
-                border-radius: 8px;
-                box-shadow: 0 0 16px #000;
-            }
-
-            #message {
-                margin: 0;
-                padding: 0.4em;
-                text-align: center;
-                box-shadow: 0 0 8px #222;
-                font-family: sans-serif;
-                background: rgba(255,255,255,0.3);
-            }
-
-            #message.type-message {
-                /* no overriding necessary */
-            }
-            #message.type-error {
-                font-weight: bold;
-                background: rgba(255,0,0,0.6);
-            }
-
-            /*** Grid ************************************/
-            #grid {
-                margin: 3em auto;
-                padding: 0.4em;
-            }
-
             #grid td {
-                position: relative;
-                margin: 0;
-                padding: 0;
-
                 width: {{ cell_w }}px;
                 height: {{ cell_h }}px;
-            }
-            #grid td > img {
-                width: 100%;
-                height: 100%;
             }
 
             #grid           { background: #000;                    }
             #grid img       { background-color: {{ color_empty }}; }
             #grid img:hover { background-color: {{ color_hover }}; }
 
-
-            /*** Queue ***********************************/
-            div#queue {
-                text-align: center;
-                border-style: solid;
-                border-width: 1px;
-                border-color: black;
-                width: 200px;
-                margin: auto;
-                margin-top: 10px;
-                padding: 10px;
-                background-color: rgba(255,255,255,0.3);
-            }
-            p#queuemsg {
-                margin: 2px;
-                color: black;
-            }
             {% block style %}
             {% end %}
         </style>
         <script>
-            function setMessage(msg, type) {
-                var el = document.getElementById('message')
-                el.className = el.className.replace(/ ?type-\w+/g, '')
-                el.className += ' type-' + type
-                el.innerHTML = msg
-                el.removeChild(el.firstChild)
-                el.appendChild(document.createTextNode(String(msg)))
+            var config = {
+                grid_x: {{ grid_x }},
+                grid_y: {{ grid_y }}
             }
-
-            window.onload = function() {
-                var wsHost = document.location.hostname + ":" + 8080,
-                    ws     = new WebSocket("ws://{}/websocket".replace(/{}/, wsHost))
-
-                ws.onmessage = function (evt) {
-                    var obj = JSON.parse(evt.data)
-
-                    if      (obj.error)   setMessage(obj.error,   'error')
-                    else if (obj.message) setMessage(obj.message, 'message')
-
-                    {% block message %}
-                    {% end %}
-
-                    {% block queuemsg %}
-
-                    if (obj.queuepos != undefined) {
-                        qmsg = document.getElementById("queuemsg")
-                        qbtn = document.getElementById("queuebtn")
-                        if(obj.queuepos > 0) {
-                            qmsg.innerHTML = "Your place in queue: " + obj.queuepos;
-                            qbtn.value = "Leave queue";
-                            qbtn.onclick = function() {
-                                ws.send(JSON.stringify({ queueaction : 0 }));
-                            }
-                        } else {
-                            qmsg.innerHTML = "You are not in the queue";
-                            qbtn.value = "Join queue";
-                            qbtn.onclick = function() {
-                                ws.send(JSON.stringify({ queueaction : 1 }));
-                            }
-                        }
-                    }
-
-                    {% end %}
-                };
-
-                var table = document.getElementById("grid");
-                for(var i=0; i<{{ grid_y }}; i++) {
-                    // Create tr
-                    var tr = document.createElement("tr");
-                    for(var ii=0; ii<{{ grid_x }}; ii++) {
-                        // Add td and function onclick
-                        var td = document.createElement("td");
-                        tr.appendChild(td);
-
-                        var img = document.createElement('img')
-                        img.src = '/static/lamp.png'
-                        img.id  = ii + '-' + i
-                        img.className += ' tile'
-                        img.onclick = play
-                        td.appendChild(img)
-                    }
-
-                    // Add tr to DOM
-                    table.appendChild(tr);
-                }
-
-                function play() {
-                    coords = this.id.split("-")
-
-                    function reply(response) {
-                        ws.send(JSON.stringify(extend({ gameaction: true }, response)))
-                    }
-
-                    {% block click %}
-                    {% end %}
-
-                    function extend(target, source) {
-                        for (var k in source) target[k] = source[k]
-                        return target
-                    }
-                }
-            }
-
-            {% block script %}
-            {% end %}
         </script>
     </head>
     <body>
         <img src="http://placehold.it/100x100">
-        
+
         {% block grid %}
             {% block message-area %}
             <div id="message">Connecting...</div>
@@ -183,5 +44,37 @@
             <input type=button id="queuebtn" value="Join queue" />
         </div>
         {% end %}
+
+        <script>
+            function on_message(obj) {
+                {% block message %}
+                {% end %}
+
+                {% block queuemsg %}
+                handle_queue_msg(obj)
+                {% end %}
+            }
+
+            function play() {
+                coords = this.id.split("-")
+
+                function reply(response) {
+                    ws.send(JSON.stringify(extend({ gameaction: true }, response)))
+                }
+
+                {% block click %}
+                {% end %}
+
+                function extend(target, source) {
+                    for (var k in source) target[k] = source[k]
+                    return target
+                }
+            }
+
+            {% block script %}
+            {% end %}
+        </script>
+
+        <script src="/static/game-base.js"></script>
     </body>
 </html>
