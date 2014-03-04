@@ -3,6 +3,7 @@ import tornado.web
 
 import http.client
 import time 
+import traceback
 
 import lightgames
 import manager
@@ -288,6 +289,7 @@ class GameConfigHandler(RequestHandler):
                 manager.config = backup
                 msg = "Loading failed: %s" % e
                 status = "error"
+                traceback.print_exc()
         else:
             ret = manager.game.set_options(cfg)
             if ret == None:
