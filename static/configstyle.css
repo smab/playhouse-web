@@ -1,0 +1,123 @@
+
+#center {
+    width: 900px;
+    margin: 2em auto;
+}
+
+#menu { text-align: center; padding: 0; }
+#menu li {
+    width: 132px;
+    height: 48px;
+    line-height: 48px;
+
+    display: inline-block;
+    text-align: center;
+    background-color: #9CF;
+    border: 2px solid #666;
+}
+#menu li a:hover { background-color: #CEF; }
+#menu li a, #menu li a:visited { color: #333; }
+#menu li a {
+    display: block;
+    text-decoration: none;
+}
+#menu li a.active {
+    background-color: #69F;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+h1 { font-size: 26px; }
+h1,h2 { color: #555; margin: 1em 0 0.5em 4em; }
+
+#settings {
+    margin-top: 2em; 
+}
+#settings h1 {
+    width: 75%; 
+    padding-left: 0.5em;
+    border-bottom: 2px solid #666;
+}
+#settings h2 {
+    margin-left: 8em; 
+    font-size: 22px; 
+}
+#settings .subsection {
+    margin: 0;
+    padding: 0;
+}
+#settings table {
+    margin: 0.5em auto 2em auto;
+    border-spacing: 0;
+    font-family: "sans-serif";
+}
+#settings td {
+    padding: 5px 10px;
+}
+#settings.fill {
+    padding-right: 10px;
+}
+
+
+#bridges {
+    margin: 0 auto;
+    margin-bottom: 2.5em;
+
+    color: #444;
+    font-family: "monospace";
+    border-spacing: 0;
+    text-align: center;
+    border: 2px solid #666;
+}
+
+#bridges tr:hover {
+    background-color:#CEF!important;
+}
+#bridges tr:nth-child(odd) {
+    background-color: #9CF;
+}
+#bridges tr {
+    font-size: 14px;
+}
+
+#bridges td {
+    padding: 8px 10px;
+    font-size: 11px;
+}
+#bridges th {
+    color: white;
+    background-color: #666;
+    padding: 8px 16px;
+}
+
+#bridges .ip { width: 125px; font-size: 11px; line-height:16px;}
+#bridges .username { width: 215px; font-size: 11px; line-height:16px;}
+
+#buttons { text-align: center; padding: 0; }
+#buttons li {
+    width: 128px;
+    height: 32px;
+
+    margin: 0 4px;
+    display: inline-block;
+}
+#buttons li input { width: 100%; height: 100%;}
+
+
+#message {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    width: 100%;
+    padding: 0.4em 0;
+    text-align: center;
+    box-shadow: 0 0 8px #222;
+    font-family: sans-serif;
+    background: rgba(255,255,255,0.3);
+}
+#message.type-error {
+    font-weight: bold;
+    background: rgba(255,0,0,0.6);
+}
+

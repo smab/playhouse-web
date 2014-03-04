@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Configure Playhouse!</title>
+
+        <link href="/static/configstyle.css" rel="stylesheet" type="text/css"> 
+        <style type="text/css">
+            {% block configstyle %}
+            {% end %}
+        </style>
+
+        <script>
+            {% block configscript %}
+            {% end %}
+        </script>
+        {% block confighead %}
+        {% end %}
+    </head>
+    <body>
+        <div id="center">
+            <ul id="menu">
+                <li><a class="{% block menu_setup %}{% end%}" href="/config/setup">Setup</a></li>
+                <li><a class="{% block menu_game %}{% end%}" href="/config/game">Settings</a></li>
+                <li><a class="{% block menu_bridges %}{% end%}" href="/config/bridges">Bridges</a></li>
+                <li><a class="{% block menu_preview %}{% end%}" href="">Preview</a></li>
+            </ul>
+
+            {% block configbody %}
+            {% end%}
+        </div>
+    </body>
+</html>
