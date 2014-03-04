@@ -43,6 +43,9 @@ def update_config(cur_cfg, new_cfg, key):
 
 class RequestHandler(tornado.web.RequestHandler):
     def get_current_user(self):
+        if 'disable_login' in manager.config and manager.config['disable_login']:
+            return "disabled"
+
         user_json = self.get_secure_cookie("user")
         if user_json:
             return tornado.escape.json_decode(user_json)
