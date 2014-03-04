@@ -2,7 +2,6 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
-import http.client
 import uuid
 
 import lightgames
@@ -54,9 +53,7 @@ def initialize():
 
     manager.config.update(cfg)
 
-    print("Connecting to lamp server (%s:%d)" % (manager.config['lampdest'], manager.config['lampport']))
-    manager.client = http.client.HTTPConnection(manager.config['lampdest'], manager.config['lampport'])
-
+    manager.connect_lampserver()
     manager.load_game()
 
 

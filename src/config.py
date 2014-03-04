@@ -34,6 +34,13 @@ response = {
 }
 
 
+def update_config(cur_cfg, new_cfg, key):
+    if key in new_cfg and cur_cfg[key] != new_cfg[key]:
+        cur_cfg[key] = new_cfg[key]
+        return True
+    return False
+
+
 class RequestHandler(tornado.web.RequestHandler):
     def get_current_user(self):
         user_json = self.get_secure_cookie("user")
@@ -83,9 +90,24 @@ class SetupConfigHandler(RequestHandler):
     def post(self):
         print('POST', self.request.body)
 
-        # TODO: Stuff here. Do the changes the user requests
+        cfg = {}
+        for key,val in self.request.arguments.items():
+            cfg[key] = self.get_argument(key)
 
-        self.redirect("setup?status=%s&msg=%s" % ("error", "Saving not implemented"))
+        cfg['lampport'] = int(cfg['lampport'])
+        cfg['serverport'] = int(cfg['serverport'])
+
+        status = "message"
+        msg = "Setup saved"
+        if update_config(manager.config, cfg, 'lampdest') or \
+            update_config(manager.config, cfg, 'lampport'):
+            manager.connect_lampserver()
+            msg = "Reconnected to lampserver"
+
+        update_config(manager.config, cfg, 'serverport')
+        update_config(manager.config, cfg, 'stream_embedcode')
+
+        self.redirect("setup?status=%s&msg=%s" % (status, msg))
 
 
 
@@ -249,8 +271,8 @@ class GameConfigHandler(RequestHandler):
 
         load_game = False
 
-        if self.update_config(manager.config, cfg, 'game_name') or \
-            self.update_config(manager.config, cfg, 'game_path'):
+        if update_config(manager.config, cfg, 'game_name') or \
+            update_config(manager.config, cfg, 'game_path'):
             load_game = True
 
         status = "message"
@@ -272,9 +294,3 @@ class GameConfigHandler(RequestHandler):
                 msg = ret
 
         self.redirect("game?status=%s&msg=%s" % (status, msg))
-
-    def update_config(self, cur_cfg, new_cfg, key):
-        if key in new_cfg and cur_cfg[key] != new_cfg[key]:
-            cur_cfg[key] = new_cfg[key]
-            return True
-        return False

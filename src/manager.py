@@ -1,3 +1,5 @@
+import http.client
+
 import queue
 import lightgames
 
@@ -19,6 +21,12 @@ queue = queue.Queue()
 
 connections = []
 
+
+def connect_lampserver():
+    global client
+
+    print("Connecting to lamp server (%s:%d)" % (config['lampdest'], config['lampport']))
+    client = http.client.HTTPConnection(config['lampdest'], config['lampport'])
 
 def load_game():
     global game

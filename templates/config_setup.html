@@ -46,9 +46,9 @@
 
             <div class="content">
                 <span class="fill">Grid size:</span>
-                <input name="grid_y" value="3" class="numberinput" style="text-align: right;" />
+                <input disabled name="grid_y" value="3" class="numberinput" style="text-align: right;" />
                 x
-                <input name="grid_x" value="3" class="numberinput" />
+                <input disabled name="grid_x" value="3" class="numberinput" />
             </div>
         </div>
         <div class="subsection">
@@ -58,14 +58,14 @@
                 <div class="row">
                     <div class="cell fill">Lampserver:</div>
                     <div class="cell">
-                        <input name="ip" value="{{ config('lampdest') }}" />
+                        <input name="lampdest" value="{{ config('lampdest') }}" />
                         :
-                        <input name="port" value="{{ config('lampport') }}" class="portinput" />
+                        <input name="lampport" value="{{ config('lampport') }}" class="portinput" />
                     </div>
                 </div>
                 <div class="row">
                     <div class="cell fill">Webserver port:</div>
-                    <input name="port" value="{{ config('serverport') }}" class="cell portinput" />
+                    <input name="serverport" value="{{ config('serverport') }}" class="cell portinput" />
                 </div>
             </div>
         </div>
@@ -74,9 +74,7 @@
 
             <div class="content">
                 <div>Embed code:</div>
-                <textarea type="text" id="stream" name="livestream_code">
-                    {{ config('stream_embedcode') }}
-                </textarea>
+                <textarea type="text" id="stream" name="stream_embedcode">{{ config('stream_embedcode') }}</textarea>
             </div>
         </div>
 
