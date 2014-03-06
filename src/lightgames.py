@@ -70,15 +70,14 @@ class Game:
         'color_hover': "#999"
     }
 
-
-    # State variables, to be used by the game
-    queue       = None
-    connections = set()     # connections to sync the board with
-    players     = []        # current players
-
-
     def __init__(self, client):
-        self.client = client
+        # State variables, to be used by the game
+        self.queue       = None
+        self.connections = set()
+        self.players     = []
+
+        # Internal variables
+        self.client      = client
 
     # Internal, do not override/use
     def set_queue(self, queue):
