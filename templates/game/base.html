@@ -25,14 +25,16 @@
         </script>
     </head>
     <body>
+        <!--
         <img src="http://placehold.it/100x100">
+        -->
 
         {% block grid %}
             {% block message-area %}
-            <div id="message">Connecting...</div>
+            <div id="message" class="box">Connecting...</div>
             {% end %}
 
-        <table id="grid" class="box"></table>
+        <table id="grid"></table>
 
         {% block postgrid %}
         {% end %}

@@ -25,8 +25,8 @@
 
         var el = y < 0? null : document.getElementById(x + "-" + y)
 
-        if (shadowEl != null) shadowEl.className = shadowEl.className.replace(/ shadow/, '')
-        if (el != null && shadowShown) el.className += ' shadow'
+        if (shadowEl != null) shadowEl.classList.remove('shadow')
+        if (el != null && shadowShown) el.classList.add('shadow')
         shadowEl = el
     }
 

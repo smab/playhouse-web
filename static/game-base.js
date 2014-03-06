@@ -24,6 +24,11 @@ ws.onmessage = function (evt) {
     handle_queue_msg(obj)
 };
 
+function ignoreEvent(ev) {
+  ev.preventDefault()
+  return false
+}
+
 var table = document.getElementById("grid");
 for(var i=0; i < config.grid_y; i++) {
     // Create tr
@@ -34,10 +39,12 @@ for(var i=0; i < config.grid_y; i++) {
         tr.appendChild(td);
 
         var img = document.createElement('img')
-        img.src = '/static/lamp.png'
-        img.id  = ii + '-' + i
-        img.className += ' tile'
-        img.onclick = play
+        img.src         = '/static/lamp.png'
+        img.draggable   = false
+        img.id          = ii + '-' + i
+        img.onclick     = play
+        img.ondragstart = ignoreEvent
+        img.classList.add('tile')
         td.appendChild(img)
     }
 
