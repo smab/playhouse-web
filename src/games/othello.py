@@ -13,8 +13,8 @@ class Othello(lightgames.Game):
         'title':       'Othello',
         'grid_x':      8,
         'grid_y':      8,
-        'color_1':    '#33F',
-        'color_2':    '#F33',
+        'color_1':    '#3333FF',
+        'color_2':    '#FF3333',
     }
 
     colors        = [         0,      45000, 65000]

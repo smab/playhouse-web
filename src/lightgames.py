@@ -66,8 +66,8 @@ class Game:
         'module_name': '<name not set>',
         'cell_w':      64,
         'cell_h':      64,
-        'color_empty': "#222",
-        'color_hover': "#999"
+        'color_empty': "#222222",
+        'color_hover': "#999999"
     }
 
     def __init__(self, client):

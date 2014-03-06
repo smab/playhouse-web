@@ -15,8 +15,8 @@ class MnkGame(lightgames.Game):
         'grid_x':      3,
         'grid_y':      3,
         'winner_req':  3,
-        'color_1':    '#33F',
-        'color_2':    '#F33',
+        'color_1':    '#3333FF',
+        'color_2':    '#FF3333',
     }
     # note: concept/idea
     options = {
