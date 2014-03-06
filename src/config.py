@@ -56,10 +56,11 @@ class RequestHandler(tornado.web.RequestHandler):
 
 class ConfigHandler(tornado.web.RequestHandler):
     def get(self):
-        self.redirect("config/setup")
+        self.redirect("/config/setup")
 
 
 class ConfigLoginHandler(tornado.web.RequestHandler):
+    @tornado.web.removeslash
     def get(self):
         self.render('config_login.html', next=self.get_argument("next", "/config"))
 
@@ -76,6 +77,7 @@ class ConfigLoginHandler(tornado.web.RequestHandler):
 
 
 class SetupConfigHandler(RequestHandler): 
+    @tornado.web.removeslash
     @tornado.web.authenticated 
     def get(self): 
         def config(key):
@@ -117,6 +119,7 @@ class SetupConfigHandler(RequestHandler):
 
 class BridgeConfigHandler(RequestHandler):
     bridges = None 
+    @tornado.web.removeslash
     @tornado.web.authenticated
     def get(self):
         if BridgeConfigHandler.bridges == None: 
@@ -239,6 +242,7 @@ class BridgeConfigHandler(RequestHandler):
 
 
 class GameConfigHandler(RequestHandler):
+    @tornado.web.removeslash
     @tornado.web.authenticated
     def get(self):
         template_vars = {
