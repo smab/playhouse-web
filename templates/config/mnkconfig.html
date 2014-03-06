@@ -5,7 +5,7 @@
 {% block extragridsettings %}
     <tr><td>
         <span class="fill">Winning requirement:</span>
-        <input name="winner_req" value="{{ winner_req }}" class="numberinput" style="text-align:center" />
+        <input type="number" name="winner_req" value="{{ winner_req }}" />
     </td></tr>
 {% end %}
 
@@ -14,15 +14,15 @@
     <table>
     <tr>
         <td>Player 1 color: </td>
-        <td><input type="color" name="color_1" value="{{ color_1}}" class="colorinput" /></td>
+        <td><input type="color" size="8" name="color_1" value="{{ color_1}}" /></td>
     </tr>
     <tr>
         <td>Player 2 color: </td>
-        <td><input type="color" name="color_2" value="{{ color_2 }}" class="colorinput" /></td>
+        <td><input type="color" size="8" name="color_2" value="{{ color_2 }}" /></td>
     </tr>
     <tr>
         <td>Empty color: </td>
-        <td><input type="color" name="color_empty" value="{{ color_empty }}" class="colorinput" /></td>
+        <td><input type="color" size="8" name="color_empty" value="{{ color_empty }}" /></td>
     </tr>
     </table>
 {% end %}

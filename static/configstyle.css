@@ -1,3 +1,6 @@
+body {
+  padding-top: 1em;
+}
 
 #center {
     width: 900px;
@@ -17,6 +20,7 @@
     display: block;
     height: 100%;
     padding: 1em;
+    font-family: sans-serif;
     text-align: center;
     text-decoration: none;
 }
@@ -104,19 +108,18 @@ h1,h2 { color: #555; margin: 1em 0 0.5em 4em; }
 
 
 #message {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
+    position: fixed;
+    left: 0;
+    top: 0;
     width: 100%;
-    padding: 0.4em 0;
+    padding: 0.6em;
     text-align: center;
     box-shadow: 0 0 8px #222;
     font-family: sans-serif;
-    background: rgba(255,255,255,0.3);
+    background: #EEE;
 }
 #message.type-error {
     font-weight: bold;
-    background: rgba(255,0,0,0.6);
+    background: #F33;
 }
 

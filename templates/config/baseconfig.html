@@ -1,9 +1,8 @@
 <style>
-    .numberinput {
-        width: 30px;
-    }
-    .colorinput {
-        width: 70px;
+    input[type=number] {
+      display: inline-block;
+      text-align: right;
+      width: 3em;
     }
 
     {% block style %}{% end %}
@@ -15,17 +14,17 @@
     {% block gridsize %}
     <tr><td>
         <span class="fill">Grid size:</span>
-        <input name="grid_y" value="{{ grid_y }}" class="numberinput" style="text-align: right;" />
-        x
-        <input name="grid_x" value="{{ grid_x }}" class="numberinput" />
+        <input type="number" size="2" name="grid_y" value="{{ grid_y }}" />
+        ×
+        <input type="number" size="2" name="grid_x" value="{{ grid_x }}" />
     </td></tr>
     {% end %}
     {% block cellsize %}
     <tr><td>
         <span class="fill">Cell size:</span>
-        <input name="cell_w" value="{{ cell_w }}" class="numberinput" style="text-align: right;" />
-        x
-        <input name="cell_h" value="{{ cell_h }}" class="numberinput" />
+        <input type="number" size="3" name="cell_w" value="{{ cell_w }}" />
+        ×
+        <input type="number" size="3" name="cell_h" value="{{ cell_h }}" />
     </td></tr>
     {% end %}
     {% block extragridsettings %}
