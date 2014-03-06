@@ -87,18 +87,12 @@ class Connect4(lightgames.Game):
                     winner_lamps.update(rights)
 
             if len(winner_lamps) > 0:
-                lightgames.send_msg(playerH,                {'message':'You won!'})
-                lightgames.send_msg(opponentH,              {'message':'You lost!'})
-                lightgames.send_msgs(self.get_spectators(), {'message':"Player %d won" % (self.player+1)})
-
-                print("Player %d wins!" % self.player)
-                self.reset()
+                lightgames.game_over(self, playerH)
                 return
 
             # Check for full board
             if all(all(i != 2 for i in j) for j in self.board):
-                print("The game tied")
-                lightgames.send_msgs(self.connections, {'message':"The game tied"})
+                lightgames.game_over(self, None)
                 self.reset()
                 return
 

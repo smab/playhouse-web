@@ -13,14 +13,7 @@
             y: parseInt(coords[1], 10) })
 {% end %}
 
-
-{% block script %}
-    var state = 'spectating'
-{% end %}
-
 {% block message %}
-    if (obj.state != null) state = obj.state
-
     if (obj.x != null && state != 'gameover') {
         var el = document.getElementById(obj.x + "-" + obj.y)
         el.className = obj.color;

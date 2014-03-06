@@ -15,8 +15,9 @@
     var heights   = [],
         maxHeight = Infinity
 
-    var shadowEl   = null,
-        lastColumn = -1
+    var shadowEl    = null,
+        shadowShown = true,
+        lastColumn  = -1
 
     function updateShadow() {
         var x = lastColumn,
@@ -25,7 +26,7 @@
         var el = y < 0? null : document.getElementById(x + "-" + y)
 
         if (shadowEl != null) shadowEl.className = shadowEl.className.replace(/ shadow/, '')
-        if (el != null) el.className += ' shadow'
+        if (el != null && shadowShown) el.className += ' shadow'
         shadowEl = el
     }
 
@@ -52,12 +53,30 @@
 
 
 {% block message %}
+    console.log(obj.state)
+    switch (obj.state) {
+      case 'playing':
+        console.log("Enabling shadow...")
+        shadowShown = true
+        updateShadow()
+        break
+
+      case undefined:
+        break
+
+      default:
+        console.log("Disabling shadow...")
+        shadowShown = false
+        updateShadow()
+        break
+    }
+
     switch (obj.gamestate) {
         case 'reset':
            heights = []
     }
 
-    if (obj.x != undefined) {
+    if (obj.x != undefined && state != 'gameover') {
         e = document.getElementById(obj.x + "-" + obj.y)
 
         if (obj.delay != null) {

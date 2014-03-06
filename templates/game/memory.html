@@ -9,7 +9,7 @@
 
 
 {% block message %}
-    if (obj.x != undefined) {
+    if (obj.x != undefined && state != 'gameover') {
         e = document.getElementById(obj.x + "-" + obj.y)
 
         if (obj.delay != null) {

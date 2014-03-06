@@ -10,11 +10,15 @@ function setMessage(msg, type) {
 var wsHost = document.location.hostname + ":" + 8080,
     ws     = new WebSocket("ws://{}/websocket".replace(/{}/, wsHost))
 
+var state = 'spectating'
+
 ws.onmessage = function (evt) {
     var obj = JSON.parse(evt.data)
 
-    if      (obj.error)   setMessage(obj.error,   'error')
-    else if (obj.message) setMessage(obj.message, 'message')
+    if      (obj.error   != null) setMessage(obj.error,   'error')
+    else if (obj.message != null) setMessage(obj.message, 'message')
+
+    if      (obj.state   != null) state = obj.state
 
     on_message(obj)
     handle_queue_msg(obj)

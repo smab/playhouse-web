@@ -103,19 +103,12 @@ class MnkGame(lightgames.Game):
             # Check whether this was a winning move for the current player
             winner_lamps = self.search_winner_lamps(x, y)
             if len(winner_lamps) > 0:
-                lightgames.send_msg(playerH,                {'state': 'gameover', 'message': 'You won!'})
-                lightgames.send_msg(opponentH,              {'state': 'gameover', 'message': 'You lost!'})
-                lightgames.send_msgs(self.get_spectators(), {'message': "Player %d won" % (self.player+1)})
-
-                print("Player %d wins!" % self.player)
-                self.reset()
+                lightgames.game_over(self, playerH)
                 return
 
             # Check if the board is full
             if all(all(i != 2 for i in j) for j in self.board):
-                print("The game tied")
-                lightgames.send_msgs(self.connections, {'message':"The game tied"})
-                self.reset()
+                lightgames.game_over(self, None)
                 return
 
             # Switch player

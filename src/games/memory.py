@@ -114,17 +114,11 @@ class Memory(lightgames.Game):
 
             # Check if the board is full
             if all(all(hue >= 0 for hue in row) for row in self.board):
-                winner = -1
-                if   self.scores[0] > self.scores[1]: winner = 0
-                elif self.scores[0] < self.scores[1]: winner = 1
+                winner = None
+                if   self.scores[0] > self.scores[1]: winner = self.players[0]
+                elif self.scores[0] < self.scores[1]: winner = self.players[1]
 
-                print("Game over; winner: %d" % winner)
-                if winner == -1:
-                    lightgames.send_msgs(self.connections, {'message':"The game tied"})
-                else:
-                    lightgames.send_msgs(self.connections, {'message':"Player %d won!" % (winner + 1)})
-
-                self.reset()
+                lightgames.game_over(self, winner)
                 return
 
         else:

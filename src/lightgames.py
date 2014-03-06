@@ -42,6 +42,22 @@ def reply_wrong_player(game, handler):
         print("Spectator")
         send_msg(handler, {'error':'You are not a player!'})
 
+def game_over(game, winnerH):
+  if winnerH == None:
+    send_msgs(self.players,          {'state': 'gameover'})
+    send_msgs(self.get_spectators(), {'message': "The game tied"})
+    print("The game tied")
+
+  else:
+    winner = game.players.index(winnerH)
+    send_msg(winnerH, {'state': 'gameover', 'message': 'You won!'})
+    send_msgs((p for p in game.players if p != winnerH),
+                      {'state': 'gameover', 'message': 'You lost!'})
+    send_msgs(game.get_spectators(), {'message': "Player %d won" % (winner + 1)})
+    print("Player %d wins!" % winner)
+
+  game.reset()
+
 
 class Game:
     config_file = "defaultconfig.html"
@@ -122,6 +138,7 @@ class Game:
             print("Connection %s as player %d" % (handler, player))
             send_msg(handler, { 'state':   'playing',
                                 'message': 'You are player %d' % (player + 1) })
+            self.sync(handler)
 
     def remove_player(self, handler):
         player = self.players.index(handler)
@@ -190,6 +207,7 @@ class Game:
         unloaded because of a configuration change, and marks the final
         interaction with this instance.
         """
+        print("lightgames: destroy", self.connections)
         for h in self.connections:
             send_msg(h, {'message':"The game got destroyed!"})
 

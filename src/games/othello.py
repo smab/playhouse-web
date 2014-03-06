@@ -43,23 +43,19 @@ class Othello(lightgames.Game):
                 lightgames.send_msg(handler, {'x':x, 'y':y, 'color':button_color})
 
     def game_over(self):
-        scores = [0, 0, 0]
+        # The game is over, see who won (or if the game is a tie) and notify
+        # everyone of the result.
+        scores = [0, 0, 0] # P1, P2, empty
         for y in range(len(self.board)):
             for x in range(len(self.board[y])):
                 player = self.board[y][x]
                 scores[player] += 1
 
-        winner = -1
-        if   scores[0] > scores[1]: winner = 0
-        elif scores[0] < scores[1]: winner = 1
+        winner = None
+        if   scores[0] > scores[1]: winner = self.players[0]
+        elif scores[0] < scores[1]: winner = self.players[1]
 
-        print("Game over; winner: %d" % winner)
-        if winner == -1:
-            lightgames.send_msgs(self.connections, {'message':"The game tied"})
-        else:
-            lightgames.send_msgs(self.connections, {'message':"Player %d won!" % (winner + 1)})
-
-        self.reset()
+        lightgames.game_over(self, winner)
 
     def on_message(self, handler, coords):
         def search(x, y, dx, dy, pred):
