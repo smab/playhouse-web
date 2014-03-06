@@ -58,14 +58,14 @@ def initialize():
 
 
 application = tornado.web.Application([
-    (r"/",               MainHandler),
-    (r"/websocket",      CommunicationHandler),
+    (r"/",                 MainHandler),
+    (r"/websocket",        CommunicationHandler),
     (r"/config/?",         configinterface.ConfigHandler),
     (r"/config/login/?",   configinterface.ConfigLoginHandler),
-    (r"/config/setup/?",    configinterface.SetupConfigHandler),
+    (r"/config/setup/?",   configinterface.SetupConfigHandler),
     (r"/config/game/?",    configinterface.GameConfigHandler),
     (r"/config/bridges/?", configinterface.BridgeConfigHandler),
-    (r"/static/(.*)",    tornado.web.StaticFileHandler, {'path': 'static'})
+    (r"/static/(.*)",      tornado.web.StaticFileHandler, {'path': 'static'})
 ], template_path='templates',
    cookie_secret=str(uuid.uuid4()),
    login_url="login",
