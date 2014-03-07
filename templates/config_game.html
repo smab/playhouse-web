@@ -42,27 +42,43 @@
         <div id="message" class="type-{{ status }}">{{ message }}</div>
     {% end %}
     <form enctype="multipart/form-data" action="/config/game" method="post">
-        <h1>Game Choice</h1>
-        <table>
-        <tr>
-            <td>Current game: </td>
-            <td>
-                <select id="name" name="game_name" value="{{ game_name }}" onchange="onnamechange(this)">
-                {% for name in game_list %}
-                    <option value="{{ name }}" {% if name==game_name %}selected{% end %}>{{ name }}</option>
-                {% end %}
-                </select>
-            </td>
-        </tr><tr>
-            <td>Game paths: </td>
-            <td><input id="path" name="game_path" value="{{ game_path }}" onchange="onpathchange(this)" /></td>
-        </tr>
-        </table>
+        <h1>Game Settings - {{ module_name }}</h1>
 
-        <div id="gameconfig">
-            <h1>Game Settings - {{ module_name }}</h1>
-            <div class="subsection">
-            {% module Template("config/" + config_file, **vars) %}
+        <label for="game_path">Game path</label>
+        <input id="path" name="game_path" value="{{ game_path }}" onchange="onpathchange(this)" />
+
+        <div id="game-settings">
+            <div id="game-menu">
+                <h2>Change game</h2>
+                <ul>
+                    {% for name in game_list %}
+                        <li><input type="submit" name="game_name" value="{{ name }}" /></li>
+                    {% end %}
+                </ul>
+            </div>
+
+            {#
+            <table>
+            <tr>
+                <td>Current game: </td>
+                <td>
+                    <select id="name" name="game_name" value="{{ game_name }}" onchange="onnamechange(this)">
+                    {% for name in game_list %}
+                        <option value="{{ name }}" {% if name==game_name %}selected{% end %}>{{ name }}</option>
+                    {% end %}
+                    </select>
+                </td>
+            </tr><tr>
+                <td>Game paths: </td>
+                <td><input id="path" name="game_path" value="{{ game_path }}" onchange="onpathchange(this)" /></td>
+            </tr>
+            </table>
+            #}
+
+            <div id="gameconfig">
+                <div class="subsection">
+                {% module Template("config/" + config_file, **vars) %}
+                </div>
             </div>
         </div>
 

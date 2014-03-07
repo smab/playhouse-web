@@ -7,27 +7,23 @@
 
 {% block setting %}
     <h2>Animation</h2>
-    <table>
-        <tr>
-            <td>Current animation:</td>
-            <td>{{ animation_file }}</td>
-        </tr>
-        <tr>
-            <td>New animation: </td>
-            <td><input type="file" name="animation_file" value="" accept="image/gif" /></td>
-        </tr>
-        <tr>
-            <td>Play animation:</td>
-            <td>
-                <label style="padding-right:10px">
-                    <input type="radio" name="playgif" value="on" {% if  playgif %}checked{% end %} />
-                    On
-                </label>
-                <label>
-                    <input type="radio" name="playgif" value="off" {% if not playgif %}checked{% end %} />
-                    Off
-                </label>
-            </td>
-        </tr>
-    </table>
+    <dl>
+        <dt>Current animation:</dt>
+        <dd>{{ animation_file }}</dd>
+
+        <dt>New animation:</dt>
+        <dd><input type="file" name="animation_file" value="" accept="image/gif" /></dd>
+
+        <dt>Play animation:</dt>
+        <dd>
+            <label>
+                <input type="radio" name="playgif" value="on" {% if  playgif %}checked{% end %} />
+                On
+            </label>
+            <label>
+                <input type="radio" name="playgif" value="off" {% if not playgif %}checked{% end %} />
+                Off
+            </label>
+        </dd>
+    </dl>
 {% end %}

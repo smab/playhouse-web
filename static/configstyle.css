@@ -1,10 +1,6 @@
-body {
-  padding-top: 1em;
-}
-
 #center {
     width: 900px;
-    margin: 2em auto;
+    margin: 3em auto;
 }
 
 #menu { text-align: center; padding: 0; }
@@ -30,21 +26,21 @@ body {
     font-weight: bold;
 }
 
-h1 { font-size: 26px; }
-h1,h2 { color: #555; margin: 1em 0 0.5em 4em; }
+h1 { font-size: 160%; }
+h1,h2 { color: #555; }
 
 #settings {
     margin-top: 2em; 
 }
 #settings h1 {
-    width: 75%; 
+    margin: 1em 10%;
     padding-left: 0.5em;
     border-bottom: 2px solid #666;
 }
 #settings h2 {
-    margin-left: 8em; 
-    font-size: 22px; 
+    font-size: 140%;
 }
+
 #settings .subsection {
     margin: 0;
     padding: 0;
@@ -56,9 +52,6 @@ h1,h2 { color: #555; margin: 1em 0 0.5em 4em; }
 }
 #settings td {
     padding: 5px 10px;
-}
-#settings.fill {
-    padding-right: 10px;
 }
 
 
@@ -123,3 +116,64 @@ h1,h2 { color: #555; margin: 1em 0 0.5em 4em; }
     background: #F33;
 }
 
+
+#game-settings {
+    margin: 1em 0;
+    padding: 0.5em;
+    border: 1px solid #CCC;
+    border-radius: 1em;
+}
+#game-settings > * {
+    display: table-cell;
+    height: 100%;
+    padding: 0 1em;
+}
+#game-settings > *:not(:last-child) {
+    margin-right: 1em;
+    border-right: 1px solid #CCC;
+}
+#game-menu {
+    /*
+    float: left;
+    height: 100%;
+    padding: 0 1em;
+    margin-right: 1em;
+    border-right: 1px solid #CCC;
+    */
+}
+#game-menu > ul {
+    display: block;
+    padding-left: 0;
+}
+#game-menu > ul li {
+    list-style-type: none;
+}
+#game-menu > ul input {
+    display: block;
+    width: 100%;
+}
+#game-settings > div {
+}
+
+.subsection dl {
+    display: block;
+    margin-bottom: 2em;
+}
+.subsection dt, .subsection dd {
+    padding: 0.3em 0;
+}
+.subsection dt {
+    display: block;
+    float: left;
+    width: 10em;
+}
+.subsection dd {
+    display: block;
+    margin-left: 10em;
+    width: 20em;
+}
+.subsection dd::after {
+    content: "";
+    clear: both;
+    display: block;
+}

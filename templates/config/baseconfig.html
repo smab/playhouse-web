@@ -10,26 +10,27 @@
 
 {% block configbody %}
     <h2>{% block gridsetname %}Grid{% end %}</h2>
-    <table>
+
+    <dl>
     {% block gridsize %}
-    <tr><td>
-        <span class="fill">Grid size:</span>
+      <dt>Grid size:</dt>
+      <dd>
         <input type="number" size="2" name="grid_y" value="{{ grid_y }}" />
         ×
         <input type="number" size="2" name="grid_x" value="{{ grid_x }}" />
-    </td></tr>
+      </dd>
     {% end %}
     {% block cellsize %}
-    <tr><td>
-        <span class="fill">Cell size:</span>
+      <dt>Cell size:</dt>
+      <dd>
         <input type="number" size="3" name="cell_w" value="{{ cell_w }}" />
         ×
         <input type="number" size="3" name="cell_h" value="{{ cell_h }}" />
-    </td></tr>
+      </dd>
     {% end %}
     {% block extragridsettings %}
     {% end %}
-    </table>
+    </dl>
     {% block setting %}
     {% end %}
 {% end %}

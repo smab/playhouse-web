@@ -3,26 +3,21 @@
 {% block gridsetname %}Grid/Game{% end %}
 
 {% block extragridsettings %}
-    <tr><td>
-        <span class="fill">Winning requirement:</span>
-        <input type="number" name="winner_req" value="{{ winner_req }}" />
-    </td></tr>
+    <dt>Winning requirement:</dt>
+    <dd><input type="number" name="winner_req" value="{{ winner_req }}" /></dd>
 {% end %}
 
 {% block setting %}
     <h2>Colors</h2>
-    <table>
-    <tr>
-        <td>Player 1 color: </td>
-        <td><input type="color" size="8" name="color_1" value="{{ color_1}}" /></td>
-    </tr>
-    <tr>
-        <td>Player 2 color: </td>
-        <td><input type="color" size="8" name="color_2" value="{{ color_2 }}" /></td>
-    </tr>
-    <tr>
-        <td>Empty color: </td>
-        <td><input type="color" size="8" name="color_empty" value="{{ color_empty }}" /></td>
-    </tr>
-    </table>
+
+    <dl>
+        <dt>Player 1 color:</dt>
+        <dd><input type="color" size="8" name="color_1" value="{{ color_1}}" /></dd>
+
+        <dt>Player 2 color:</dt>
+        <dd><input type="color" size="8" name="color_2" value="{{ color_2 }}" /></dd>
+
+        <dt>Empty color:</dt>
+        <dd><input type="color" size="8" name="color_empty" value="{{ color_empty }}" /></dd>
+    </dl>
 {% end %}
