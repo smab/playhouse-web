@@ -249,6 +249,22 @@ class BridgeConfigHandler(RequestHandler):
 
 
 class GridConfigHandler(RequestHandler):
+    grid = None
+    bridges = None
+
+    def get_lights(self):
+        if GridConfigHandler.bridges == None:
+            response = get_data('/bridges')
+            GridConfigHandler.bridges = response['bridges']
+        bridges = GridConfigHandler.bridges
+
+        lights = []
+        for mac in bridges:
+            for light in range(bridges[mac]['lights']):
+                lights.append({'mac':mac, 'light':light+1})
+
+        return lights
+
     @tornado.web.removeslash
     @tornado.web.authenticated
     def get(self):
@@ -257,16 +273,64 @@ class GridConfigHandler(RequestHandler):
             'message': self.get_argument('msg', '')
         }
 
-        response = get_data('/grid')
-        grid = {k: response[k] for k in ('width', 'height', 'grid')}
+        if GridConfigHandler.grid == None:
+            response = get_data('/grid')
+            GridConfigHandler.grid = {
+                k: response[k] for k in ('width', 'height', 'grid')
+            }
+        grid = GridConfigHandler.grid
 
-        template_vars['grid'] = grid
+        lights = self.get_lights()
+        ingrid = [cell for row in grid['grid'] for cell in row if cell != None]
 
+        free    = [c for c in lights if c not in ingrid]
+        invalid = [c for c in ingrid if c not in lights]
+
+        if len(free) > 0:
+            # choose and activate one of the free lights
+            choosen = free[0]
+            template_vars['activated'] = choosen
+
+            request = tornado.escape.json_encode(
+                [{'light': choosen['light'], 'change':{'on':True}}]
+            )
+
+            headers = {'Content-Type': 'application/json'}
+            print(">>> POST:", "/bridges/%s/lights" % choosen['mac'], request)
+            manager.client.request("POST",
+                "/bridges/%s/lights" % choosen['mac'], request, headers)
+
+            response = manager.client.getresponse().read().decode()
+            print('POST response:', response)
+
+        template_vars['free'] = free
+        template_vars['invalid'] = invalid
+        template_vars['grid'] = GridConfigHandler.grid
         self.render('config_grid.html', **template_vars)
 
     @tornado.web.authenticated
     def post(self):
-        self.redirect('grid?status=%s&msg=%s' % ("error", "not implemented"))
+        args = self.request.arguments
+        status,msg = ('message','')
+
+        if 'save' in args:
+            status,msg = ('error','Saving not implemented')
+        elif 'refresh' in args:
+            GridConfigHandler.grid = None
+            GridConfigHandler.bridges = None
+        elif 'off' in args:
+            manager.config['game_name'] = 'off'
+            try:
+                manager.load_game()
+                msg = 'Game changed to: off'
+            except Exception as e:
+                msg = 'Loading failed: %s' % e
+                status = 'error'
+                traceback.print_exc()
+        else:
+            status,msg = ('error','Unknown request')
+
+        self.redirect('grid?status=%s&msg=%s' % (status,msg))
 
 
 class GameConfigHandler(RequestHandler):
