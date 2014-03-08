@@ -65,6 +65,14 @@ def update_config(cur_cfg, new_cfg, key):
         return True
     return False
 
+def use_statusmessage(func):
+    def new_func(self, *args, **kwargs):
+        vars = {
+            'status':  self.get_argument('status', 'message'),
+            'message': self.get_argument('msg', '')
+        }
+        return func(self, vars, *args, **kwargs)
+    return new_func
 
 class RequestHandler(tornado.web.RequestHandler):
     def get_current_user(self):
@@ -101,20 +109,17 @@ class ConfigLoginHandler(tornado.web.RequestHandler):
 
 
 class SetupConfigHandler(RequestHandler): 
+    @use_statusmessage
     @tornado.web.removeslash
     @tornado.web.authenticated 
-    def get(self): 
+    def get(self, vars):
         def config(key):
             if key in manager.config:
                 return manager.config[key]
             return None
 
-        template_vars = {
-            'config':  config,
-            'status':  self.get_argument("status", ""),
-            'message': self.get_argument("msg", "")
-        }
-        self.render("config_setup.html", **template_vars)
+        vars['config'] = config
+        self.render("config_setup.html", **vars)
 
     @tornado.web.authenticated
     def post(self):
@@ -265,14 +270,10 @@ class GridConfigHandler(RequestHandler):
 
         return lights
 
+    @use_statusmessage
     @tornado.web.removeslash
     @tornado.web.authenticated
-    def get(self):
-        template_vars = {
-            'status':  self.get_argument('status', ''),
-            'message': self.get_argument('msg', '')
-        }
-
+    def get(self, vars):
         if GridConfigHandler.grid == None:
             response = get_data('/grid')
             GridConfigHandler.grid = {
@@ -289,7 +290,7 @@ class GridConfigHandler(RequestHandler):
         if len(free) > 0:
             # choose and activate one of the free lights
             choosen = free[0]
-            template_vars['activated'] = choosen
+            vars['activated'] = choosen
 
             request = tornado.escape.json_encode(
                 [{'light': choosen['light'], 'change':{'on':True}}]
@@ -303,10 +304,10 @@ class GridConfigHandler(RequestHandler):
             response = manager.client.getresponse().read().decode()
             print('POST response:', response)
 
-        template_vars['free'] = free
-        template_vars['invalid'] = invalid
-        template_vars['grid'] = GridConfigHandler.grid
-        self.render('config_grid.html', **template_vars)
+        vars['free'] = free
+        vars['invalid'] = invalid
+        vars['grid'] = GridConfigHandler.grid
+        self.render('config_grid.html', **vars)
 
     @tornado.web.authenticated
     def post(self):
@@ -334,25 +335,24 @@ class GridConfigHandler(RequestHandler):
 
 
 class GameConfigHandler(RequestHandler):
+    @use_statusmessage
     @tornado.web.removeslash
     @tornado.web.authenticated
-    def get(self):
-        template_vars = {
+    def get(self, vars):
+        vars.update({
             'config_file': manager.game.config_file,
             'game_name':   manager.config['game_name'],
             'game_path':   tornado.escape.json_encode(manager.config['game_path']),
-            'game_list':   lightgames.get_games(manager.config['game_path']),
-            'status':      self.get_argument("status", ""),
-            'message':     self.get_argument("msg", "")
-        }
+            'game_list':   lightgames.get_games(manager.config['game_path'])
+        })
 
-        template_vars.update(lightgames.Game.template_vars)  # Game defaults
-        template_vars.update(manager.game.template_vars)
-        if 'title' not in template_vars:
-            template_vars['title'] = template_vars.get('module_name', "Untitled game")
+        vars.update(lightgames.Game.template_vars)  # Game defaults
+        vars.update(manager.game.template_vars)
+        if 'title' not in vars:
+            vars['title'] = vars.get('module_name', "Untitled game")
 
-        template_vars['vars'] = template_vars;
-        self.render('config_game.html', **template_vars)
+        vars['vars'] = vars;
+        self.render('config_game.html', **vars)
 
     @tornado.web.authenticated
     def post(self):
