@@ -50,6 +50,8 @@
                 {% for c in range(grid['width']) %}
                     {% if grid['grid'][r][c] == None %}
                         {% set cell_class = "free" %}
+                    {% elif grid['grid'][r][c] in invalid %}
+                        {% set cell_class = "error" %}
                     {% else %}
                         {% set cell_class = "claimed" %}
                     {% end %}

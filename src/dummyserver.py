@@ -32,7 +32,7 @@ grid = {
     "grid": [
         [None, {"mac":"00178811f9c2","light":1}, None],
         [None, None, None],
-        [None, None, None]
+        [{"mac":"001758182c73","light":2}, None, None]
     ]
 }
 
