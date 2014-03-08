@@ -38,7 +38,7 @@ grid = {
 
 class MainHandler(tornado.web.RequestHandler): 
     def get(self, path):
-        print("GET:", self.request.body) 
+        print("GET %s:" % path, self.request.body)
         self.set_header("Content-Type", "application/json")
         response = {"state": "success"};
         if path == "/bridges":
@@ -48,7 +48,7 @@ class MainHandler(tornado.web.RequestHandler):
         self.write(tornado.escape.json_encode(response)) 
     def post(self, path):
         # For easy debugging, here you can respond like a lampserver 
-        print("POST:", self.request.body) 
+        print("POST %s:" % path, self.request.body)
         self.set_header("Content-Type", "application/json")
         self.write(tornado.escape.json_encode({"state": "success"})) 
 

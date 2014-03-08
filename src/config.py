@@ -35,6 +35,30 @@ response = {
 }
 
 
+class GetException(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+def get_data(path):
+    print("GET %s" % path)
+    manager.client.request("GET", path);
+
+    json = manager.client.getresponse().read().decode()
+    print("GET %s response:" % path, json)
+    try:
+        response = tornado.escape.json_decode(json)
+    except ValueError:
+        print("ValueError: Did not get json from server when requesting %s" % path)
+        print(json)
+        raise GetException("<p>Did not get json from server. Is the IP and port correct? Check the output in console</p>")
+    else:
+        if response.get('state',None) == 'success':
+            return response
+        else:
+            raise GetException("<p>Unexpected answer from lamp-server.</p>" +
+                "<p>" + str(response) + "</p>" +
+                "<p>Expected 'state':'success'</p>")
+
 def update_config(cur_cfg, new_cfg, key):
     if key in new_cfg and cur_cfg[key] != new_cfg[key]:
         cur_cfg[key] = new_cfg[key]
@@ -123,31 +147,14 @@ class BridgeConfigHandler(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         if BridgeConfigHandler.bridges == None: 
-            client = http.client.HTTPConnection(
-                manager.config['lampdest'], manager.config['lampport']
-            )
-            print("BridgeConfig GET /bridges")
-            client.request("GET", "/bridges");
-
-            json = client.getresponse().read().decode()
             try:
-                response = tornado.escape.json_decode(json)
-            except ValueError:
-                print("ValueError: Did not get json from server when requesting /bridges")
-                print(json) 
-                self.write("<p>Did not get json from server. Is the IP and port correct? Check the output in console</p>")
-            else:
-                if response['state'] == 'success':
-                    data = response['bridges']
-                    print("BridgeConfig response:", data)
-                    BridgeConfigHandler.bridges = data 
-                    self.render('config_bridges.html', bridges=data)
-                else:
-                    self.write("<p>Unexpected answer from lamp-server.</p>")
-                    self.write("<p>" + str(response) + "</p>")
-                    self.write("<p>Expected 'state':'success'</p>")
-        else: 
-            self.render('config_bridges.html', bridges=BridgeConfigHandler.bridges) 
+                response = get_data("/bridges")
+                BridgeConfigHandler.bridges = response['bridges']
+            except GetException as e:
+                self.write(e.msg)
+                return
+
+        self.render('config_bridges.html', bridges=BridgeConfigHandler.bridges)
 
     @tornado.web.authenticated
     def post(self):
@@ -250,15 +257,8 @@ class GridConfigHandler(RequestHandler):
             'message': self.get_argument('msg', '')
         }
 
-        grid = {
-            "width": 3,
-            "height": 3,
-            "grid": [
-                [None, {"mac":"00178811f9c2","light":1}, None],
-                [None, None, None],
-                [None, None, None]
-            ]
-        }
+        response = get_data('/grid')
+        grid = {k: response[k] for k in ('width', 'height', 'grid')}
 
         template_vars['grid'] = grid
 
