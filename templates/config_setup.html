@@ -35,10 +35,6 @@
 
 
 {% block configbody %}
-    {% if status != "" %}
-        <div id="message" class="type-{{ status }}">{{ message }}</div>
-    {% end %}
-
     <div id="settings">
     <form action="/config/setup" method="post">
         <div class="subsection">

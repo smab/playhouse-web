@@ -42,9 +42,6 @@
 
 {% block configbody %}
 <div id="settings">
-    {% if status != "" %}
-        <div id="message" class="type-{{ status }}">{{ message }}</div>
-    {% end %}
     <h1>Grid</h1>
     <form action="/config/grid" method="post">
         <table id="grid">
