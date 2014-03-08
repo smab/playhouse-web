@@ -241,6 +241,34 @@ class BridgeConfigHandler(RequestHandler):
         self.redirect("bridges")
 
 
+class GridConfigHandler(RequestHandler):
+    @tornado.web.removeslash
+    @tornado.web.authenticated
+    def get(self):
+        template_vars = {
+            'status':  self.get_argument('status', ''),
+            'message': self.get_argument('msg', '')
+        }
+
+        grid = {
+            "width": 3,
+            "height": 3,
+            "grid": [
+                [None, {"mac":"00178811f9c2","light":1}, None],
+                [None, None, None],
+                [None, None, None]
+            ]
+        }
+
+        template_vars['grid'] = grid
+
+        self.render('config_grid.html', **template_vars)
+
+    @tornado.web.authenticated
+    def post(self):
+        self.redirect('grid?status=%s&msg=%s' % ("error", "not implemented"))
+
+
 class GameConfigHandler(RequestHandler):
     @tornado.web.removeslash
     @tornado.web.authenticated

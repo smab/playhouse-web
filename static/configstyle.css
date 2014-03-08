@@ -45,14 +45,6 @@ h1,h2 { color: #555; }
     margin: 0;
     padding: 0;
 }
-#settings table {
-    margin: 0.5em auto 2em auto;
-    border-spacing: 0;
-    font-family: "sans-serif";
-}
-#settings td {
-    padding: 5px 10px;
-}
 
 
 #bridges {
