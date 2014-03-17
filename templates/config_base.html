@@ -19,11 +19,18 @@
         {% end %}
     </head>
     <body>
+        {% try %}
+            {% if message and status %}
+                <div id="message" class="type-{{ status }}">{{ message }}</div>
+            {% end %}
+        {% except NameError %}
+        {% end %}
         <div id="center">
             <ul id="menu">
                 <li><a class="{% block menu_setup %}{% end%}"   href="/config/setup">Setup</a></li>
                 <li><a class="{% block menu_game %}{% end%}"    href="/config/game">Settings</a></li>
                 <li><a class="{% block menu_bridges %}{% end%}" href="/config/bridges">Bridges</a></li>
+                <li><a class="{% block menu_grid %}{% end%}"    href="/config/grid">Grid</a></li>
                 <li><a class="{% block menu_preview %}{% end%}" href="">Preview</a></li>
             </ul>
 

@@ -1,0 +1,71 @@
+{% extends config_base.html %}
+
+
+{% block menu_grid %}active{% end %}
+
+
+{% block configstyle %}
+    table#grid {
+        margin: 0 auto;
+    }
+    #grid td:hover {
+        width: 46px;
+        height: 46px;
+        border: 2px solid #666;
+    }
+    #grid td {
+        width: 48px;
+        height: 48px;
+        border: 1px solid #666;
+    }
+
+    #grid .free {
+        background-color: #ddd;
+    }
+    #grid .claimed {
+        background-color: #9cf;
+    }
+    #grid .error {
+        background-color: #f44;
+    }
+{% end %}
+
+
+{% block configscript %}
+    function gridclick(e) {
+         coords = e.id.split("-")
+
+         alert("Click: " + coords)
+    }
+{% end %}
+
+
+{% block configbody %}
+<div id="settings">
+    <h1>Grid</h1>
+    <form action="/config/grid" method="post">
+        <table id="grid">
+            {% for r in range(grid['height']) %}
+                <tr>
+                {% for c in range(grid['width']) %}
+                    {% if grid['grid'][r][c] == None %}
+                        {% set cell_class = "free" %}
+                    {% elif grid['grid'][r][c] in invalid %}
+                        {% set cell_class = "error" %}
+                    {% else %}
+                        {% set cell_class = "claimed" %}
+                    {% end %}
+                    <td id="{{ r }}-{{ c }}" class="{{ cell_class }}" onclick="gridclick(this)"></td>
+                {% end %}
+                </tr>
+            {% end %}
+        </table>
+
+        <ul id="buttons">
+            <li><input type="submit" name="save" value="Save"></li>
+            <li><input type="submit" name="refresh" value="Refresh"></li>
+            <li><input type="submit" name="off" value="Turn Off"></li>
+        </ul>
+    </form>
+</div>
+{% end %}

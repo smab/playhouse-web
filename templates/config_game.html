@@ -38,9 +38,6 @@
 
 {% block configbody %}
 <div id="settings">
-    {% if status != "" %}
-        <div id="message" class="type-{{ status }}">{{ message }}</div>
-    {% end %}
     <form enctype="multipart/form-data" action="/config/game" method="post">
         <h1>Game Settings - {{ module_name }}</h1>
 

@@ -3,8 +3,7 @@ import tornado.web
 import tornado.websocket
 
 
-response = {
-    "state": "success", 
+bridges = {
     "bridges": {
         "001788182e78": {
             "ip": "130.237.228.58:80", 
@@ -22,26 +21,40 @@ response = {
             "ip": "130.237.228.161:80", 
             "username": "24f99ac4b92c8af22ea52ec3d6c3e37", 
             "valid_username": True, 
-            "lights": 'aoeu'
+            "lights": 3
         }
     }
 }
 
+grid = {
+    "width": 3,
+    "height": 3,
+    "grid": [
+        [None, {"mac":"00178811f9c2","light":1}, None],
+        [None, None, None],
+        [{"mac":"001758182c73","light":2}, None, None]
+    ]
+}
 
 class MainHandler(tornado.web.RequestHandler): 
-    def get(self): 
-        print("GET:", self.request.body) 
+    def get(self, path):
+        print("GET %s:" % path, self.request.body)
         self.set_header("Content-Type", "application/json")
+        response = {"state": "success"};
+        if path == "/bridges":
+            response.update(bridges)
+        elif path == "/grid":
+            response.update(grid)
         self.write(tornado.escape.json_encode(response)) 
-    def post(self):
+    def post(self, path):
         # For easy debugging, here you can respond like a lampserver 
-        print("POST:", self.request.body) 
+        print("POST %s:" % path, self.request.body)
         self.set_header("Content-Type", "application/json")
         self.write(tornado.escape.json_encode({"state": "success"})) 
 
 
 application = tornado.web.Application([
-    (r".*", MainHandler) # For debugging
+    (r"(.*)", MainHandler) # For debugging
 ])
 
 if __name__ == "__main__":
