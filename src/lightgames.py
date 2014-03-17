@@ -1,6 +1,8 @@
 import imp
 import os
 import tornado.escape
+import tornado.ioloop
+import datetime
 
 
 def load(name, path, client):
@@ -42,21 +44,37 @@ def reply_wrong_player(game, handler):
         print("Spectator")
         send_msg(handler, {'error':'You are not a player!'})
 
-def game_over(game, winnerH):
-  if winnerH == None:
-    send_msgs(self.players,          {'state': 'gameover'})
-    send_msgs(self.get_spectators(), {'message': "The game tied"})
-    print("The game tied")
+def game_over(game, winnerH, coords = set()):
+    if winnerH == None:
+        send_msgs(self.players,          {'state': 'gameover'})
+        send_msgs(self.get_spectators(), {'message': "The game tied"})
+        print("The game tied")
 
-  else:
-    winner = game.players.index(winnerH)
-    send_msg(winnerH, {'state': 'gameover', 'message': 'You won!'})
-    send_msgs((p for p in game.players if p != winnerH),
-                      {'state': 'gameover', 'message': 'You lost!'})
-    send_msgs(game.get_spectators(), {'message': "Player %d won" % (winner + 1)})
-    print("Player %d wins!" % winner)
+    else:
+        winner = game.players.index(winnerH)
+        send_msg(winnerH, {'state': 'gameover', 'message': 'You won!'})
+        send_msgs((p for p in game.players if p != winnerH),
+                          {'state': 'gameover', 'message': 'You lost!'})
+        send_msgs(game.get_spectators(), {'message': "Player %d won" % (winner + 1)})
+        print("Player %d wins!" % winner)
 
-  game.reset()
+    changes = []
+    for (x,y) in coords:
+        changes += [ { 'x': x, 'y': y,             'change': { 'alert': 'lselect' } },
+                     { 'x': x, 'y': y, 'delay': 3, 'change': { 'alert': 'none'    } } ]
+    self.send_lamp_multi(changes)
+
+    set_timeout(datetime.timedelta(seconds = len(coords) + 3), game.reset)
+  # game.reset()
+
+def set_timeout(deadline, callback):
+    """
+    Runs `callback` at the time `deadline` from Tornado's I/O loop.
+
+    Thin wrapper over Tornado's `IOLoop.add_timeout`.
+    """
+    ioloop = tornado.ioloop.IOLoop.instance()
+    ioloop.add_timeout(deadline, callback)
 
 
 class Game:
@@ -105,6 +123,17 @@ class Game:
 
     def reset_lamp_all(self):
         self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0 })
+
+    def send_lamp_animation(self, coords, change, callback = None, revert = False):
+        changes = []
+        for i, (x,y) in enumerate(coords):
+            changes += [ { 'x': x, 'y': y, 'delay': i, 'change': dict(change, transitiontime = 10) } ]
+            if revert:
+                changes += [ { 'x': x, 'y': y, 'delay': i + 1, 'change': { 'bri':0, 'transitiontime':10 } } ]
+        self.send_lamp_multi(changes)
+
+        if callback:
+            set_timeout(datetime.timedelta(seconds = len(coords) + 1), callback)
 
 
     # Other utility methods for abstracting snippets commonly used in games

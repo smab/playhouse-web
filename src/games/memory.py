@@ -11,6 +11,7 @@ def create(client):
 
 class Memory(lightgames.Game):
     template_file = "memory.html"
+    config_file   = "baseconfig.html"
     template_vars = {
         'module_name': 'Memory',
         'grid_x':      6,

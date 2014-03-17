@@ -8,6 +8,7 @@ def create(client):
 
 class Connect4(lightgames.Game):
     template_file = "connect4.html"
+    config_file   = "baseconfig.html"
     template_vars = {
         'module_name': 'Connect 4',
         'grid_x':      7,
@@ -41,6 +42,10 @@ class Connect4(lightgames.Game):
                 lightgames.send_msg(handler, {'x':x, 'y':y, 'hue':hue, 'power':powered})
 
     def on_message(self, handler, message):
+        if self.player == None:
+            lightgames.reply_wrong_player(self, handler)
+            return
+
         playerH   = self.players[self.player]
         opponentH = self.players[1 - self.player]
 
@@ -66,38 +71,46 @@ class Connect4(lightgames.Game):
 
             return res
 
-        if self.board[y][x] == 2 and (y == self.height - 1 or
-                                        self.board[y + 1][x] != 2):
-            self.board[y][x] = self.player
+        if self.board[y][x] == 2 and (y == self.height - 1 or self.board[y + 1][x] != 2):
+            player = self.player
+            self.player = None
 
-            self.send_lamp(x, y, {'sat': 255, 'hue': hue})
+            self.board[y][x] = player
+
+            def done():
+                # Check if this move caused a win
+                winner_lamps = set()
+                for (dx,dy) in [(0, 1), (1, 0), (1, 1), (1, -1)]:
+                    lefts  = grab_ray((x,y), ( dx, dy))
+                    rights = grab_ray((x,y), (-dx,-dy))
+
+                    if len(lefts) + len(rights) - 1 >= 4:
+                        winner_lamps.update(lefts)
+                        winner_lamps.update(rights)
+
+                if len(winner_lamps) > 0:
+                    lightgames.game_over(self, playerH, lamps = winner_lamps)
+                    return
+
+                # Check for full board
+                if all(all(i != 2 for i in j) for j in self.board):
+                    lightgames.game_over(self, None)
+                    self.reset()
+                    return
+
+                # Switch player
+                self.player = 1 - player
+                lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
+                lightgames.send_msg(opponentH, {'message':'Your turn!'})
+
+            # Perform piece-dropping animation
+            coords = []
+            for ty in range(0, y + 1):
+                coords += [ (x, ty) ]
+            self.send_lamp_animation(coords, { 'sat': 255, 'hue': hue }, revert = True, callback = done)
+          # self.send_lamp(x, y, {'sat': 255, 'hue': hue})
+
             lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hue':hue, 'power':True})
-
-            lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
-            lightgames.send_msg(opponentH, {'message':'Your turn!'})
-
-            # Check if this move caused a win
-            winner_lamps = set()
-            for (dx,dy) in [(0, 1), (1, 0), (1, 1), (1, -1)]:
-                lefts  = grab_ray((x,y), ( dx, dy))
-                rights = grab_ray((x,y), (-dx,-dy))
-
-                if len(lefts) + len(rights) - 1 >= 4:
-                    winner_lamps.update(lefts)
-                    winner_lamps.update(rights)
-
-            if len(winner_lamps) > 0:
-                lightgames.game_over(self, playerH)
-                return
-
-            # Check for full board
-            if all(all(i != 2 for i in j) for j in self.board):
-                lightgames.game_over(self, None)
-                self.reset()
-                return
-
-            # Switch player
-            self.player = 1 - self.player
 
         else:
             lightgames.send_msg(playerH, {'error':'Invalid move!'})

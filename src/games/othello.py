@@ -8,8 +8,9 @@ def create(client):
 
 class Othello(lightgames.Game):
     template_file = "mnkgame.html"
+    config_file   = "baseconfig.html"
     template_vars = {
-        'module_name': 'othello',
+        'module_name': 'Othello',
         'title':       'Othello',
         'grid_x':      8,
         'grid_y':      8,
