@@ -39,11 +39,11 @@ class GetException(Exception):
     def __init__(self, msg):
         self.msg = msg
 
-def get_data(path):
+def get_data(client, path):
     print("GET %s" % path)
-    manager.client.request("GET", path);
+    client.request("GET", path);
 
-    json = manager.client.getresponse().read().decode()
+    json = client.getresponse().read().decode()
     print("GET %s response:" % path, json)
     try:
         response = tornado.escape.json_decode(json)
@@ -136,7 +136,8 @@ class SetupConfigHandler(RequestHandler):
         msg = "Setup saved"
         if update_config(manager.config, cfg, 'lampdest') or \
             update_config(manager.config, cfg, 'lampport'):
-            manager.connect_lampserver()
+            manager.client = manager.connect_lampserver()
+            manager.fetch_grid_size()
             msg = "Reconnected to lampserver"
 
         update_config(manager.config, cfg, 'serverport')
@@ -153,7 +154,8 @@ class BridgeConfigHandler(RequestHandler):
     def get(self):
         if BridgeConfigHandler.bridges == None: 
             try:
-                response = get_data("/bridges")
+                client = manager.connect_lampserver()
+                response = get_data(client, "/bridges")
                 BridgeConfigHandler.bridges = response['bridges']
             except GetException as e:
                 self.write(e.msg)
@@ -164,9 +166,7 @@ class BridgeConfigHandler(RequestHandler):
     @tornado.web.authenticated
     def post(self):
         print('POST', self.request.arguments)
-        client = http.client.HTTPConnection(
-            manager.config['lampdest'], manager.config['lampport']
-        )
+        client = manager.connect_lampserver()
         headers = {'Content-Type': 'application/json'}
 
         data = self.request.arguments 
@@ -256,17 +256,20 @@ class BridgeConfigHandler(RequestHandler):
 class GridConfigHandler(RequestHandler):
     grid = None
     bridges = None
+    changed = False
 
-    def get_lights(self):
+    headers = {'Content-Type': 'application/json'}
+
+    def get_lights(self, client):
         if GridConfigHandler.bridges == None:
-            response = get_data('/bridges')
+            response = get_data(client, '/bridges')
             GridConfigHandler.bridges = response['bridges']
         bridges = GridConfigHandler.bridges
 
         lights = []
         for mac in bridges:
             for light in range(bridges[mac]['lights']):
-                lights.append({'mac':mac, 'light':light+1})
+                lights.append({'mac':mac, 'lamp':light+1})
 
         return lights
 
@@ -274,32 +277,37 @@ class GridConfigHandler(RequestHandler):
     @tornado.web.removeslash
     @tornado.web.authenticated
     def get(self, vars):
-        if GridConfigHandler.grid == None:
-            response = get_data('/grid')
-            GridConfigHandler.grid = {
-                k: response[k] for k in ('width', 'height', 'grid')
-            }
-        grid = GridConfigHandler.grid
+        client = manager.connect_lampserver()
+        try:
+            if GridConfigHandler.grid == None:
+                response = get_data(client, '/grid')
+                GridConfigHandler.grid = {
+                    k: response[k] for k in ('width', 'height', 'grid')
+                }
+            grid = GridConfigHandler.grid
 
-        lights = self.get_lights()
+            lights = self.get_lights(client)
+        except GetException as e:
+            self.write(e.msg)
+            return
         ingrid = [cell for row in grid['grid'] for cell in row if cell != None]
 
         free    = [c for c in lights if c not in ingrid]
         invalid = [c for c in ingrid if c not in lights]
 
+        vars['activated'] = ''
         if len(free) > 0:
             # choose and activate one of the free lights
             choosen = free[0]
-            vars['activated'] = choosen
+            vars['activated'] = tornado.escape.json_encode(choosen)
 
             request = tornado.escape.json_encode(
-                [{'light': choosen['light'], 'change':{'on':True}}]
+                [{'light': choosen['lamp'], 'change':{'on':True,'bri':0}}]
             )
 
-            headers = {'Content-Type': 'application/json'}
             print(">>> POST:", "/bridges/%s/lights" % choosen['mac'], request)
             manager.client.request("POST",
-                "/bridges/%s/lights" % choosen['mac'], request, headers)
+                "/bridges/%s/lights" % choosen['mac'], request, self.headers)
 
             response = manager.client.getresponse().read().decode()
             print('POST response:', response)
@@ -307,6 +315,8 @@ class GridConfigHandler(RequestHandler):
         vars['free'] = free
         vars['invalid'] = invalid
         vars['grid'] = GridConfigHandler.grid
+        vars['json_encode'] = tornado.escape.json_encode
+        vars['changed'] = GridConfigHandler.changed
         self.render('config_grid.html', **vars)
 
     @tornado.web.authenticated
@@ -314,11 +324,69 @@ class GridConfigHandler(RequestHandler):
         args = self.request.arguments
         status,msg = ('message','')
 
-        if 'save' in args:
-            status,msg = ('error','Saving not implemented')
+        if 'changesize' in args:
+            size = self.get_argument('grid_size').split('x')
+
+            if len(size) == 2 and size[0].isdigit() and size[1].isdigit():
+                h, w = int(size[0]), int(size[1])
+
+                newgrid = [[None for _ in range(w)] for _ in range(h)]
+
+                GridConfigHandler.grid['grid'] = newgrid
+                GridConfigHandler.grid['width'] = w
+                GridConfigHandler.grid['height'] = h
+
+                msg = "Grid size changed to %dx%d" % (h,w)
+                print(msg)
+            else:
+                status,msg = ('error','Invalid size')
+        elif 'placelamp' in args:
+            coords = self.get_argument('coords').split(',')
+
+            if len(coords) == 2 and coords[0].isdigit() and coords[1].isdigit():
+                y,x = int(coords[0]), int(coords[1])
+
+                if GridConfigHandler.grid['grid'][y][x] != None:
+                    GridConfigHandler.grid['grid'][y][x] = None
+                    print('Lamp removed from %s' % coords)
+                    msg = 'Lamp removed from %d,%d' % (y,x)
+                    GridConfigHandler.changed = True
+                elif self.get_argument('lamp') == '':
+                    status,msg = ('error','No activated lamp')
+                else:
+                    try:
+                        lamp = tornado.escape.json_decode(
+                            self.get_argument('lamp'))
+                        GridConfigHandler.grid['grid'][y][x] = lamp
+                        print('Lamp %s placed at %s' % (lamp, coords))
+                        msg = 'Lamp placed at %d,%d' % (y,x)
+                        GridConfigHandler.changed = True
+                    except ValueError:
+                        status,msg = ('error','Invalid lamp')
+            else:
+                status,msg = ('error','Invalid position')
+        elif 'save' in args:
+            request = tornado.escape.json_encode(
+                GridConfigHandler.grid['grid']
+            )
+
+            print(">>> POST:", "/grid", request)
+            manager.client.request('POST', '/grid', request, self.headers)
+            response = manager.client.getresponse().read().decode()
+            response = tornado.escape.json_decode(response)
+            print('POST response:', response)
+
+            if response['state'] == 'success':
+                msg = 'Grid saved'
+                manager.grid['width'] = GridConfigHandler.grid['width']
+                manager.grid['height'] = GridConfigHandler.grid['height']
+                GridConfigHandler.changed = False
+            else:
+                status,msg = ('error','Saving failed!')
         elif 'refresh' in args:
             GridConfigHandler.grid = None
             GridConfigHandler.bridges = None
+            GridConfigHandler.changed = False
         elif 'off' in args:
             manager.config['game_name'] = 'off'
             try:
@@ -340,14 +408,16 @@ class GameConfigHandler(RequestHandler):
     @tornado.web.authenticated
     def get(self, vars):
         vars.update({
-            'config_file': manager.game.config_file,
+            'config_file': lightgames.Game.config_file,
             'game_name':   manager.config['game_name'],
             'game_path':   tornado.escape.json_encode(manager.config['game_path']),
             'game_list':   lightgames.get_games(manager.config['game_path'])
         })
 
         vars.update(lightgames.Game.template_vars)  # Game defaults
-        vars.update(manager.game.template_vars)
+        if manager.game != None:
+            vars.update(manager.game.template_vars)
+            vars['config_file'] = manager.game.config_file
         if 'title' not in vars:
             vars['title'] = vars.get('module_name', "Untitled game")
 
@@ -371,7 +441,8 @@ class GameConfigHandler(RequestHandler):
 
         load_game = False
 
-        if update_config(manager.config, cfg, 'game_name') or \
+        update_config(manager.config, cfg, 'game_name')
+        if 'game_name' in cfg or \
             update_config(manager.config, cfg, 'game_path'):
             load_game = True
 
@@ -381,6 +452,8 @@ class GameConfigHandler(RequestHandler):
             try:
                 manager.load_game()
                 msg = "Game changed"
+                if backup['game_name'] == manager.config['game_name']:
+                    msg = "Game restarted"
             except Exception as e:
                 manager.config = backup
                 msg = "Loading failed: %s" % e

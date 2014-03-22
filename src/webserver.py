@@ -53,7 +53,9 @@ def initialize():
 
     manager.config.update(cfg)
 
-    manager.connect_lampserver()
+    manager.client = manager.connect_lampserver()
+    manager.fetch_grid_size()
+    print("Grid: %dx%d" % (manager.grid['height'], manager.grid['width']))
     manager.load_game()
 
 

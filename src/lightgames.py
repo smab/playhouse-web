@@ -76,6 +76,10 @@ def set_timeout(deadline, callback):
     ioloop = tornado.ioloop.IOLoop.instance()
     ioloop.add_timeout(deadline, callback)
 
+def get_grid_size():
+    import manager
+    return (manager.grid['height'], manager.grid['width'])
+
 
 class Game:
     config_file = "defaultconfig.html"
@@ -96,6 +100,9 @@ class Game:
 
         # Internal variables
         self.client      = client
+
+        self.template_vars['grid_x'] = get_grid_size()[1]
+        self.template_vars['grid_y'] = get_grid_size()[0]
 
     # Internal, do not override/use
     def set_queue(self, queue):
@@ -152,7 +159,6 @@ class Game:
         for h in self.connections:
             if h not in self.players:
                 yield h
-
 
     # Feel free to override these, but make sure to call the super function
     # directly if you do, so that the connection-managing logic still works.

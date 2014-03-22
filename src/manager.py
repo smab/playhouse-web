@@ -2,7 +2,7 @@ import http.client
 
 import queue
 import lightgames
-
+import config as webconfig
 
 config = {
     'game_name': 'default',
@@ -15,6 +15,7 @@ config = {
 
     'stream_embedcode':''
 }
+grid = None
 client = None
 game = None
 queue = queue.Queue()
@@ -23,10 +24,9 @@ connections = []
 
 
 def connect_lampserver():
-    global client
-
     print("Connecting to lamp server (%s:%d)" % (config['lampdest'], config['lampport']))
-    client = http.client.HTTPConnection(config['lampdest'], config['lampport'])
+    return http.client.HTTPConnection(config['lampdest'], config['lampport'])
+
 
 def load_game():
     global game
@@ -45,3 +45,12 @@ def load_game():
     game = new_game
     game.set_queue(queue)
     game.init()
+
+
+def fetch_grid_size():
+    global grid
+
+    response = webconfig.get_data(client, '/grid')
+    grid = {
+        k: response[k] for k in ('width', 'height')
+    }

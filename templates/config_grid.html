@@ -28,14 +28,34 @@
     #grid .error {
         background-color: #f44;
     }
+
+    .center {
+        text-align: center;
+    }
+    #miscinput {
+        margin-top: 16px;
+    }
+    #miscinput input[type='text'] {
+        width: 4em;
+    }
+    #miscinput input[type='submit'] {
+        width: 8em;
+    }
+    #grid_data {
+        width: 400px;
+        height: 80px;
+    }
 {% end %}
 
 
 {% block configscript %}
     function gridclick(e) {
-         coords = e.id.split("-")
+        coords = e.id.split("-");
 
-         alert("Click: " + coords)
+        field = document.getElementById("coords");
+        field.value = coords;
+
+        document.gridform.placelamp.click()
     }
 {% end %}
 
@@ -43,7 +63,7 @@
 {% block configbody %}
 <div id="settings">
     <h1>Grid</h1>
-    <form action="/config/grid" method="post">
+    <form name="gridform" action="/config/grid" method="post">
         <table id="grid">
             {% for r in range(grid['height']) %}
                 <tr>
@@ -61,11 +81,25 @@
             {% end %}
         </table>
 
+        <!-- todo: move or something -->
+        <div id="miscinput" class="center">
+            <input id="coords" name="coords" type="text" value="" />
+            <input type="submit" name="placelamp" value="Place Lamp" />
+            <input type="hidden" name="lamp" value="{{ activated }}" />
+            <br />
+            <input name="grid_size" type="text" value="{{ grid['height'] }}x{{ grid['width'] }}" />
+            <input type="submit" name="changesize" value="Change Size" {% if changed %}disabled{% end %} />
+        </div>
+
         <ul id="buttons">
-            <li><input type="submit" name="save" value="Save"></li>
+            <li><input type="submit" name="save" value="Save" {% if not changed %}disabled{% end %}></li>
             <li><input type="submit" name="refresh" value="Refresh"></li>
             <li><input type="submit" name="off" value="Turn Off"></li>
+            <li><input type="submit" name="test" value="Test"></li>
         </ul>
+        <div class="center">
+        <textarea type="text" id="grid_data" name="grid_data">{{ json_encode(grid['grid']) }}</textarea>
+        </div>
     </form>
 </div>
 {% end %}
