@@ -48,14 +48,18 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
 
 
 def initialize():
-    with open('config.json', 'r') as file:
-        cfg = tornado.escape.json_decode(file.read())
+    config_file = 'config.json'
+    try:
+        with open(config_file, 'r') as file:
+            cfg = tornado.escape.json_decode(file.read())
 
-    if 'config_pwd' in cfg:
-        configinterface.password = cfg['config_pwd']
-        del cfg['config_pwd']
+        if 'config_pwd' in cfg:
+            configinterface.password = cfg['config_pwd']
+            del cfg['config_pwd']
 
-    manager.config.update(cfg)
+        manager.config.update(cfg)
+    except FileNotFoundError:
+        print("Config file '%s' not found" % config_file)
 
     manager.client = manager.connect_lampserver()
     manager.fetch_grid_size()
