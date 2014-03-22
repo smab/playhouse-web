@@ -26,10 +26,6 @@
         </script>
     </head>
     <body>
-        <!--
-        <img src="http://placehold.it/100x100">
-        -->
-
         <h1>{{ title }}</h1>
 
         {% block grid %}
@@ -40,6 +36,9 @@
         <table id="grid"></table>
 
         {% block postgrid %}
+        <div style="text-align:center">
+            {% raw stream_embedcode %}
+        </div>
         {% end %}
 
         {% end %}
@@ -56,6 +55,7 @@
                 {% end %}
 
                 {% block queuemsg %}
+                session = "{{ gamesession }}" // to lazy to use the cookie value
                 handle_queue_msg(obj)
                 {% end %}
             }

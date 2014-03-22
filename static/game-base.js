@@ -60,13 +60,13 @@ function handle_queue_msg(obj) {
             qmsg.innerHTML = "Your place in queue: " + obj.queuepos;
             qbtn.value = "Leave queue";
             qbtn.onclick = function() {
-                ws.send(JSON.stringify({ queueaction : 0 }));
+                ws.send(JSON.stringify({ session : session, queueaction : 0 }));
             }
         } else {
             qmsg.innerHTML = "You are not in the queue";
             qbtn.value = "Join queue";
             qbtn.onclick = function() {
-                ws.send(JSON.stringify({ queueaction : 1 }));
+                ws.send(JSON.stringify({ session : session, queueaction : 1 }));
             }
         }
     }
