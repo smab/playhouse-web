@@ -42,6 +42,10 @@
 
             <div class="content">
                 <div class="row">
+                    <div class="cell fill">Status:</div>
+                    <span class="cell">{{ connection_status }}<span>
+                </div>
+                <div class="row">
                     <div class="cell fill">Lampserver:</div>
                     <div class="cell">
                         <input name="lampdest" value="{{ config('lampdest') }}" />

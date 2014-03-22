@@ -132,6 +132,7 @@ class SetupConfigHandler(RequestHandler):
             return None
 
         vars['config'] = config
+        vars['connection_status'] = manager.client_status
         self.render("config_setup.html", **vars)
 
     @tornado.web.authenticated
@@ -150,8 +151,15 @@ class SetupConfigHandler(RequestHandler):
         if update_config(manager.config, cfg, 'lampdest') or \
             update_config(manager.config, cfg, 'lampport'):
             manager.client = manager.connect_lampserver()
-            manager.fetch_grid_size()
-            msg = "Reconnected to lampserver"
+            try:
+                manager.fetch_grid_size()
+                manager.client_status = "connected"
+                msg = "Connected to lampserver"
+            except:
+                traceback.print_exc()
+                manager.client_status = "error"
+                status = "error"
+                msg = "Failed to connect to lampserver"
 
         update_config(manager.config, cfg, 'serverport')
         update_config(manager.config, cfg, 'stream_embedcode')
@@ -458,6 +466,7 @@ class GameConfigHandler(RequestHandler):
         if load_game:
             print("Changing or restarting game")
             try:
+                manager.client = manager.connect_lampserver()
                 manager.load_game()
                 msg = "Game changed"
                 if backup['game_name'] == manager.config['game_name']:

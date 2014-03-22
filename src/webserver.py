@@ -3,6 +3,7 @@ import tornado.web
 import tornado.websocket
 
 import uuid
+import traceback
 
 import lightgames
 import manager
@@ -62,9 +63,22 @@ def initialize():
         print("Config file '%s' not found" % config_file)
 
     manager.client = manager.connect_lampserver()
-    manager.fetch_grid_size()
-    print("Grid: %dx%d" % (manager.grid['height'], manager.grid['width']))
-    manager.load_game()
+
+    status = manager.check_client_status()
+    print("Connection status: %s" % manager.client_status)
+    if status:
+        manager.fetch_grid_size()
+        print("Grid: %dx%d" % (manager.grid['height'], manager.grid['width']))
+    else:
+        print("Error: Couldn't connect to lampserver")
+
+    try:
+        manager.load_game()
+    except Exception:
+        traceback.print_exc()
+        print("Error: Failed to load game")
+
+    return True
 
 
 application = tornado.web.Application([
@@ -83,10 +97,9 @@ application = tornado.web.Application([
    debug=True)
 
 if __name__ == "__main__":
-    initialize()
-
-    print("Starting web server (port %d)" % manager.config['serverport'])
-    application.listen(manager.config['serverport'])
-    tornado.ioloop.IOLoop.instance().start()
-
-
+    if initialize():
+        print("Starting web server (port %d)" % manager.config['serverport'])
+        application.listen(manager.config['serverport'])
+        tornado.ioloop.IOLoop.instance().start()
+    else:
+        print("Error: Server failed to start")

@@ -15,17 +15,37 @@ config = {
 
     'stream_embedcode':''
 }
-grid = None
+grid = {'width':-1, 'height':-1}
 client = None
+client_status = None
 game = None
 queue = queue.Queue()
 
 connections = []
 
 
-def connect_lampserver():
-    print("Connecting to lamp server (%s:%d)" % (config['lampdest'], config['lampport']))
+def connect_lampserver(print_msg=True):
+    if print_msg:
+        print("Connecting to lamp server (%s:%d)" % (config['lampdest'], config['lampport']))
     return http.client.HTTPConnection(config['lampdest'], config['lampport'])
+
+
+def check_client_status():
+    global client
+    global client_status
+
+    client_status = "error"
+    try:
+        client.request("GET", "/status");
+        response = client.getresponse()
+        if response.status == 200:
+            client_status = "connected"
+        response.read()
+        return True
+    except:
+        client = connect_lampserver(False)
+
+    return False
 
 
 def load_game():
