@@ -53,10 +53,20 @@ for(var i=0; i < config.grid_y; i++) {
 }
 
 function handle_queue_msg(obj) {
+    qmsg = document.getElementById("queuemsg")
+    qbtn = document.getElementById("queuebtn")
+    if (obj.state != null) {
+        qbtn.disabled = state == 'playing'
+        if (state == 'playing') {
+            qmsg.innerHTML = "You are currently playing";
+            qbtn.value = "Leave game";
+            qbtn.onclick = function() {}
+        } else if (obj.queuepos == undefined) {
+            obj.queuepos = 0
+        }
+    }
     if (obj.queuepos != undefined) {
-        qmsg = document.getElementById("queuemsg")
-        qbtn = document.getElementById("queuebtn")
-        if(obj.queuepos > 0) {
+        if (obj.queuepos > 0) {
             qmsg.innerHTML = "Your place in queue: " + obj.queuepos;
             qbtn.value = "Leave queue";
             qbtn.onclick = function() {
