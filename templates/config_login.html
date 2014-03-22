@@ -1,11 +1,29 @@
 {% extends config_base.html %}
 
 
+{% block configstyle %}
+    #login {
+        padding: 0;
+        margin: 0 auto;
+        width: 200px;
+    }
+    #login li {
+        list-style: none;
+    }
+    #login input {
+        width: 100%;
+    }
+{% end %}
+
+
 {% block configbody %}
 <div id="settings"> 
     <h1>Login</h1>
     <form action="/config/login?next={{ next }}" method="post">
-        <input type="hidden" name="user" value="test" />
+        <ul id="login">
+            <li><input type="text" name="username" placeholder="Username" /></li>
+            <li><input type="password" name="password" placeholder="Password" /></li>
+        </ul>
 
         <ul id="buttons">
             <li><input type="submit" value="Login"></li>

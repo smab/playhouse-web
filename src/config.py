@@ -34,6 +34,8 @@ response = {
     }
 }
 
+password = None
+
 
 class GetException(Exception):
     def __init__(self, msg):
@@ -76,7 +78,7 @@ def use_statusmessage(func):
 
 class RequestHandler(tornado.web.RequestHandler):
     def get_current_user(self):
-        if 'disable_login' in manager.config and manager.config['disable_login']:
+        if password == None:
             return "disabled"
 
         user_json = self.get_secure_cookie("user")
@@ -92,13 +94,24 @@ class ConfigHandler(tornado.web.RequestHandler):
 
 
 class ConfigLoginHandler(tornado.web.RequestHandler):
+    @use_statusmessage
     @tornado.web.removeslash
-    def get(self):
-        self.render('config_login.html', next=self.get_argument("next", "/config"))
+    def get(self, vars):
+        vars['next'] = self.get_argument("next", "/config")
+        self.render('config_login.html', **vars)
 
     def post(self):
-        self.set_current_user("test")
-        self.redirect(self.get_argument("next"))
+        user = self.get_argument("username")
+        if self.check(user, self.get_argument("password",None)):
+            self.set_current_user(user)
+            self.redirect(self.get_argument("next"))
+        else:
+            self.set_current_user(None)
+            self.redirect("login?next=%s&status=error&msg=%s" % (
+                self.get_argument("next"), "Wrong username or password"))
+
+    def check(self, user, pwd):
+        return user == 'admin' and pwd == password
 
     def set_current_user(self, user):
         if user:

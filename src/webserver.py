@@ -51,6 +51,10 @@ def initialize():
     with open('config.json', 'r') as file:
         cfg = tornado.escape.json_decode(file.read())
 
+    if 'config_pwd' in cfg:
+        configinterface.password = cfg['config_pwd']
+        del cfg['config_pwd']
+
     manager.config.update(cfg)
 
     manager.client = manager.connect_lampserver()
