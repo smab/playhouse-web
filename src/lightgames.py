@@ -46,8 +46,8 @@ def reply_wrong_player(game, handler):
 
 def game_over(game, winnerH, coords = set()):
     if winnerH == None:
-        send_msgs(self.players,          {'state': 'gameover'})
-        send_msgs(self.get_spectators(), {'message': "The game tied"})
+        send_msgs(game.players,     {'state': 'gameover'})
+        send_msgs(game.connections, {'message': 'The game tied'})
         print("The game tied")
 
     else:
@@ -62,7 +62,7 @@ def game_over(game, winnerH, coords = set()):
     for (x,y) in coords:
         changes += [ { 'x': x, 'y': y,             'change': { 'alert': 'lselect' } },
                      { 'x': x, 'y': y, 'delay': 3, 'change': { 'alert': 'none'    } } ]
-    self.send_lamp_multi(changes)
+    game.send_lamp_multi(changes)
 
     set_timeout(datetime.timedelta(seconds = len(coords) + 3), game.reset)
   # game.reset()
