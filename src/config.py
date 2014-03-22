@@ -410,7 +410,6 @@ class GameConfigHandler(RequestHandler):
         vars.update({
             'config_file': lightgames.Game.config_file,
             'game_name':   manager.config['game_name'],
-            'game_path':   tornado.escape.json_encode(manager.config['game_path']),
             'game_list':   lightgames.get_games(manager.config['game_path'])
         })
 
@@ -432,9 +431,6 @@ class GameConfigHandler(RequestHandler):
         for key,val in self.request.arguments.items():
             cfg[key] = self.get_argument(key)
 
-        if 'game_path' in cfg:
-            cfg['game_path'] = tornado.escape.json_decode(cfg['game_path'])
-
         print("Config: %s" % cfg)
 
         cfg['files'] = self.request.files
@@ -442,8 +438,7 @@ class GameConfigHandler(RequestHandler):
         load_game = False
 
         update_config(manager.config, cfg, 'game_name')
-        if 'game_name' in cfg or \
-            update_config(manager.config, cfg, 'game_path'):
+        if 'game_name' in cfg:
             load_game = True
 
         status = "message"

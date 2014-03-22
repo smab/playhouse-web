@@ -19,9 +19,6 @@
     function onnamechange(e) {
         set_state(e.value != '{{ game_name }}');
     }
-    function onpathchange(e) {
-        set_state(e.value != '{% raw game_path %}');
-    }
     function set_state(change_game) {
         config = document.getElementById("gameconfig");
         save = document.getElementById("savebutton");
@@ -40,9 +37,6 @@
 <div id="settings">
     <form enctype="multipart/form-data" action="/config/game" method="post">
         <h1>Game Settings - {{ module_name }}</h1>
-
-        <label for="game_path">Game path</label>
-        <input id="path" name="game_path" value="{{ game_path }}" onchange="onpathchange(this)" />
 
         <div id="game-settings">
             <div id="game-menu">
