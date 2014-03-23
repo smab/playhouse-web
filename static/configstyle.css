@@ -36,9 +36,13 @@ h1,h2 { color: #555; }
     margin: 1em 10%;
     padding-left: 0.5em;
     border-bottom: 2px solid #666;
+
+    font-family: sans-serif 
 }
 #settings h2 {
     font-size: 140%;
+
+    font-family: sans-serif; 
 }
 
 #settings .subsection {
