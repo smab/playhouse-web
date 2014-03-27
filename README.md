@@ -34,3 +34,7 @@ whereas the address <http://localhost:8080/> displays the actual animations/
 games.
 To change the startup behaviour of the webserver, edit the config.json file
 in the root directory.
+If you wish to add password protection to the config interface you can add
+the parameter "config_pwd" followed by a password string. This will be
+stored in plaintext and should not be considered safe by any means. 
+The default username to log in using the password is "admin".
