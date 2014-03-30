@@ -21,7 +21,10 @@ class MainHandler(tornado.web.RequestHandler):
             gamesession = str(uuid.uuid4())
             self.set_cookie("gamesession", gamesession)
 
-        template_vars = { 'stream_embedcode': manager.config['stream_embedcode'] }
+        template_vars = {
+                'stream_embedcode': manager.config['stream_embedcode'],
+                'socketport': manager.config['serverport']
+            }
         template_vars.update(lightgames.Game.template_vars)  # Game defaults
         template_vars.update(manager.game.template_vars)
         if 'title' not in template_vars:
