@@ -80,6 +80,12 @@ def get_grid_size():
     import manager
     return (manager.grid['height'], manager.grid['width'])
 
+def add_auth_cookie(headers):
+    if light_cookie and 'user' in light_cookie:
+        headers['Cookie'] = light_cookie['user'].output(attrs=[], header='')
+    return headers
+
+light_cookie = None
 
 class Game:
     config_file = "defaultconfig.html"
@@ -113,7 +119,7 @@ class Game:
     # Methods for updating the lamps
     def send_lamp_multi(self, changes):
         json    = tornado.escape.json_encode(changes)
-        headers = {'Content-Type': 'application/json'}
+        headers = add_auth_cookie({'Content-Type': 'application/json'})
         self.client.request("POST", "/lights", json, headers)
         # Print response
         print(self.client.getresponse().read().decode())
@@ -123,7 +129,7 @@ class Game:
 
     def send_lamp_all(self, change):
         json    = tornado.escape.json_encode(change)
-        headers = {'Content-Type': 'application/json'}
+        headers = add_auth_cookie({'Content-Type': 'application/json'})
         self.client.request("POST", "/lights/all", json, headers)
         # Print response
         print(self.client.getresponse().read().decode())
