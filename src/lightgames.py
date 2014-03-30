@@ -80,6 +80,12 @@ def get_grid_size():
     import manager
     return (manager.grid['height'], manager.grid['width'])
 
+def add_auth_cookie(headers):
+    if light_cookie and 'user' in light_cookie:
+        headers['Cookie'] = light_cookie['user'].output(attrs=[], header='')
+    return headers
+
+light_cookie = None
 
 class Game:
     config_file = "defaultconfig.html"
@@ -101,8 +107,10 @@ class Game:
         # Internal variables
         self.client      = client
 
-        self.template_vars['grid_x'] = get_grid_size()[1]
-        self.template_vars['grid_y'] = get_grid_size()[0]
+        if 'grid_x' not in self.template_vars or \
+           'grid_y' not in self.template_vars:
+            self.template_vars['grid_x'] = get_grid_size()[1]
+            self.template_vars['grid_y'] = get_grid_size()[0]
 
     # Internal, do not override/use
     def set_queue(self, queue):
@@ -113,7 +121,7 @@ class Game:
     # Methods for updating the lamps
     def send_lamp_multi(self, changes):
         json    = tornado.escape.json_encode(changes)
-        headers = {'Content-Type': 'application/json'}
+        headers = add_auth_cookie({'Content-Type': 'application/json'})
         self.client.request("POST", "/lights", json, headers)
         # Print response
         print(self.client.getresponse().read().decode())
@@ -123,7 +131,7 @@ class Game:
 
     def send_lamp_all(self, change):
         json    = tornado.escape.json_encode(change)
-        headers = {'Content-Type': 'application/json'}
+        headers = add_auth_cookie({'Content-Type': 'application/json'})
         self.client.request("POST", "/lights/all", json, headers)
         # Print response
         print(self.client.getresponse().read().decode())

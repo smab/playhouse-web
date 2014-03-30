@@ -38,13 +38,19 @@ password = None
 
 
 class GetException(Exception):
-    def __init__(self, msg):
+    def __init__(self, msg, response):
         self.msg = msg
+        self.response = response
+
+def add_auth_cookie(headers):
+    if manager.light_cookie and 'user' in manager.light_cookie:
+        headers['Cookie'] = manager.light_cookie['user'].output(attrs=[], header='')
+    return headers
 
 def get_data(client, path):
     print("GET %s" % path)
     try: 
-        client.request("GET", path);
+        client.request("GET", path, headers=add_auth_cookie({}));
     except ConnectionRefusedError: 
         print("ConnectionRefusedError: [Errno 111] Connection refused")
         raise GetException("<p>ConnectionRefusedError: [Errno 111] Connection refused</p>")
@@ -56,14 +62,14 @@ def get_data(client, path):
     except ValueError:
         print("ValueError: Did not get json from server when requesting %s" % path)
         print(json)
-        raise GetException("<p>Did not get json from server. Is the IP and port correct? Check the output in console</p>")
+        raise GetException("<p>Did not get json from server. Is the IP and port correct? Check the output in console</p>", json)
     else:
         if response.get('state',None) == 'success':
             return response
         else:
             raise GetException("<p>Unexpected answer from lamp-server.</p>" +
                 "<p>" + str(response) + "</p>" +
-                "<p>Expected 'state':'success'</p>")
+                "<p>Expected 'state':'success'</p>", json)
 
 def update_config(cur_cfg, new_cfg, key):
     if key in new_cfg and cur_cfg[key] != new_cfg[key]:
@@ -197,7 +203,7 @@ class BridgeConfigHandler(RequestHandler):
     def post(self):
         print('POST', self.request.arguments)
         client = manager.connect_lampserver()
-        headers = {'Content-Type': 'application/json'}
+        headers = add_auth_cookie({'Content-Type': 'application/json'})
 
         data = self.request.arguments 
         if 'identify' in data and 'select' in data:
@@ -325,8 +331,6 @@ class GridConfigHandler(RequestHandler):
     bridges = None
     changed = False
 
-    headers = {'Content-Type': 'application/json'}
-
     def get_lights(self, client):
         if GridConfigHandler.bridges == None:
             response = get_data(client, '/bridges')
@@ -344,6 +348,8 @@ class GridConfigHandler(RequestHandler):
     @tornado.web.removeslash
     @tornado.web.authenticated
     def get(self, vars):
+        headers = add_auth_cookie({'Content-Type': 'application/json'})
+
         client = manager.connect_lampserver()
         try:
             if GridConfigHandler.grid == None:
@@ -374,7 +380,7 @@ class GridConfigHandler(RequestHandler):
 
             print(">>> POST:", "/bridges/%s/lights" % choosen['mac'], request)
             manager.client.request("POST",
-                "/bridges/%s/lights" % choosen['mac'], request, self.headers)
+                "/bridges/%s/lights" % choosen['mac'], request, headers)
 
             response = manager.client.getresponse().read().decode()
             print('POST response:', response)
@@ -388,6 +394,8 @@ class GridConfigHandler(RequestHandler):
 
     @tornado.web.authenticated
     def post(self):
+        headers = add_auth_cookie({'Content-Type': 'application/json'})
+
         args = self.request.arguments
         status,msg = ('message','')
 
@@ -405,6 +413,7 @@ class GridConfigHandler(RequestHandler):
 
                 msg = "Grid size changed to %dx%d" % (h,w)
                 print(msg)
+                GridConfigHandler.changed = True
             else:
                 status,msg = ('error','Invalid size')
         elif 'placelamp' in args:
@@ -438,7 +447,7 @@ class GridConfigHandler(RequestHandler):
             )
 
             print(">>> POST:", "/grid", request)
-            manager.client.request('POST', '/grid', request, self.headers)
+            manager.client.request('POST', '/grid', request, headers)
             response = manager.client.getresponse().read().decode()
             response = tornado.escape.json_decode(response)
             print('POST response:', response)

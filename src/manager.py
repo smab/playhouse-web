@@ -1,4 +1,5 @@
 import http.client
+import ssl
 
 import queue
 import lightgames
@@ -16,6 +17,9 @@ config = {
     'stream_embedcode':''
 }
 grid = {'width':-1, 'height':-1}
+light_pwd = None
+light_cookie = None
+
 client = None
 client_status = None
 game = None
@@ -26,8 +30,38 @@ connections = []
 
 def connect_lampserver(print_msg=True):
     if print_msg:
-        print("Connecting to lamp server (%s:%d)" % (config['lampdest'], config['lampport']))
-    return http.client.HTTPConnection(config['lampdest'], config['lampport'])
+        print("Connecting to lamp server (%s:%d)" %
+            (config['lampdest'], config['lampport']))
+
+    if config.get('ssl', False):
+        context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        context.verify_mode = ssl.CERT_REQUIRED
+        context.load_cert_chain(config['certfile'])
+        conn = http.client.HTTPSConnection(
+            config['lampdest'], config['lampport'], context=context)
+    else:
+        conn = http.client.HTTPConnection(config['lampdest'], config['lampport'])
+
+    if light_pwd is not None:
+        authenticate(conn)
+
+    return conn
+
+
+def authenticate(conn):
+    global light_cookie
+
+    print("Authenticating...")
+    conn.request("POST", "/authenticate",
+        body='{"username":"web", "password":"%s"}' % light_pwd)
+    res = conn.getresponse()
+    print(res.read())
+
+    light_cookie = http.cookies.BaseCookie()
+    for cookie in res.headers.get_all("Set-Cookie", []):
+      light_cookie.load(cookie)
+
+    lightgames.light_cookie = light_cookie
 
 
 def check_client_status():
@@ -70,7 +104,11 @@ def load_game():
 def fetch_grid_size():
     global grid
 
-    response = webconfig.get_data(client, '/grid')
-    grid = {
-        k: response[k] for k in ('width', 'height')
-    }
+    try:
+        response = webconfig.get_data(client, '/grid')
+        grid = {
+            k: response[k] for k in ('width', 'height')
+        }
+    except webconfig.GetException as e:
+        return e.response
+    return None
