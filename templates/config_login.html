@@ -19,7 +19,7 @@
 {% block configbody %}
 	</div>
 	<script>
-		if (window.location.hostname.match(/192.168/))	{
+		if (window.location.hostname.match(/192.168/) || window.location.hostname.match(/localhost/))	{
 		document.write(
 			'<div id="settings">'+
 			    '<h1>Login</h1>'+
