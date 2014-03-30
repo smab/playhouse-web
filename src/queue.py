@@ -79,6 +79,6 @@ class Queue:
 
     def clear(self):
         for queuer in self.queue:
-            lightgames.send_msg(queuer, {'queuepos':0})
+            lightgames.send_msg(self.session[queuer], {'queuepos':0})
         self.queue.clear()
         self.sessions.clear()
