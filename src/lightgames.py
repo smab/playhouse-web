@@ -107,8 +107,10 @@ class Game:
         # Internal variables
         self.client      = client
 
-        self.template_vars['grid_x'] = get_grid_size()[1]
-        self.template_vars['grid_y'] = get_grid_size()[0]
+        if 'grid_x' not in self.template_vars or \
+           'grid_y' not in self.template_vars:
+            self.template_vars['grid_x'] = get_grid_size()[1]
+            self.template_vars['grid_y'] = get_grid_size()[0]
 
     # Internal, do not override/use
     def set_queue(self, queue):
