@@ -21,6 +21,8 @@ class Connect4(lightgames.Game):
 
     def reset(self):
         print("New game!")
+        print("Size: %d %d" % (self.template_vars['grid_x'], self.template_vars['grid_y']))
+        self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
 
         self.player  = 0
         self.players = [None, None]
@@ -78,6 +80,10 @@ class Connect4(lightgames.Game):
             self.board[y][x] = player
 
             def done():
+                # Turn the final lamps on
+                self.send_lamp(x, y, {'sat': 255, 'hue': hue, 'transitiontime': 10})
+                lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hue':hue, 'power':True, 'transitiontime':10, 'move':True})
+
                 # Check if this move caused a win
                 winner_lamps = set()
                 for (dx,dy) in [(0, 1), (1, 0), (1, 1), (1, -1)]:
@@ -105,14 +111,26 @@ class Connect4(lightgames.Game):
 
             # Perform piece-dropping animation
             coords = []
-            for ty in range(0, y + 1):
+            for ty in range(0, y):
                 coords += [ (x, ty) ]
             self.send_lamp_animation(coords, { 'sat': 255, 'hue': hue }, revert = True, callback = done)
-          # self.send_lamp(x, y, {'sat': 255, 'hue': hue})
-
-            lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hue':hue, 'power':True})
+            lightgames.send_msgs_animation(self.connections, coords, { 'hue':hue, 'power':True }, revert = True)
 
         else:
             lightgames.send_msg(playerH, {'error':'Invalid move!'})
+
+
+    def set_options(self, config):
+        def clamp(low, x, high):
+            return max(low, min(high, x))
+
+        m = 50
+        vars = self.template_vars
+        vars['grid_y']      = clamp(2, int(config['grid_y']),            m)
+        vars['grid_x']      = clamp(2, int(config['grid_x']),            m)
+        vars['cell_w']      = clamp(2, int(config['cell_w']),          500)
+        vars['cell_h']      = clamp(2, int(config['cell_h']),          500)
+
+        self.reset()
 
 # vim: set sw=4:

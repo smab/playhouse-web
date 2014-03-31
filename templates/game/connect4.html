@@ -89,7 +89,14 @@
     function updateCell(obj) {
       var el = document.getElementById(obj.x + "-" + obj.y)
 
-      if (obj.power) {
+      if (obj.transitiontime != null) {
+        el.style.transition = 'background-color ' + (obj.transitiontime * 100) + 'ms'
+        setTimeout(function () {
+          el.style.transition = ''
+        }, obj.transitiontime * 100)
+      }
+
+      if (obj.move && obj.power) {
           heights[obj.x] = Math.min(heights[obj.x] || maxHeight, obj.y)
           if (heights[obj.x] == 0) heights[obj.x] = -1  // indicates full column
           updateShadow()

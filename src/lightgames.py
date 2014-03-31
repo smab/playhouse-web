@@ -36,6 +36,16 @@ def send_msgs(handlers, msg):
     for h in handlers:
         send_msg(h, msg)
 
+def send_msgs_animation(handlers, coords, message, callback = None, revert = False):
+    changes = []
+    for i, (x,y) in enumerate(coords):
+        send_msgs(handlers, dict(message, x = x, y = y, delay = i * 500, transitiontime = 10))
+        if revert:
+            send_msgs(handlers, dict(message, power = False, x = x, y = y, delay = i*500 + 1000, transitiontime = 10))
+
+    if callback:
+        set_timeout(datetime.timedelta(seconds = len(coords)/2 + (0.5 if revert else 0)), callback)
+
 def reply_wrong_player(game, handler):
     if handler in game.players:
         print("Wrong player")
@@ -79,6 +89,16 @@ def set_timeout(deadline, callback):
 def get_grid_size():
     import manager
     return (manager.grid['height'], manager.grid['width'])
+
+
+def rgb_to_xyz(r, g, b):
+    X =  1.076450 * r - 0.237662 * g + 0.161212 * b
+    Y =  0.410964 * r + 0.554342 * g + 0.034694 * b
+    Z = -0.010954 * r - 0.013389 * g + 1.024343 * b
+
+    x = X / (X + Y + Z)
+    y = Y / (X + Y + Z)
+    return x, y, Z
 
 
 class Game:
@@ -134,13 +154,13 @@ class Game:
     def send_lamp_animation(self, coords, change, callback = None, revert = False):
         changes = []
         for i, (x,y) in enumerate(coords):
-            changes += [ { 'x': x, 'y': y, 'delay': i, 'change': dict(change, transitiontime = 10) } ]
+            changes += [ { 'x': x, 'y': y, 'delay': i*0.5, 'change': dict(change, transitiontime = 10) } ]
             if revert:
-                changes += [ { 'x': x, 'y': y, 'delay': i + 1, 'change': { 'bri':0, 'transitiontime':10 } } ]
+                changes += [ { 'x': x, 'y': y, 'delay': i*0.5 + 1, 'change': { 'bri':0, 'transitiontime':10 } } ]
         self.send_lamp_multi(changes)
 
         if callback:
-            set_timeout(datetime.timedelta(seconds = len(coords) + 1), callback)
+            set_timeout(datetime.timedelta(seconds = len(coords)/2 + (0.5 if revert else 0)), callback)
 
 
     # Other utility methods for abstracting snippets commonly used in games
