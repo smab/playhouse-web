@@ -7,7 +7,7 @@ function setMessage(msg, type) {
     el.appendChild(document.createTextNode(String(msg)))
 }
 
-var wsHost = document.location.hostname + ":" + 8080,
+var wsHost = document.location.hostname + ":" + socketport,
     ws     = new WebSocket("ws://{}/websocket".replace(/{}/, wsHost))
 
 var state = 'spectating'

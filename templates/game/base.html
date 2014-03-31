@@ -50,6 +50,8 @@
         {% end %}
 
         <script>
+            socketport = {{ socketport }}
+
             function on_message(obj) {
                 {% block message %}
                 {% end %}

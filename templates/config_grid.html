@@ -83,12 +83,15 @@
 
         <!-- todo: move or something -->
         <div id="miscinput" class="center">
-            <input id="coords" name="coords" type="text" value="" />
-            <input type="submit" name="placelamp" value="Place Lamp" />
-            <input type="hidden" name="lamp" value="{{ activated }}" />
-            <br />
-            <input name="grid_size" type="text" value="{{ grid['height'] }}x{{ grid['width'] }}" />
-            <input type="submit" name="changesize" value="Change Size" {% if changed %}disabled{% end %} />
+            <div style="width:100%"> 
+                <input id="coords" name="coords" type="text" value="" />
+                <input type="submit" name="placelamp" value="Place Lamp" />
+                <input type="hidden" name="lamp" value="{{ activated }}" />
+            </div>
+            <div style="width:100%">
+                <input name="grid_size" type="text" value="{{ grid['height'] }}x{{ grid['width'] }}" />
+                <input type="submit" name="changesize" value="Change Size" {% if changed %}disabled{% end %} />
+            </div> 
         </div>
 
         <ul id="buttons">

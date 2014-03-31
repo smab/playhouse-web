@@ -3,47 +3,50 @@
 
 {% block menu_bridges %}active{% end %}
 
-{% block config_script %}
-    function addBridge() {
-        var bridges = document.getElementById('bridges');
-        var tr = document.createElement('tr');
+{% block configstyle %}
+.uname:hover {
+    background-color: #ccc; 
+}
 
-        var no = document.createElement('td');
-        no.innerHTML = '-';
-        tr.appendChild(no);
+.uname {
+    font-weight: bold; 
+    text-decoration: underline; 
+    color: blue; 
+}
+{% end %}
 
-        var select = document.createElement('input');
-        select.type = 'checkbox';
-        select.name = 'checkbox';
-        tr.appendChild(wrapTd(select));
+{% block configscript %}
+function changeUsername(e) {
+    var a = prompt("Change username", e.innerHTML=='None'?'':e.innerHTML)
+    if(a == null) return 
+    a = a.trim() 
+    // Check that the new username is not empty and is not the same as before. 
+    if(a != '' && a != e.innerHTML) { 
+        form = document.createElement('form') 
+        form.method = 'POST' 
+        form.action = '/config/bridges' 
+        
+        change = document.createElement('input') 
+        change.type = 'text'; 
+        change.name = 'changeUsername' 
+        change.value = '' 
 
-        var mac = document.createElement('td');
-        mac.innerHTML = '-';
-        tr.appendChild(mac);
+        uname = document.createElement('input') 
+        uname.type = 'text' 
+        uname.name = 'username' 
+        uname.value = a 
 
-        var ip = document.createElement('input');
-        ip.className = 'ip';
-        ip.type = 'text';
-        ip.name = 'ip';
-        tr.appendChild(wrapTd(ip));
+        mac = document.createElement('input') 
+        mac.type = 'text' 
+        mac.name = 'mac' 
+        mac.value = e.className.split(" ")[1] 
 
-        var username = document.createElement('input');
-        username.className = 'username';
-        username.type = 'text';
-        username.name = 'username';
-        tr.appendChild(wrapTd(username));
-
-        var valid = document.createElement('td');
-        valid.innerHTML = '-';
-        tr.appendChild(valid);
-
-        var lights = document.createElement('td');
-        lights.innerHTML = '-';
-        tr.appendChild(lights);
-
-        bridges.appendChild(tr);
-        ip.focus();
+        form.appendChild(change) 
+        form.appendChild(uname) 
+        form.appendChild(mac) 
+        form.submit() 
     }
+}
 {% end %}
 
 {% block configbody %}
@@ -54,19 +57,19 @@
             <tr>
                 <th>#</th>
                 <th>Select</th>
-                <th class="mac">MAC</th>
-                <th class="">IP</th>
-                <th class="">Username</th>
-                <th class="valid">valid_username</th>
-                <th class="lights"># Lights</th>
+                <th>MAC</th>
+                <th>IP</th>
+                <th>Username</th>
+                <th>valid_username</th>
+                <th># Lights</th>
             </tr>
-            {% for i, mac in enumerate(bridges) %}
+            {% for i, mac in enumerate(sorted(bridges)) %}
             <tr>
                 <td>{{ i+1 }}</td>
                 <td><input type="checkbox" name="select" value="{{ mac }}"></td>
                 <td>{{ mac }}</td>
                 <td>{{ bridges[mac]['ip'] }}</td>
-                <td>{{ bridges[mac]['username'] }}</td>
+                <td class="uname {{ mac }}" onclick="changeUsername(this)">{{ bridges[mac]['username'] }}</td>
                 <td>{{ bridges[mac]['valid_username'] }}</td>
                 <td>{{ bridges[mac]['lights'] }}</td>
             </tr>
@@ -87,10 +90,10 @@
         </table>
         <ul id="buttons">
             <li><input type="submit" name='identify' value="Identify Selected"></li>
-            <li><input type="submit" name='add' value="Add Bridge"></li>
-            <li><input type="submit" name='remove' value="Remove Selected"></li>
-            <li><input type="submit" name='refresh' value="Refresh List"></li>
-            <li><input type="submit" name='search' value="Search Bridges"></li>
+            <li><input type="submit" name='add'      value="Add Bridge"></li>
+            <li><input type="submit" name='remove'   value="Remove Selected"></li>
+            <li><input type="submit" name='refresh'  value="Refresh List"></li>
+            <li><input type="submit" name='search'   value="Search Bridges"></li>
         </ul>
     </form>
 </div> 
