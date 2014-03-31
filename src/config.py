@@ -74,6 +74,8 @@ def get_data(client, path):
 def update_config(cur_cfg, new_cfg, key):
     if key in new_cfg and cur_cfg[key] != new_cfg[key]:
         cur_cfg[key] = new_cfg[key]
+        with open(manager.config_file, 'w') as f: 
+            f.write(tornado.escape.json_encode(cur_cfg)) 
         return True
     return False
 
@@ -171,7 +173,9 @@ class SetupConfigHandler(RequestHandler):
                 status = "error"
                 msg = "Failed to connect to lampserver"
 
-        update_config(manager.config, cfg, 'serverport')
+        if update_config(manager.config, cfg, 'serverport'): 
+            msg = 'Webserver port change requires a restart' 
+
         update_config(manager.config, cfg, 'stream_embedcode')
 
         self.redirect("setup?status=%s&msg=%s" % (status, msg))

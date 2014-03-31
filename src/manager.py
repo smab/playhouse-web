@@ -1,3 +1,5 @@
+import tornado.ioloop 
+
 import http.client
 import ssl
 
@@ -16,6 +18,9 @@ config = {
 
     'stream_embedcode':''
 }
+
+config_file = 'config.json' 
+
 grid = {'width':-1, 'height':-1}
 light_pwd = None
 light_cookie = None
@@ -112,3 +117,7 @@ def fetch_grid_size():
     except webconfig.GetException as e:
         return e.response
     return None
+
+
+
+

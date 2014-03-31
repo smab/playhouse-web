@@ -58,7 +58,7 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
 
 
 def initialize():
-    config_file = 'config.json'
+    config_file = manager.config_file 
     try:
         with open(config_file, 'r') as file:
             cfg = tornado.escape.json_decode(file.read())
@@ -116,3 +116,5 @@ if __name__ == "__main__":
     print("Starting web server (port %d)" % manager.config['serverport'])
     application.listen(manager.config['serverport'])
     tornado.ioloop.IOLoop.instance().start()
+
+
