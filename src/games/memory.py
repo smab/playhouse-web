@@ -18,19 +18,18 @@ class Memory(lightgames.Game):
         'grid_y':      4,
     }
 
-    width, height = template_vars['grid_x'], template_vars['grid_y']
     hues = itertools.cycle([5000, 15000, 25000, 35000, 45000, 55000, 65000])
-
-    active_tiles = []
-
 
     def reset(self):
         print("New game!")
+        self.width  = self.template_vars['grid_x']
+        self.height = self.template_vars['grid_y']
 
         # Reset game state
         self.player = 0
         self.players = [None, None]
         self.scores  = [0, 0]
+        self.active_tiles = []
 
         coords = [(x,y) for x in range(self.width) for y in range(self.height)]
         random.shuffle(coords)
@@ -124,5 +123,24 @@ class Memory(lightgames.Game):
 
         else:
             lightgames.send_msg(playerH, {'error':'Invalid move!'})
+
+
+    def set_options(self, config):
+        def clamp(low, x, high):
+            return max(low, min(high, x))
+
+        def is_even(n): return n % 2 == 0
+
+        if not is_even(int(config['grid_x']) * int(config['grid_y'])):
+            return "Bad grid size: must have even number of bricks"
+
+        m = 50
+        vars = self.template_vars
+        vars['grid_y'] = clamp(2, int(config['grid_y']),   m)
+        vars['grid_x'] = clamp(2, int(config['grid_x']),   m)
+        vars['cell_w'] = clamp(2, int(config['cell_w']), 500)
+        vars['cell_h'] = clamp(2, int(config['cell_h']), 500)
+
+        self.reset()
 
 # vim: set sw=4:
