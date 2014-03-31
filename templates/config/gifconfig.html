@@ -25,5 +25,25 @@
                 Off
             </label>
         </dd>
+
+        <dt>Center horizontally:</dt>
+        <dd>
+            <label>
+                <input type="radio" name="center" value="true" {% if center %}checked{% end %} />
+                True
+            </label>
+            <label>
+                <input type="radio" name="center" value="false" {% if not center %}checked{% end %} />
+                False
+            </label>
+        </dd>
+
+        <dt>Transition time:</dt>
+        <dd>
+            <label>
+                <input type="text" size="8" name="transitiontime" value="{{ transition_time }}" />
+                (in 10ths of a second)
+            </label>
+        </dd>
     </dl>
 {% end %}

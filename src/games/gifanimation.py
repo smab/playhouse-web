@@ -18,36 +18,54 @@ class GifAnimation(lightgames.Game):
         'grid_x': 3,
         'grid_y': 3,
         'animation_file': 'animations/test3x3.gif',
-        'playgif': False
+        'playgif': False,
+        'center': False,
+        'transition_time': 4
     }
 
     def init(self):
         self.play = False
         self.data = open(self.template_vars['animation_file'], 'rb').read()
 
+        self.grid = lightgames.get_grid_size()
+        self.template_vars['grid_x'], self.template_vars['grid_y'] = self.grid
+
+        self.center = self.template_vars['center']
+        self.transition_time = self.template_vars['transition_time']
+
 
     @gen.engine
     def play_animation(self):
         self.play = True
+
         while self.play == True:
             try:
                 gif = Image.open(io.BytesIO(self.data))
                 (width, height) = gif.size
-                self.template_vars['grid_x'] = width
-                self.template_vars['grid_y'] = height
+                #self.template_vars['grid_x'] = width
+                #self.template_vars['grid_y'] = height
                 i = 0
                 for frame in ImageSequence(gif):
                     if self.play == False:
                         break
+                    tt = self.transition_time
                     i = i+1
                     rgb_im = gif.convert("RGB")
                     dur = gif.info['duration']
                     buffer = []
-                    for y in range(0, height):
-                        for x in range(0, width):
-                            r, g, b = rgb_im.getpixel((x, y))
-                            buffer += [{'x': x, 'y': y, 'change': {'rgb': (r,g,b)}}]
-                            lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'color':(r,g,b)})
+                    for y in range(0, min(height,self.grid[1])):
+                        for x in range(0, min(width,self.grid[0])):
+
+                            # center the image
+                            x_im = x_grid = x
+                            if(self.center and width > self.grid[0]):
+                                x_im = int( (width - self.grid[0])/2 + x)
+                            elif(self.center and width < self.grid[0]):
+                                x_grid = int( (self.grid[0] - width)/2 + x)
+
+                            r, g, b = rgb_im.getpixel((x_im, y))
+                            buffer += [{'x': x_grid, 'y': y, 'change': {'rgb': (r,g,b), 'transitiontime':tt}}]
+                            lightgames.send_msgs(self.connections, {'x':x_grid, 'y':y, 'color':(r,g,b)})
 
                     self.send_lamp_multi(buffer)
                     yield gen.Task(IOLoop.instance().add_timeout, time.time() + (dur/1000.0))
@@ -68,6 +86,21 @@ class GifAnimation(lightgames.Game):
 
             self.data = fileinfo['body']
             self.template_vars['animation_file'] = fileinfo['filename']
+
+        if 'center' in config:
+            if config['center'] == 'true':
+                self.center = True
+            else:
+                self.center = False
+            self.template_vars['center'] = self.center
+
+        if 'transitiontime' in config:
+            try:
+                tt = int(config['transitiontime'])
+                self.template_vars['transition_time'] = tt
+                self.transition_time = tt
+            except ValueError:
+                print("Couldn't convert string to int")
 
         if 'playgif' in config:
             if config['playgif'] == 'on' and self.play == False:
