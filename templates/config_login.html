@@ -17,24 +17,17 @@
 
 
 {% block configbody %}
-	</div>
-	<script>
-		if (window.location.hostname.match(/192.168/) || window.location.hostname.match(/localhost/))	{
-		document.write(
-			'<div id="settings">'+
-			    '<h1>Login</h1>'+
-			    '<form action="/config/login?next={{ next }}" method="post">'+
-				'<ul id="login">'+
-				    '<li><input type="text" name="username" placeholder="Username" /></li>'+
-				    '<li><input type="password" name="password" placeholder="Password" /></li>'+
-				'</ul>'+
+<div id="settings"> 
+    <h1>Login</h1>
+    <form action="/config/login?next={{ next }}" method="post">
+        <ul id="login">
+            <li><input type="text" name="username" placeholder="Username" /></li>
+            <li><input type="password" name="password" placeholder="Password" /></li>
+        </ul>
 
-				'<ul id="buttons">'+
-				    '<li><input type="submit" value="Login"></li>'+
-				'</ul>'+
-			    '</form>'+
-			'</div>');
-		}
-	</script>
-	</div>
+        <ul id="buttons">
+            <li><input type="submit" value="Login"></li>
+        </ul>
+    </form>
+</div> 
 {% end %}
