@@ -379,7 +379,8 @@ class GridConfigHandler(RequestHandler):
             vars['activated'] = tornado.escape.json_encode(choosen)
 
             request = tornado.escape.json_encode(
-                [{'light': choosen['lamp'], 'change':{'on':True,'bri':0}}]
+                [{'light' : choosen['lamp'],
+                  'change': {'on':True, 'sat':0, 'hue':0, 'bri':255}}]
             )
 
             print(">>> POST:", "/bridges/%s/lights" % choosen['mac'], request)
