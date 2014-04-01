@@ -1,4 +1,4 @@
-import tornado.ioloop 
+import tornado.escape
 
 import http.client
 import ssl
@@ -119,5 +119,12 @@ def fetch_grid_size():
     return None
 
 
+def save_config():
+    cfg = config.copy()
+    if light_pwd is not None:
+        cfg['light_pwd'] = light_pwd
+    if webconfig.password is not None:
+        cfg['config_pwd'] = webconfig.password
 
-
+    with open(config_file, 'w') as f:
+        f.write(tornado.escape.json_encode(cfg))
