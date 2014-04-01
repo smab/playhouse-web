@@ -273,9 +273,6 @@ class Game:
         for h in self.connections:
             send_msg(h, {'message':"The game got destroyed!"})
 
-        connections = set()
-        players     = []
-
     def on_message(self, handler, message):
         """
         Event: game-related JSON message was received.  This is where you want

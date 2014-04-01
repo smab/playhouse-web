@@ -2,8 +2,9 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
+CONFIG_FILE = 'config.json'
 
-bridges = {
+BRIDGES = {
     "bridges": {
         "001788182e78": {
             "ip": "130.237.228.58:80", 
@@ -26,7 +27,7 @@ bridges = {
     }
 }
 
-grid = {
+GRID = {
     "width": 3,
     "height": 3,
     "grid": [
@@ -40,11 +41,11 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self, path):
         print("GET %s:" % path, self.request.body)
         self.set_header("Content-Type", "application/json")
-        response = {"state": "success"};
+        response = {"state": "success"}
         if path == "/bridges":
-            response.update(bridges)
+            response.update(BRIDGES)
         elif path == "/grid":
-            response.update(grid)
+            response.update(GRID)
         self.write(tornado.escape.json_encode(response)) 
     def post(self, path):
         # For easy debugging, here you can respond like a lampserver 
@@ -52,17 +53,18 @@ class MainHandler(tornado.web.RequestHandler):
         self.set_header("Content-Type", "application/json")
         self.write(tornado.escape.json_encode({"state": "success"})) 
 
+def init_http():
+    application = tornado.web.Application([
+        (r"(.*)", MainHandler) # For debugging
+    ])
 
-application = tornado.web.Application([
-    (r"(.*)", MainHandler) # For debugging
-])
-
-if __name__ == "__main__":
-    with open('config.json', 'r') as file:
+    with open(CONFIG_FILE, 'r') as file:
         config = tornado.escape.json_decode(file.read())
 
     print("Starting dummy lamp server (port %d)" % config['lampport'])
     application.listen(config['lampport'])
+
+if __name__ == "__main__":
+    init_http()
+
     tornado.ioloop.IOLoop.instance().start()
-
-

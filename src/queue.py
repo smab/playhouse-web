@@ -49,7 +49,7 @@ class Queue:
 
             if action == 1:
                 if session in self.queue: # disconnected client rejoins
-                    pos = 0;
+                    pos = 0
                     # no index function :( find position with loop instead
                     for e in self.queue:
                         pos += 1
@@ -79,6 +79,6 @@ class Queue:
 
     def clear(self):
         for queuer in self.queue:
-            lightgames.send_msg(self.session[queuer], {'queuepos':0})
+            lightgames.send_msg(self.sessions[queuer], {'queuepos':0})
         self.queue.clear()
         self.sessions.clear()

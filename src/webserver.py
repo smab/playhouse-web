@@ -9,10 +9,6 @@ import lightgames
 import manager
 import config as configinterface
 
-headers = {
-    'Content-Type': 'application/json',
-}
-
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
@@ -58,7 +54,7 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
 
 
 def initialize():
-    config_file = manager.config_file 
+    config_file = manager.CONFIG_FILE
     try:
         with open(config_file, 'r') as file:
             cfg = tornado.escape.json_decode(file.read())
@@ -90,31 +86,36 @@ def initialize():
 
     try:
         manager.load_game()
-    except Exception:
+    except:
         traceback.print_exc()
         print("Error: Failed to load game")
 
 
-application = tornado.web.Application([
-    (r"/",                 MainHandler),
-    (r"/websocket",        CommunicationHandler),
-    (r"/config/?",         configinterface.ConfigHandler),
-    (r"/config/login/?",   configinterface.ConfigLoginHandler),
-    (r"/config/setup/?",   configinterface.SetupConfigHandler),
-    (r"/config/game/?",    configinterface.GameConfigHandler),
-    (r"/config/bridges/?", configinterface.BridgeConfigHandler),
-    (r"/config/grid/?",    configinterface.GridConfigHandler),
-    (r"/static/(.*)",      tornado.web.StaticFileHandler, {'path': 'static'})
-], template_path='templates',
-   cookie_secret=str(uuid.uuid4()),
-   login_url="login",
-   debug=True)
+def init_http():
+    application = tornado.web.Application([
+        (r"/",                 MainHandler),
+        (r"/websocket",        CommunicationHandler),
+        (r"/config/?",         configinterface.ConfigHandler),
+        (r"/config/login/?",   configinterface.ConfigLoginHandler),
+        (r"/config/setup/?",   configinterface.SetupConfigHandler),
+        (r"/config/game/?",    configinterface.GameConfigHandler),
+        (r"/config/bridges/?", configinterface.BridgeConfigHandler),
+        (r"/config/grid/?",    configinterface.GridConfigHandler),
+        (r"/static/(.*)",      tornado.web.StaticFileHandler, {'path': 'static'})
+    ], template_path='templates',
+       cookie_secret=str(uuid.uuid4()),
+       login_url="login",
+       debug=True)
+
+    print("Starting web server (port %d)" % manager.config['serverport'])
+    application.listen(manager.config['serverport'])
+
 
 if __name__ == "__main__":
     initialize()
 
-    print("Starting web server (port %d)" % manager.config['serverport'])
-    application.listen(manager.config['serverport'])
+    init_http()
+
     tornado.ioloop.IOLoop.instance().start()
 
 
