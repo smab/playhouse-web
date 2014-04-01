@@ -274,7 +274,7 @@ class BridgeConfigHandler(RequestHandler):
 
         # Set bridges to None, to force it to get them in get() 
         elif 'refresh' in data: 
-            BridgeConfigHandler.bridges = None 
+            BridgeConfigHandler.bridges = {} 
             self.redirect('bridges') 
 
         elif 'changeUsername' in data and 'mac' in data: 
@@ -296,9 +296,13 @@ class BridgeConfigHandler(RequestHandler):
             if response['state'] == 'success': 
                 BridgeConfigHandler.bridges[mac]['username'] = response['username'] 
                 BridgeConfigHandler.bridges[mac]['valid_username'] = response['valid_username'] 
-                self.redirect("bridges?status=msg&msg=%s" % "Changed username") 
+                if not response['valid_username']: 
+                    BridgeConfigHandler.bridges[mac]['lights'] = -1 
+                #self.redirect("bridges?status=msg&msg=%s" % "Changed username") 
+                self.write({'state': 'success'}) 
             else: 
-                self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
+                self.write(response) 
+                #self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
 
         elif 'search' in data: 
             print('Search') 

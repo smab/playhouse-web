@@ -22,29 +22,16 @@ function changeUsername(e) {
     a = a.trim() 
     // Check that the new username is not empty and is not the same as before. 
     if(a != '' && a != e.innerHTML) { 
-        form = document.createElement('form') 
-        form.method = 'POST' 
-        form.action = '/config/bridges' 
-        
-        change = document.createElement('input') 
-        change.type = 'text'; 
-        change.name = 'changeUsername' 
-        change.value = '' 
+        xhr = new XMLHttpRequest() 
+        xhr.open("POST", "/config/bridges", false) 
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+        xhr.send("changeUsername&mac=" + e.className.split(" ")[1] + "&username=" + a)
 
-        uname = document.createElement('input') 
-        uname.type = 'text' 
-        uname.name = 'username' 
-        uname.value = a 
-
-        mac = document.createElement('input') 
-        mac.type = 'text' 
-        mac.name = 'mac' 
-        mac.value = e.className.split(" ")[1] 
-
-        form.appendChild(change) 
-        form.appendChild(uname) 
-        form.appendChild(mac) 
-        form.submit() 
+        var url = location.protocol + '//' + location.host + location.pathname 
+        if(JSON.parse(xhr.responseText).state != 'success') 
+            location.href = url + "?status=error&msg=" + xhr.responseText["errormsg"]
+        else 
+            location.href = url 
     }
 }
 {% end %}
