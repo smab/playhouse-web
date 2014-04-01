@@ -277,17 +277,14 @@ class BridgeConfigHandler(RequestHandler):
             BridgeConfigHandler.bridges = {} 
             self.redirect('bridges') 
 
-        elif 'changeUsername' in data and 'mac' in data: 
-            uname = data['username'][0].decode() 
+        elif 'newUsername' in data and 'mac' in data: 
             mac = data['mac'][0].decode() 
-            print("Change username of", mac, "to", uname)
+            print("New username to", mac)
 
-            request = {'username': uname}
-            request = tornado.escape.json_encode(request)
             client.request(
                 "POST", 
-                "/bridges/" + mac, 
-                request,
+                "/bridges/" + mac + "/adduser", 
+                tornado.escape.json_encode({}),
                 headers
             ) 
             response = client.getresponse().read().decode() 
@@ -298,11 +295,10 @@ class BridgeConfigHandler(RequestHandler):
                 BridgeConfigHandler.bridges[mac]['valid_username'] = response['valid_username'] 
                 if not response['valid_username']: 
                     BridgeConfigHandler.bridges[mac]['lights'] = -1 
-                #self.redirect("bridges?status=msg&msg=%s" % "Changed username") 
                 self.write({'state': 'success'}) 
             else: 
+                response['errormessage'] = response['errormessage'].capitalize(); 
                 self.write(response) 
-                #self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
 
         elif 'search' in data: 
             print('Search') 
