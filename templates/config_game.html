@@ -38,6 +38,9 @@
     <form enctype="multipart/form-data" action="/config/game" method="post">
         <h1>Game Settings - {{ module_name }}</h1>
 
+        <!-- prevent games from becoming default submit  -->
+        <input type="submit" name="save" style="display:none" />
+
         <div id="game-settings">
             <div id="game-menu">
                 <h2>Change game</h2>
