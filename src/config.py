@@ -128,6 +128,7 @@ class SetupConfigHandler(RequestHandler):
 
         cfg['lampport'] = int(cfg['lampport'])
         cfg['serverport'] = int(cfg['serverport'])
+        cfg['configport'] = int(cfg['configport'])
 
         status = "message"
         msg = "Setup saved"
@@ -144,8 +145,15 @@ class SetupConfigHandler(RequestHandler):
                 status = "error"
                 msg = "Failed to connect to lampserver"
 
-        if update_config(manager.config, cfg, 'serverport'): 
-            msg = 'Webserver port change requires a restart' 
+        if update_config(manager.config, cfg, 'serverport'):
+            msg = 'Web server port change requires a restart'
+        if update_config(manager.config, cfg, 'configport'):
+            msg = 'Web server port change requires a restart'
+
+        if manager.config['serverport'] == manager.config['configport']:
+            msg = 'Warning: Game server port and config server port are the same'
+            status = 'error'
+
 
         update_config(manager.config, cfg, 'stream_embedcode')
 

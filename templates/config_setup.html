@@ -46,7 +46,7 @@
                     <span class="cell">{{ connection_status }}<span>
                 </div>
                 <div class="row">
-                    <div class="cell fill">Lampserver:</div>
+                    <div class="cell fill">Lamp server:</div>
                     <div class="cell">
                         <input name="lampdest" value="{{ config('lampdest') }}" />
                         :
@@ -54,8 +54,12 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="cell fill">Webserver port:</div>
+                    <div class="cell fill">Game server port:</div>
                     <input name="serverport" value="{{ config('serverport') }}" class="cell portinput" />
+                </div>
+                <div class="row">
+                    <div class="cell fill">Config server port:</div>
+                    <input name="configport" value="{{ config('configport') }}" class="cell portinput" />
                 </div>
             </div>
         </div>

@@ -15,6 +15,7 @@ config = {
     'lampport': 4711,
 
     'serverport': 8080,
+    'configport': 8081,
 
     'stream_embedcode':''
 }
