@@ -373,7 +373,7 @@ class GridConfigHandler(RequestHandler):
         invalid = [c for c in ingrid if c not in lights]
 
         vars['activated'] = ''
-        if len(free) > 0:
+        if len(free) > 0 and not all([all(row) for row in grid['grid']]):
             # choose and activate one of the free lights
             choosen = free[0]
             vars['activated'] = tornado.escape.json_encode(choosen)
