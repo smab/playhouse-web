@@ -303,14 +303,14 @@ class BridgeConfigHandler(RequestHandler):
         elif 'search' in data: 
             print('Search') 
             request = tornado.escape.json_encode({'auto_add': True})
-            client.request('GET', '/bridges/search', request, headers) 
+            client.request('POST', '/bridges/search', request, headers) 
 
             response = client.getresponse().read().decode() 
             print(response) 
             response = tornado.escape.json_decode(response) 
             if response['state'] == 'success': 
                 time.sleep(20)  
-                client.request('GET', '/bridges/search/result', {}, headers) 
+                client.request('GET', '/bridges/search', {}, headers) 
 
                 response = client.getresponse().read().decode() 
                 response = tornado.escape.json_decode(response) 
