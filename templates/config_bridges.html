@@ -17,7 +17,11 @@
 
 {% block configscript %}
 function changeUsername(e) {
-    if(confirm("To generate a new valid username, press the link button on the bridge and then press OK.")) {
+    var str = "To generate a new valid username, press the link button on the bridge and then press OK."
+    if(e.innerHTML == "True")
+        str += "\n\nThis bridge already has a valid username. Are you sure you want to generate a new one?"
+
+    if(confirm(str)) {
         xhr = new XMLHttpRequest() 
         xhr.open("POST", "/config/bridges", false) 
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
