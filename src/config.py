@@ -309,25 +309,12 @@ class BridgeConfigHandler(RequestHandler):
             print(response) 
             response = tornado.escape.json_decode(response) 
             if response['state'] == 'success': 
-                time.sleep(20)  
-                client.request('GET', '/bridges/search', {}, headers) 
-
-                response = client.getresponse().read().decode() 
-                response = tornado.escape.json_decode(response) 
-                print('BridgeConfig search response', response) 
-                if response['state'] == 'success': 
-                    BridgeConfigHandler.bridges.update(response['bridges']) 
-                    self.redirect('bridges') 
-                else: 
-                    print(response['errorcode'], response['errormessage']) 
-                    self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
+                self.redirect("bridges?status=message&msg=%s" % "Server begun searching, refresh bridges (using the button) after 20 s") 
             else: 
                 print(response['errorcode'], response['errormessage']) 
                 self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
         else: 
             print('Unknown request. What did you do?') 
-            
-        #self.redirect("bridges")
 
 
 class GridConfigHandler(RequestHandler):
