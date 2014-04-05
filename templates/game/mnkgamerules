@@ -1,7 +1,0 @@
-'''
-Name: mnkgame
-
-Players: 2
-
-Rules & Goals: The goal of this game is to, on an m by n grid, connect k dots. Each player takes turn to place a dot anywhere on the grid where there is not already another dot and the first player to get k dots in a row horizontally, vertically or diagonally wins the game.
-'''

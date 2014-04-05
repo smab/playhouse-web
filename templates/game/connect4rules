@@ -1,7 +1,0 @@
-'''
-Name: Connect four
-
-Players: 2
-
-Rules & Goals: Each player takes turns to drop their coloured circles from the top straight down in a chosen column. The first player to connect four circles vertically, horizontally or diagonally wins the game.
-'''

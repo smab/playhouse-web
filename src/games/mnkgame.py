@@ -28,9 +28,9 @@ class MnkGame(lightgames.Game):
     colors        = [         0,      45000, 65000]
     button_colors = ["player_1", "player_2",    ""]
 
-    def reset(self):
+    def reset(self):        
         print("New game!")
-
+        
         self.player  = 0
         self.players = [None, None]
         self.board   = [[2 for _ in range(self.template_vars['grid_x'])]
@@ -41,7 +41,10 @@ class MnkGame(lightgames.Game):
         self.reset_lamp_all()
 
     def sync(self, handler):
+        global winning_req
         print("Syncing %s" % handler)
+        #Send the info about how many you need to connect for a win
+        lightgames.send_msg(handler,   {'rulemessage': self.template_vars['winner_req']})
         for y in range(len(self.board)):
             for x in range(len(self.board[y])):
                 button_color = self.button_colors[self.board[y][x]]
@@ -75,9 +78,13 @@ class MnkGame(lightgames.Game):
 
 
     def on_message(self, handler, coords):
+
+		
+        
+
         playerH   = self.players[self.player]
         opponentH = self.players[1 - self.player]
-
+        
         if playerH != handler:
             lightgames.reply_wrong_player(self, handler)
             return
