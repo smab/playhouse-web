@@ -245,7 +245,7 @@ class Game:
 
         if handler in self.players:
             self.remove_player(handler)
-
+           
 
     # Override these to implement the actual game
     def init(self):
@@ -298,3 +298,8 @@ class Game:
         is bad/invalid.
         """
         pass
+        
+    def send_description(self, handler):
+        """
+        Sends the game description to the client
+        """

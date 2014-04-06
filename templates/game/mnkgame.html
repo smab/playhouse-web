@@ -25,25 +25,20 @@
 {%block rulemessage%}
 
     if (obj.rulemessage != null){
-        document.getElementById('ruletext').innerHTML = "<p><b>Description:</b>The goal of this game is to, on a " + config.grid_y + " by " + config.grid_x + " grid, connect " + obj.rulemessage + " dots. Each player takes turn to place a dot anywhere on the grid where there is not already another dot and the first player to get "+obj.rulemessage+" dots in a row horizontally, vertically or diagonally wins the game </p>";
+        document.getElementById('therules').innerHTML = obj.rulemessage;
     }
 
 
 {% end %}
-
-
 
 {%block rules%}
 <input type="button" id="userText" value="Rules" onclick="showButton()" class = "rulebutton"/>
 	<div id="rules" class="rules">
 			
 <p id="therules" ><p>
-	<p>
-		<p><b>Name: Tic-Tac-Toe</b></p>
-		<p><b>Players:</b> 2</p>
-		<div id=ruletext></div>		
-		<p></p>
-</p>
+	
+
 </div>
+
 {%end%}
 

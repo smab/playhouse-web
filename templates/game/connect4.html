@@ -107,19 +107,23 @@
     }
 {% end %}
 
+{%block rulemessage%}
+
+    if (obj.rulemessage != null){
+        document.getElementById('therules').innerHTML = obj.rulemessage;
+    }
+
+
+{% end %}
+
 {%block rules%}
 <input type="button" id="userText" value="Rules" onclick="showButton()" class = "rulebutton"/>
 	<div id="rules" class="rules">
 			
 <p id="therules" ><p>
-	<p>
-		<p><b>Name:</b> Connect four</p>
-
-		<p><b>Players:</b> 2</p>
-
-		<p><b>Rules & Goals:</b> Each player takes turns to drop their coloured circles from the top straight down in a chosen column. The first player to connect four circles vertically, horizontally or diagonally wins the game.</p>
-</p>
+	
 
 </div>
+
 {%end%}
 

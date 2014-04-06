@@ -7,6 +7,11 @@ def create(client):
     print("Creating paint game")
     return Paint(client)
 
+def set_description(self, handler):
+    message = '<p><p><b>Name:</b> Memory</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> Each player takes turns flipping over a card. If a player manages to flip over two identical cards that player recieves onepoint, and the cards stay revealed. When all the cards have been revealed the game is over and the player with highest score wins.</p></p>'
+
+    lightgames.send_msg(handler,   {'rulemessage': (message)})
+
 
 class Paint(lightgames.Game):
     config_file = "paintconfig.html"
@@ -24,6 +29,7 @@ class Paint(lightgames.Game):
         self.reset_lamp_all()
 
     def on_connect(self, handler):
+        set_description(self, handler)
         self.playerColors[handler] = (
             random.randint(0,255),
             random.randint(0,255),
