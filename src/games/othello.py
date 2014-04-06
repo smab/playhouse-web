@@ -5,6 +5,10 @@ def create(client):
     print("Creating Othello game")
     return Othello(client)
 
+def set_description(self, handler):
+    message = '<p><p><b>Name:</b> Memory</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> Each player takes turns flipping over a card. If a player manages to flip over two identical cards that player recieves onepoint, and the cards stay revealed. When all the cards have been revealed the game is over and the player with highest score wins.</p></p>'
+
+    lightgames.send_msg(handler,   {'rulemessage': (message)})
 
 class Othello(lightgames.Game):
     template_file = "mnkgame.html"
@@ -22,6 +26,8 @@ class Othello(lightgames.Game):
     button_colors = ["player_1", "player_2",    ""]
 
     def reset(self):
+    
+        set_description(self, handler)
         print("New game!")
 
         self.player  = 0

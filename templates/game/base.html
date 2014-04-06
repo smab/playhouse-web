@@ -28,6 +28,9 @@
     <body>
         <h1>{{ title }}</h1>
 
+		{%block rules%}
+		{%end%}
+
         {% block grid %}
             {% block message-area %}
             <div id="message" class="box">Connecting...</div>
@@ -50,17 +53,42 @@
         {% end %}
 
         <script>
+
+
+			window.onload=function(){
+					document.getElementById("rules").style.display='none';
+
+				}
+				function showButton(){
+					if(document.getElementById("rules").style.display != 'block'){
+						document.getElementById("rules").style.display='block';
+				}else{
+					document.getElementById("rules").style.display='none';
+				}
+			}
+
+
             socketport = {{ socketport }}
 
             function on_message(obj) {
-                {% block message %}
+                {% block rulemessage%}
+				{% end %}
+                
+                
+                {% block message %}	
                 {% end %}
-
+				
+				
+			
                 {% block queuemsg %}
                 session = "{{ gamesession }}" // to lazy to use the cookie value
                 handle_queue_msg(obj)
                 {% end %}
             }
+
+
+
+
 
             function play() {
                 coords = this.id.split("-")

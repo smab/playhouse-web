@@ -7,6 +7,22 @@
             y: parseInt(coords[1], 10) })
 {% end %}
 
+{%block rules%}
+<input type="button" id="userText" value="Rules" onclick="showButton()" class = "rulebutton"/>
+	<div id="rules" class="rules">
+			
+<p id="therules" ><p>
+	<p>
+		<p><b>Name:</b> Memory</p>
+
+		<p><b>Players:</b> 2</p>
+
+		<p><b>Rules & Goals:</b> Each player takes turns flipping over a card. If a player manages to flip over two identical cards that player recieves one point, and the cards stay revealed. When all the cards have been revealed the game is over and the player with highest score wins.</p>
+</p>
+
+</div>
+
+{%end%}
 
 {% block message %}
     if (obj.x != undefined && state != 'gameover') {
