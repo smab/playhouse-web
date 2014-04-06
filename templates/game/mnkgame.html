@@ -13,9 +13,32 @@
             y: parseInt(coords[1], 10) })
 {% end %}
 
+
 {% block message %}
     if (obj.x != null && state != 'gameover') {
         var el = document.getElementById(obj.x + "-" + obj.y)
         el.className = obj.color;
     }
 {% end %}
+
+
+{%block rulemessage%}
+
+    if (obj.rulemessage != null){
+        document.getElementById('therules').innerHTML = obj.rulemessage;
+    }
+
+
+{% end %}
+
+{%block rules%}
+<input type="button" id="userText" value="Rules" onclick="showButton()" class = "rulebutton"/>
+	<div id="rules" class="rules">
+			
+<p id="therules" ><p>
+	
+
+</div>
+
+{%end%}
+

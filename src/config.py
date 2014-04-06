@@ -258,17 +258,14 @@ class BridgeConfigHandler(RequestHandler):
             BridgeConfigHandler.bridges = {} 
             self.redirect('bridges') 
 
-        elif 'changeUsername' in data and 'mac' in data: 
-            uname = data['username'][0].decode() 
+        elif 'newUsername' in data and 'mac' in data: 
             mac = data['mac'][0].decode() 
-            print("Change username of", mac, "to", uname)
+            print("New username to", mac)
 
-            request = {'username': uname}
-            request = tornado.escape.json_encode(request)
             client.request(
                 "POST", 
-                "/bridges/" + mac, 
-                request,
+                "/bridges/" + mac + "/adduser", 
+                tornado.escape.json_encode({}),
                 headers
             ) 
             response = client.getresponse().read().decode() 
@@ -279,11 +276,10 @@ class BridgeConfigHandler(RequestHandler):
                 BridgeConfigHandler.bridges[mac]['valid_username'] = response['valid_username'] 
                 if not response['valid_username']: 
                     BridgeConfigHandler.bridges[mac]['lights'] = -1 
-                #self.redirect("bridges?status=msg&msg=%s" % "Changed username") 
                 self.write({'state': 'success'}) 
             else: 
+                response['errormessage'] = response['errormessage'].capitalize(); 
                 self.write(response) 
-                #self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
 
         elif 'search' in data: 
             print('Search') 
@@ -294,25 +290,12 @@ class BridgeConfigHandler(RequestHandler):
             print(response) 
             response = tornado.escape.json_decode(response) 
             if response['state'] == 'success': 
-                time.sleep(20)  
-                client.request('GET', '/bridges/search', {}, headers) 
-
-                response = client.getresponse().read().decode() 
-                response = tornado.escape.json_decode(response) 
-                print('BridgeConfig search response', response) 
-                if response['state'] == 'success': 
-                    BridgeConfigHandler.bridges.update(response['bridges']) 
-                    self.redirect('bridges') 
-                else: 
-                    print(response['errorcode'], response['errormessage']) 
-                    self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
+                self.redirect("bridges?status=message&msg=%s" % "Server begun searching, refresh bridges (using the button) after 20 s") 
             else: 
                 print(response['errorcode'], response['errormessage']) 
                 self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
         else: 
             print('Unknown request. What did you do?') 
-            
-        #self.redirect("bridges")
 
 
 class GridConfigHandler(RequestHandler):

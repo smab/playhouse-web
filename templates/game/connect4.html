@@ -43,7 +43,6 @@
     }, false)
 {% end %}
 
-
 {% block click %}
     // Send to server
     var x = parseInt(coords[0], 10)
@@ -107,3 +106,24 @@
       el.style.className       = obj.power? 'on'  : 'off'
     }
 {% end %}
+
+{%block rulemessage%}
+
+    if (obj.rulemessage != null){
+        document.getElementById('therules').innerHTML = obj.rulemessage;
+    }
+
+
+{% end %}
+
+{%block rules%}
+<input type="button" id="userText" value="Rules" onclick="showButton()" class = "rulebutton"/>
+	<div id="rules" class="rules">
+			
+<p id="therules" ><p>
+	
+
+</div>
+
+{%end%}
+

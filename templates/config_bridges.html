@@ -4,11 +4,11 @@
 {% block menu_bridges %}active{% end %}
 
 {% block configstyle %}
-.uname:hover {
+.linkify:hover {
     background-color: #ccc; 
 }
 
-.uname {
+.linkify {
     font-weight: bold; 
     text-decoration: underline; 
     color: blue; 
@@ -17,19 +17,21 @@
 
 {% block configscript %}
 function changeUsername(e) {
-    var a = prompt("Change username", e.innerHTML=='None'?'':e.innerHTML)
-    if(a == null) return 
-    a = a.trim() 
-    // Check that the new username is not empty and is not the same as before. 
-    if(a != '' && a != e.innerHTML) { 
+    var str = "To generate a new valid username, press the link button on the bridge and then press OK."
+    if(e.innerHTML == "True")
+        str += "\n\nThis bridge already has a valid username. Are you sure you want to generate a new one?"
+
+    if(confirm(str)) {
         xhr = new XMLHttpRequest() 
         xhr.open("POST", "/config/bridges", false) 
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-        xhr.send("changeUsername&mac=" + e.className.split(" ")[1] + "&username=" + a)
+        xhr.send("newUsername&mac=" + e.className.split(" ")[1]) 
 
         var url = location.protocol + '//' + location.host + location.pathname 
-        if(JSON.parse(xhr.responseText).state != 'success') 
-            location.href = url + "?status=error&msg=" + xhr.responseText["errormsg"]
+        var response = JSON.parse(xhr.responseText) 
+        console.log(response) 
+        if(response["state"] != 'success') 
+            location.href = url + "?status=error&msg=" + response["errormessage"]
         else 
             location.href = url 
     }
@@ -46,7 +48,6 @@ function changeUsername(e) {
                 <th>Select</th>
                 <th>MAC</th>
                 <th>IP</th>
-                <th>Username</th>
                 <th>valid_username</th>
                 <th># Lights</th>
             </tr>
@@ -56,8 +57,7 @@ function changeUsername(e) {
                 <td><input type="checkbox" name="select" value="{{ mac }}"></td>
                 <td>{{ mac }}</td>
                 <td>{{ bridges[mac]['ip'] }}</td>
-                <td class="uname {{ mac }}" onclick="changeUsername(this)">{{ bridges[mac]['username'] }}</td>
-                <td>{{ bridges[mac]['valid_username'] }}</td>
+                <td class="linkify {{ mac }}" onclick="changeUsername(this)">{{ bridges[mac]['valid_username'] }}</td>
                 <td>{{ bridges[mac]['lights'] }}</td>
             </tr>
             {% end %}
@@ -67,9 +67,6 @@ function changeUsername(e) {
                 <td>-</td>
                 <td>
                     <input type="text" class="ip" name="ip" placeholder="IP Address">
-                </td>
-                <td>
-                    <input type="text" class="username" name="username" placeholder="Username">
                 </td>
                 <td>-</td>
                 <td>-</td>

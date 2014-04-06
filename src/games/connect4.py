@@ -5,6 +5,11 @@ def create(client):
     print("Creating connect-4 game")
     return Connect4(client)
 
+def set_description(self, handler):
+    message ='<p><p><b>Name:</b> Connect four</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> Each player takes turns to drop their coloured circles from the top straight down in a chosen column. The first player to connect four circles vertically, horizontally or diagonally wins the game.</p></p>'
+
+    lightgames.send_msg(handler,   {'rulemessage': (message)})
+
 
 class Connect4(lightgames.Game):
     template_file = "connect4.html"
@@ -36,6 +41,7 @@ class Connect4(lightgames.Game):
         self.reset_lamp_all()
 
     def sync(self, handler):
+        set_description(self, handler)
         print("Syncing %s" % handler)
         for y in range(self.height):
             for x in range(self.width):
