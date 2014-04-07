@@ -2,7 +2,8 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
-CONFIG_FILE = 'config.json'
+import manager
+
 
 BRIDGES = {
     "bridges": {
@@ -58,11 +59,15 @@ def init_http():
         (r"(.*)", MainHandler) # For debugging
     ])
 
-    with open(CONFIG_FILE, 'r') as file:
-        config = tornado.escape.json_decode(file.read())
+    try:
+        with open(manager.CONFIG_FILE, 'r') as file:
+            config = tornado.escape.json_decode(file.read())
+            manager.config.update(config)
+    except FileNotFoundError:
+        print("Config file %s not found, using defaults" % manager.CONFIG_FILE)
 
-    print("Starting dummy lamp server (port %d)" % config['lampport'])
-    application.listen(config['lampport'])
+    print("Starting dummy lamp server (port %d)" % manager.config['lampport'])
+    application.listen(manager.config['lampport'])
 
 if __name__ == "__main__":
     init_http()
