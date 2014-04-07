@@ -30,27 +30,27 @@ class Diagnostics(lightgames.Game):
             width, height = lightgames.get_grid_size()
             for x in range(width+1):
                 if self.on == False:
-                        break
+                    break
                 changes = []
                 for y in range(height):
                     if x != width:
                         changes += [{'x': x,'y': y,'change': {'sat':255, 'transitiontime':0}}]
                     if x != 0:
                         changes += [{'x': x-1,'y': y,'change': {'sat':0, 'transitiontime':0}}]
-                    self.send_lamp_multi(changes)
-                    yield gen.Task(IOLoop.instance().add_timeout, time.time() + (self.delay/1000.0))
+                self.send_lamp_multi(changes)
+                yield gen.Task(IOLoop.instance().add_timeout, time.time() + (self.delay/1000.0))
 
             for y in range(height+1):
                 if self.on == False:
-                        break
+                    break
                 changes = []
                 for x in range(width):
                     if y != height:
                         changes += [{'x': x,'y': y,'change': {'sat':255, 'transitiontime':0}}]
                     if y != 0:
                         changes += [{'x': x,'y': y-1,'change': {'sat':0, 'transitiontime':0}}]
-                    self.send_lamp_multi(changes)
-                    yield gen.Task(IOLoop.instance().add_timeout, time.time() + (self.delay/1000.0))
+                self.send_lamp_multi(changes)
+                yield gen.Task(IOLoop.instance().add_timeout, time.time() + (self.delay/1000.0))
 
 
     def set_options(self, config):
