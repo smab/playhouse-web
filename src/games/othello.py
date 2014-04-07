@@ -6,7 +6,7 @@ def create(client):
     return Othello(client)
 
 def set_description(self, handler):
-    message = '<p><p><b>Name:</b> Memory</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> Each player takes turns flipping over a card. If a player manages to flip over two identical cards that player recieves onepoint, and the cards stay revealed. When all the cards have been revealed the game is over and the player with highest score wins.</p></p>'
+    message = '<p><p><b>Name:</b> Othello</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> Each player takes turns placing their disks. Disks may only be placed so that at least one of the opposing players disks is between the placed disk and another of the placers disks. If a player manages to place their disk so that there is a straigh line (it may run diagonally) between the placed disk and another of the players disks, all the disks belonging to the other player that is inbetween them gets turned into the placers colour. In the end, when the board has been filled, the player with the most disks win.</p></p>'
 
     lightgames.send_msg(handler,   {'rulemessage': (message)})
 
@@ -26,8 +26,7 @@ class Othello(lightgames.Game):
     button_colors = ["player_1", "player_2",    ""]
 
     def reset(self):
-    
-        set_description(self, handler)
+
         print("New game!")
 
         self.player  = 0
@@ -43,6 +42,7 @@ class Othello(lightgames.Game):
         self.reset_lamp_all()
 
     def sync(self, handler):
+        set_description(self, handler)
         print("Syncing %s" % handler)
         for y in range(len(self.board)):
             for x in range(len(self.board[y])):

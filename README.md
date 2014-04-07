@@ -29,7 +29,7 @@ distinguish the different output from the two servers.
 The dummyserver is a local lampserver that simulates the control of the 
 hue-lights. The webserver runs the front-end as well as the config for the 
 front-end.
-To access the config interface, go to <http://localhost:8080/config>,
+To access the config interface, go to <http://localhost:8081/config>,
 whereas the address <http://localhost:8080/> displays the actual animations/
 games.
 To change the startup behaviour of the webserver, edit the config.json file
