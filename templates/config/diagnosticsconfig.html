@@ -1,0 +1,31 @@
+{% extends "baseconfig.html" %}
+
+
+{% block gridsize %}
+{% end %}
+
+
+{% block setting %}
+    <h2>Diagnostics</h2>
+    <dl>
+        <dt>Run diagnostics tool:</dt>
+        <dd>
+            <label>
+                <input type="radio" name="run" value="on" {% if  run %}checked{% end %} />
+                On
+            </label>
+            <label>
+                <input type="radio" name="run" value="off" {% if not run %}checked{% end %} />
+                Off
+            </label>
+        </dd>
+
+        <dt>Delay:</dt>
+        <dd>
+            <label>
+                <input type="text" size="8" name="delay" value="{{ delay }}" />
+                milliseconds
+            </label>
+        </dd>
+    </dl>
+{% end %}
