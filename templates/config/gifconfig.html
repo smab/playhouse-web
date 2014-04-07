@@ -38,6 +38,18 @@
             </label>
         </dd>
 
+        <dt>Center vertically:</dt>
+        <dd>
+            <label>
+                <input type="radio" name="centerv" value="true" {% if centerv %}checked{% end %} />
+                True
+            </label>
+            <label>
+                <input type="radio" name="centerv" value="false" {% if not centerv %}checked{% end %} />
+                False
+            </label>
+        </dd>
+
         <dt>Transition time:</dt>
         <dd>
             <label>
