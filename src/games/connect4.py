@@ -13,21 +13,30 @@ def set_description(self, handler):
 
 class Connect4(lightgames.Game):
     template_file = "connect4.html"
-    config_file   = "baseconfig.html"
+    config_file   = "connect4.html"
     template_vars = {
         'module_name': 'Connect 4',
         'grid_x':      7,
         'grid_y':      6,
+
+        'color_1':     '#FF0000',
+        'color_2':     '#0000FF',
+        'color_empty': '#222222',
     }
 
     width, height = template_vars['grid_x'], template_vars['grid_y']
 
-    colors = [0, 50000, 65000]
+  # colors = [0, 50000, 65000]
 
     def reset(self):
         print("New game!")
         print("Size: %d %d" % (self.template_vars['grid_x'], self.template_vars['grid_y']))
         self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
+
+        lg, vars = lightgames, self.template_vars
+        self.colors = [ lg.rgb_to_hue(*lg.parse_color(vars['color_1'])),
+                        lg.rgb_to_hue(*lg.parse_color(vars['color_2'])),
+                        lg.rgb_to_hue(*lg.parse_color(vars['color_empty'])) ]
 
         self.player  = 0
         self.players = [None, None]
@@ -132,10 +141,14 @@ class Connect4(lightgames.Game):
 
         m = 50
         vars = self.template_vars
-        vars['grid_y']      = clamp(2, int(config['grid_y']),            m)
-        vars['grid_x']      = clamp(2, int(config['grid_x']),            m)
-        vars['cell_w']      = clamp(2, int(config['cell_w']),          500)
-        vars['cell_h']      = clamp(2, int(config['cell_h']),          500)
+        vars['grid_y'] = clamp(2, int(config['grid_y']),   m)
+        vars['grid_x'] = clamp(2, int(config['grid_x']),   m)
+        vars['cell_w'] = clamp(2, int(config['cell_w']), 500)
+        vars['cell_h'] = clamp(2, int(config['cell_h']), 500)
+
+        vars['color_1']     = config['color_1']
+        vars['color_2']     = config['color_2']
+        vars['color_empty'] = config['color_empty']
 
         self.reset()
 

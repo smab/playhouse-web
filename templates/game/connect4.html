@@ -52,7 +52,7 @@
 
 
 {% block message %}
-    console.log(obj.state)
+    console.log(JSON.stringify(obj))
     switch (obj.state) {
       case 'playing':
         console.log("Enabling shadow...")

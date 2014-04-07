@@ -1,0 +1,18 @@
+{% extends "baseconfig.html" %}
+
+{% block gridsetname %}Grid/Game{% end %}
+
+{% block setting %}
+    <h2>Colors</h2>
+
+    <dl>
+        <dt>Player 1 color:</dt>
+        <dd><input type="color" size="8" name="color_1" value="{{ color_1 }}" /></dd>
+
+        <dt>Player 2 color:</dt>
+        <dd><input type="color" size="8" name="color_2" value="{{ color_2 }}" /></dd>
+
+        <dt>Empty color:</dt>
+        <dd><input type="color" size="8" name="color_empty" value="{{ color_empty }}" /></dd>
+    </dl>
+{% end %}

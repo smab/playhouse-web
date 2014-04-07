@@ -106,6 +106,22 @@ def rgb_to_xyz(r, g, b):
     y = Y / (X + Y + Z)
     return x, y, Z
 
+def parse_color(color):
+    return int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
+
+def rgb_to_hue(r, g, b):
+    # via http://en.wikipedia.org/wiki/HSL_and_HSV
+    M, m = max(r,g,b), min(r,g,b)
+    c = M - m
+
+    if   c == 0: h_ = 0
+    elif M == r: h_ = (g - b)/c % (256 * 6)
+    elif M == g: h_ = (b - r)/c + (256 * 2)
+    elif M == b: h_ = (r - g)/c + (256 * 4)
+
+    print(r, g, b, h_ / 6)
+    return int(h_ * 256 / 6)
+
 
 class Game:
     config_file = "defaultconfig.html"
