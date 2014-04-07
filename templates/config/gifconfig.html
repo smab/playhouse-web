@@ -29,11 +29,11 @@
         <dt>Center horizontally:</dt>
         <dd>
             <label>
-                <input type="radio" name="center" value="true" {% if center %}checked{% end %} />
+                <input type="radio" name="center_hor" value="true" {% if center_hor %}checked{% end %} />
                 True
             </label>
             <label>
-                <input type="radio" name="center" value="false" {% if not center %}checked{% end %} />
+                <input type="radio" name="center_hor" value="false" {% if not center_hor %}checked{% end %} />
                 False
             </label>
         </dd>
@@ -41,19 +41,35 @@
         <dt>Center vertically:</dt>
         <dd>
             <label>
-                <input type="radio" name="centerv" value="true" {% if centerv %}checked{% end %} />
+                <input type="radio" name="center_vert" value="true" {% if center_vert %}checked{% end %} />
                 True
             </label>
             <label>
-                <input type="radio" name="centerv" value="false" {% if not centerv %}checked{% end %} />
+                <input type="radio" name="center_vert" value="false" {% if not center_vert %}checked{% end %} />
                 False
+            </label>
+        </dd>
+
+        <dt>Offset horizontally:</dt>
+        <dd>
+            <label>
+                <input type="text" size="2" name="offset_hor" value="{{ offset_hor }}" />
+                pixels (or lamps)
+            </label>
+        </dd>
+
+        <dt>Offset vertically:</dt>
+        <dd>
+            <label>
+                <input type="text" size="2" name="offset_vert" value="{{ offset_vert }}" />
+                pixels (or lamps)
             </label>
         </dd>
 
         <dt>Transition time:</dt>
         <dd>
             <label>
-                <input type="text" size="8" name="transitiontime" value="{{ transition_time }}" />
+                <input type="text" size="4" name="transitiontime" value="{{ transition_time }}" />
                 (in 10ths of a second)
             </label>
         </dd>

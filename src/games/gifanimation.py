@@ -19,8 +19,10 @@ class GifAnimation(lightgames.Game):
         'grid_y': 3,
         'animation_file': 'animations/test3x3.gif',
         'playgif': False,
-        'center': False,
-        'centerv': False,
+        'center_hor': False,
+        'center_vert': False,
+        'offset_hor': 0,
+        'offset_vert': 0,
         'transition_time': 4
     }
 
@@ -31,10 +33,15 @@ class GifAnimation(lightgames.Game):
         self.grid = lightgames.get_grid_size()
         self.template_vars['grid_x'], self.template_vars['grid_y'] = self.grid
 
-        self.center = self.template_vars['center']
-        self.centerv = self.template_vars['centerv']
+        self.center_hor = self.template_vars['center_hor']
+        self.center_vert = self.template_vars['center_vert']
         self.transition_time = self.template_vars['transition_time']
-        self.changed_gif = False
+        self.offset_x = self.template_vars['offset_hor']
+        self.offset_y = self.template_vars['offset_vert']
+
+        # keep track of if anything that changed how the image is displayed has changed
+        # needed to reset lamps when changing gif or grid offset
+        self.changed_im = False
 
 
     @gen.engine
@@ -42,12 +49,7 @@ class GifAnimation(lightgames.Game):
         self.reset_lamp_all()
         self.play = True
 
-        while self.play == True:
-            # reset lamps when gif has changed
-            if self.changed_gif:
-                self.reset_lamp_all()
-                self.changed_gif = False
-
+        while self.play:
             try:
                 gif = Image.open(io.BytesIO(self.data))
                 (width, height) = gif.size
@@ -55,11 +57,19 @@ class GifAnimation(lightgames.Game):
                 #self.template_vars['grid_y'] = height
                 i = 0
                 for frame in ImageSequence(gif):
-                    if self.play == False:
+                    # reset lamps when image has changed
+                    if self.changed_im:
+                        self.reset_lamp_all()
+                        self.changed_im = False
+                    # Break if animation turned off.
+                    # Change this accordingly to wait for animation
+                    # to finish before turning off/changing animation
+                    if not self.play:
                         break
                     tt = self.transition_time
                     i = i+1
                     rgb_im = gif.convert("RGB")
+                    # duration of frame is in milliseconds
                     dur = gif.info['duration']
                     buffer = []
                     for y in range(0, min(height,self.grid[1])):
@@ -67,22 +77,39 @@ class GifAnimation(lightgames.Game):
 
                             # center the image horizontally
                             x_im = x_grid = x
-                            if(self.center and width > self.grid[0]):
+                            if(self.center_hor and width > self.grid[0]):
                                 x_im = int( (width - self.grid[0])/2 + x)
-                            elif(self.center and width < self.grid[0]):
+                            elif(self.center_hor and width < self.grid[0]):
                                 x_grid = int( (self.grid[0] - width)/2 + x)
                             # center the image vertically
                             y_im = y_grid = y 
-                            if(self.centerv and height > self.grid[1]):
+                            if(self.center_vert and height > self.grid[1]):
                                 y_im = int( (height - self.grid[1])/2 + y)
-                            elif(self.centerv and height < self.grid[0]):
+                            elif(self.center_vert and height < self.grid[0]):
                                 y_grid = int( (self.grid[0] - height)/2 + y)
+                            # offset image horizontally
+                            if(self.offset_x != 0 and width <= self.grid[0]):
+                                x_grid += self.offset_x
+                            elif(self.offset_x != 0 and width > self.grid[0]):
+                                x_im -= self.offset_x
+                            # offset image vertically
+                            if(self.offset_y != 0 and height <= self.grid[1]):
+                                y_grid += self.offset_y
+                            elif(self.offset_y != 0 and height > self.grid[1]):
+                                y_im -= self.offset_y
 
-                            r, g, b = rgb_im.getpixel((x_im, y_im))
-                            buffer += [{'x': x_grid, 'y': y_grid, 'change': {'rgb': (r,g,b), 'transitiontime':tt}}]
-                            lightgames.send_msgs(self.connections, {'x':x_grid, 'y':y_grid, 'color':(r,g,b)})
+                            # check boundaries that might be off after offset
+                            if (0 <= x_im < width
+                            and 0 <= x_grid < self.grid[0]
+                            and 0 <= y_im < height
+                            and 0 <= y_grid < self.grid[1]):
+                                r, g, b = rgb_im.getpixel((x_im, y_im))
+                                buffer += [{'x': x_grid, 'y': y_grid, 'change': {'rgb': (r,g,b), 'transitiontime':tt}}]
+                                lightgames.send_msgs(self.connections, {'x':x_grid, 'y':y_grid, 'color':(r,g,b)})
 
-                    self.send_lamp_multi(buffer)
+                    # only send if theres a lamp to be changed
+                    if buffer:
+                        self.send_lamp_multi(buffer)
                     yield gen.Task(IOLoop.instance().add_timeout, time.time() + (dur/1000.0))
             except IOError:
                 print("Couldn't open image")
@@ -101,21 +128,45 @@ class GifAnimation(lightgames.Game):
 
             self.data = fileinfo['body']
             self.template_vars['animation_file'] = fileinfo['filename']
-            self.changed_gif = True
+            self.changed_im = True
 
-        if 'center' in config:
-            if config['center'] == 'true':
-                self.center = True
-            else:
-                self.center = False
-            self.template_vars['center'] = self.center
+        if 'center_hor' in config:
+            if config['center_hor'] != self.center_hor:
+                self.changed_im = True
+                if config['center_hor'] == 'true':
+                    self.center_hor = True
+                else:
+                    self.center_hor = False
+            self.template_vars['center_hor'] = self.center_hor # remove later
 
-        if 'centerv' in config:
-            if config['centerv'] == 'true':
-                self.centerv = True
-            else:
-                self.centerv = False
-            self.template_vars['centerv'] = self.centerv
+        if 'center_vert' in config:
+            if config['center_vert'] != self.center_vert:
+                self.changed_im = True
+                if config['center_vert'] == 'true':
+                    self.center_vert = True
+                else:
+                    self.center_vert = False
+            self.template_vars['center_vert'] = self.center_vert # remove later
+
+        if 'offset_hor' in config:
+            try:
+                offsx = int(config['offset_hor'])
+                if offsx != self.offset_x:
+                    self.changed_im = True
+                self.template_vars['offset_hor'] = offsx # remove later
+                self.offset_x = offsx
+            except ValueError:
+                print("Couldn't convert string to int")
+
+        if 'offset_vert' in config:
+            try:
+                offsy = int(config['offset_vert'])
+                if offsy != self.offset_y:
+                    self.changed_im = True
+                self.template_vars['offset_vert'] = offsy # remove later
+                self.offset_y = offsy
+            except ValueError:
+                print("Couldn't convert string to int")
 
         if 'transitiontime' in config:
             try:
