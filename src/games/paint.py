@@ -8,7 +8,7 @@ def create(client):
     return Paint(client)
 
 def set_description(self, handler):
-    message = '<p><p><b>Name:</b> Memory</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> Each player takes turns flipping over a card. If a player manages to flip over two identical cards that player recieves onepoint, and the cards stay revealed. When all the cards have been revealed the game is over and the player with highest score wins.</p></p>'
+    message = '<p><p><b>Name:</b> Paint</p><p><b>Players:</b> Any</p><p><b>Rules & Goals:</b> No rules, no goals, only paint. By clicking a cell the player will fill it with their assigned colour, thus painting the grid. Refresh the page to get a new colour.</p></p>'
 
     lightgames.send_msg(handler,   {'rulemessage': (message)})
 
