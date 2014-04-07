@@ -1,7 +1,9 @@
+import tornado.escape
+
 import http.client
 import ssl
 
-import queue
+import queue as gamequeue
 import lightgames
 import config as webconfig
 
@@ -13,11 +15,12 @@ config = {
     'lampport': 4711,
 
     'serverport': 8080,
+    'configport': 8081,
 
     'stream_embedcode':''
 }
 
-config_file = 'config.json' 
+CONFIG_FILE = 'config.json'
 
 grid = {'width':-1, 'height':-1}
 light_pwd = None
@@ -26,7 +29,7 @@ light_cookie = None
 client = None
 client_status = None
 game = None
-queue = queue.Queue()
+queue = gamequeue.Queue()
 
 connections = []
 
@@ -62,7 +65,7 @@ def authenticate(conn):
 
     light_cookie = http.cookies.BaseCookie()
     for cookie in res.headers.get_all("Set-Cookie", []):
-      light_cookie.load(cookie)
+        light_cookie.load(cookie)
 
     lightgames.light_cookie = light_cookie
 
@@ -73,7 +76,7 @@ def check_client_status():
 
     client_status = "error"
     try:
-        client.request("GET", "/status");
+        client.request("GET", "/status")
         response = client.getresponse()
         if response.status == 200:
             client_status = "connected"
@@ -117,5 +120,12 @@ def fetch_grid_size():
     return None
 
 
+def save_config():
+    cfg = config.copy()
+    if light_pwd is not None:
+        cfg['light_pwd'] = light_pwd
+    if webconfig.password is not None:
+        cfg['config_pwd'] = webconfig.password
 
-
+    with open(CONFIG_FILE, 'w') as f:
+        f.write(tornado.escape.json_encode(cfg))

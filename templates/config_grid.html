@@ -84,21 +84,21 @@
         <!-- todo: move or something -->
         <div id="miscinput" class="center">
             <div style="width:100%"> 
-                <input id="coords" name="coords" type="text" value="" />
+                <input id="coords" name="coords" type="text" value="" placeholder="x,y" />
                 <input type="submit" name="placelamp" value="Place Lamp" />
                 <input type="hidden" name="lamp" value="{{ activated }}" />
             </div>
             <div style="width:100%">
-                <input name="grid_size" type="text" value="{{ grid['height'] }}x{{ grid['width'] }}" />
-                <input type="submit" name="changesize" value="Change Size" {% if changed %}disabled{% end %} />
+                <input name="grid_size" type="text" value="{{ grid['height'] }}x{{ grid['width'] }}" placeholder="HxW" {% if changed %} title="Save or refresh to enable" disabled {% end %} />
+                <input type="submit" name="changesize" value="Change Size" {% if changed %} title="Save or refresh to enable" disabled {% end %} />
             </div> 
         </div>
 
         <ul id="buttons">
-            <li><input type="submit" name="save" value="Save" {% if not changed %}disabled{% end %}></li>
+            <li><input type="submit" name="save" value="Save" {% if not changed %} title="No changes made" disabled {% end %}></li>
             <li><input type="submit" name="refresh" value="Refresh"></li>
             <li><input type="submit" name="off" value="Turn Off"></li>
-            <li><input type="submit" name="test" value="Test"></li>
+            <li><input type="submit" name="test" value="Run Diagnostics"></li>
         </ul>
         <div class="center">
         <textarea type="text" id="grid_data" name="grid_data">{{ json_encode(grid['grid']) }}</textarea>

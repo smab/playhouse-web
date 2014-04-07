@@ -1,38 +1,12 @@
 import tornado.ioloop
 import tornado.web
 
-import http.client
-import time 
+import time
 import traceback
 
 import lightgames
 import manager
 
-
-# An example response.
-response = {
-    "state": "success",
-    "bridges": {
-        "001788182e78": {
-            "ip": "130.237.228.58:80",
-            "username": "a0e48e11876b8971eb694151aba16ab",
-            "valid_username": True,
-            "lights": 3
-        },
-        "001788182c73": {
-            "ip": "130.237.228.213:80",
-            "username": "1c9cdb15142f458731745fe11189ab3",
-            "valid_username": True,
-            "lights": 3
-        },
-        "00178811f9c2": {
-            "ip": "130.237.228.161:80",
-            "username": "24f99ac4b92c8af22ea52ec3d6c3e37",
-            "valid_username": True,
-            "lights": 'aoeu'
-        }
-    }
-}
 
 password = None
 
@@ -50,7 +24,7 @@ def add_auth_cookie(headers):
 def get_data(client, path):
     print("GET %s" % path)
     try: 
-        client.request("GET", path, headers=add_auth_cookie({}));
+        client.request("GET", path, headers=add_auth_cookie({}))
     except ConnectionRefusedError: 
         print("ConnectionRefusedError: [Errno 111] Connection refused")
         raise GetException("<p>ConnectionRefusedError: [Errno 111] Connection refused</p>")
@@ -74,18 +48,16 @@ def get_data(client, path):
 def update_config(cur_cfg, new_cfg, key):
     if key in new_cfg and cur_cfg[key] != new_cfg[key]:
         cur_cfg[key] = new_cfg[key]
-        with open(manager.config_file, 'w') as f: 
-            f.write(tornado.escape.json_encode(cur_cfg)) 
         return True
     return False
 
 def use_statusmessage(func):
     def new_func(self, *args, **kwargs):
-        vars = {
+        tvars = {
             'status':  self.get_argument('status', 'message'),
             'message': self.get_argument('msg', '')
         }
-        return func(self, vars, *args, **kwargs)
+        return func(self, tvars, *args, **kwargs)
     return new_func
 
 class RequestHandler(tornado.web.RequestHandler):
@@ -108,13 +80,14 @@ class ConfigHandler(tornado.web.RequestHandler):
 class ConfigLoginHandler(tornado.web.RequestHandler):
     @use_statusmessage
     @tornado.web.removeslash
-    def get(self, vars):
-        vars['next'] = self.get_argument("next", "/config")
-        self.render('config_login.html', **vars)
+    def get(self, tvars):
+        tvars['next'] = self.get_argument("next", "/config")
+        self.render('config_login.html', **tvars)
 
     def post(self):
         user = self.get_argument("username")
-        if self.check(user, self.get_argument("password",None)):
+        pwd = self.get_argument("password",None)
+        if user == 'admin' and pwd == password:
             self.set_current_user(user)
             self.redirect(self.get_argument("next"))
         else:
@@ -122,13 +95,11 @@ class ConfigLoginHandler(tornado.web.RequestHandler):
             self.redirect("login?next=%s&status=error&msg=%s" % (
                 self.get_argument("next"), "Wrong username or password"))
 
-    def check(self, user, pwd):
-        return user == 'admin' and pwd == password
-
     def set_current_user(self, user):
         if user:
             print("User %s logged in" % user)
-            self.set_secure_cookie("user", tornado.escape.json_encode(user), expires_days=None)
+            self.set_secure_cookie("user", tornado.escape.json_encode(user),
+                expires_days=None)
         else:
             self.clear_cookie("user")
 
@@ -137,26 +108,27 @@ class SetupConfigHandler(RequestHandler):
     @use_statusmessage
     @tornado.web.removeslash
     @tornado.web.authenticated 
-    def get(self, vars):
+    def get(self, tvars):
         def config(key):
             if key in manager.config:
                 return manager.config[key]
             return None
 
-        vars['config'] = config
-        vars['connection_status'] = manager.client_status
-        self.render("config_setup.html", **vars)
+        tvars['config'] = config
+        tvars['connection_status'] = manager.client_status
+        self.render("config_setup.html", **tvars)
 
     @tornado.web.authenticated
     def post(self):
         print('POST', self.request.body)
 
         cfg = {}
-        for key,val in self.request.arguments.items():
+        for key in self.request.arguments.keys():
             cfg[key] = self.get_argument(key)
 
         cfg['lampport'] = int(cfg['lampport'])
         cfg['serverport'] = int(cfg['serverport'])
+        cfg['configport'] = int(cfg['configport'])
 
         status = "message"
         msg = "Setup saved"
@@ -173,10 +145,19 @@ class SetupConfigHandler(RequestHandler):
                 status = "error"
                 msg = "Failed to connect to lampserver"
 
-        if update_config(manager.config, cfg, 'serverport'): 
-            msg = 'Webserver port change requires a restart' 
+        if update_config(manager.config, cfg, 'serverport'):
+            msg = 'Web server port change requires a restart'
+        if update_config(manager.config, cfg, 'configport'):
+            msg = 'Web server port change requires a restart'
+
+        if manager.config['serverport'] == manager.config['configport']:
+            msg = 'Warning: Game server port and config server port are the same'
+            status = 'error'
+
 
         update_config(manager.config, cfg, 'stream_embedcode')
+
+        manager.save_config()
 
         self.redirect("setup?status=%s&msg=%s" % (status, msg))
 
@@ -187,7 +168,7 @@ class BridgeConfigHandler(RequestHandler):
     @use_statusmessage 
     @tornado.web.removeslash
     @tornado.web.authenticated
-    def get(self, vars):
+    def get(self, tvars):
         if BridgeConfigHandler.bridges == {}: 
             try:
                 client = manager.connect_lampserver()
@@ -197,11 +178,11 @@ class BridgeConfigHandler(RequestHandler):
                 self.write(e.msg)
                 return 
              
-            vars['bridges'] = BridgeConfigHandler.bridges 
-            self.render('config_bridges.html', **vars)
+            tvars['bridges'] = BridgeConfigHandler.bridges 
+            self.render('config_bridges.html', **tvars)
         else: 
-            vars['bridges'] = BridgeConfigHandler.bridges 
-            self.render('config_bridges.html', **vars) 
+            tvars['bridges'] = BridgeConfigHandler.bridges 
+            self.render('config_bridges.html', **tvars) 
 
     @tornado.web.authenticated
     def post(self):
@@ -309,25 +290,12 @@ class BridgeConfigHandler(RequestHandler):
             print(response) 
             response = tornado.escape.json_decode(response) 
             if response['state'] == 'success': 
-                time.sleep(20)  
-                client.request('GET', '/bridges/search', {}, headers) 
-
-                response = client.getresponse().read().decode() 
-                response = tornado.escape.json_decode(response) 
-                print('BridgeConfig search response', response) 
-                if response['state'] == 'success': 
-                    BridgeConfigHandler.bridges.update(response['bridges']) 
-                    self.redirect('bridges') 
-                else: 
-                    print(response['errorcode'], response['errormessage']) 
-                    self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
+                self.redirect("bridges?status=message&msg=%s" % "Server begun searching, refresh bridges (using the button) after 20 s") 
             else: 
                 print(response['errorcode'], response['errormessage']) 
                 self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
         else: 
             print('Unknown request. What did you do?') 
-            
-        #self.redirect("bridges")
 
 
 class GridConfigHandler(RequestHandler):
@@ -351,7 +319,7 @@ class GridConfigHandler(RequestHandler):
     @use_statusmessage
     @tornado.web.removeslash
     @tornado.web.authenticated
-    def get(self, vars):
+    def get(self, tvars):
         headers = add_auth_cookie({'Content-Type': 'application/json'})
 
         client = manager.connect_lampserver()
@@ -372,14 +340,15 @@ class GridConfigHandler(RequestHandler):
         free    = [c for c in lights if c not in ingrid]
         invalid = [c for c in ingrid if c not in lights]
 
-        vars['activated'] = ''
-        if len(free) > 0:
+        tvars['activated'] = ''
+        if len(free) > 0 and not all([all(row) for row in grid['grid']]):
             # choose and activate one of the free lights
             choosen = free[0]
-            vars['activated'] = tornado.escape.json_encode(choosen)
+            tvars['activated'] = tornado.escape.json_encode(choosen)
 
             request = tornado.escape.json_encode(
-                [{'light': choosen['lamp'], 'change':{'on':True,'bri':0}}]
+                [{'light' : choosen['lamp'],
+                  'change': {'on':True, 'sat':0, 'hue':0, 'bri':255}}]
             )
 
             print(">>> POST:", "/bridges/%s/lights" % choosen['mac'], request)
@@ -389,12 +358,12 @@ class GridConfigHandler(RequestHandler):
             response = manager.client.getresponse().read().decode()
             print('POST response:', response)
 
-        vars['free'] = free
-        vars['invalid'] = invalid
-        vars['grid'] = GridConfigHandler.grid
-        vars['json_encode'] = tornado.escape.json_encode
-        vars['changed'] = GridConfigHandler.changed
-        self.render('config_grid.html', **vars)
+        tvars['free'] = free
+        tvars['invalid'] = invalid
+        tvars['grid'] = GridConfigHandler.grid
+        tvars['json_encode'] = tornado.escape.json_encode
+        tvars['changed'] = GridConfigHandler.changed
+        self.render('config_grid.html', **tvars)
 
     @tornado.web.authenticated
     def post(self):
@@ -486,29 +455,29 @@ class GameConfigHandler(RequestHandler):
     @use_statusmessage
     @tornado.web.removeslash
     @tornado.web.authenticated
-    def get(self, vars):
-        vars.update({
+    def get(self, tvars):
+        tvars.update({
             'config_file': lightgames.Game.config_file,
             'game_name':   manager.config['game_name'],
             'game_list':   lightgames.get_games(manager.config['game_path'])
         })
 
-        vars.update(lightgames.Game.template_vars)  # Game defaults
+        tvars.update(lightgames.Game.template_vars)  # Game defaults
         if manager.game != None:
-            vars.update(manager.game.template_vars)
-            vars['config_file'] = manager.game.config_file
-        if 'title' not in vars:
-            vars['title'] = vars.get('module_name', "Untitled game")
+            tvars.update(manager.game.template_vars)
+            tvars['config_file'] = manager.game.config_file
+        if 'title' not in tvars:
+            tvars['title'] = tvars.get('module_name', "Untitled game")
 
-        vars['vars'] = vars;
-        self.render('config_game.html', **vars)
+        tvars['vars'] = tvars
+        self.render('config_game.html', **tvars)
 
     @tornado.web.authenticated
     def post(self):
         backup = manager.config.copy()
 
         cfg = {}
-        for key,val in self.request.arguments.items():
+        for key in self.request.arguments.keys():
             cfg[key] = self.get_argument(key)
 
         print("Config: %s" % cfg)
@@ -542,5 +511,7 @@ class GameConfigHandler(RequestHandler):
             else:
                 status = "error"
                 msg = ret
+
+        manager.save_config()
 
         self.redirect("game?status=%s&msg=%s" % (status, msg))
