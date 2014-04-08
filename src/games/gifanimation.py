@@ -41,7 +41,9 @@ class GifAnimation(lightgames.Game):
 
         # keep track of if anything that changed how the image is displayed has changed
         # needed to reset lamps when changing gif or grid offset
-        self.changed_im = False
+        self.changed_display = False
+        # keep track of if the animation file has changed
+        self.changed_gif = False
 
 
     @gen.engine
@@ -55,12 +57,18 @@ class GifAnimation(lightgames.Game):
                 (width, height) = gif.size
                 #self.template_vars['grid_x'] = width
                 #self.template_vars['grid_y'] = height
+
+                # Reset lamps if GIF file has changed
+                # since it might be of different dimensions
+                if self.changed_gif:
+                    self.reset_lamp_all()
+                    self.changed_gif = False
                 i = 0
                 for frame in ImageSequence(gif):
-                    # reset lamps when image has changed
-                    if self.changed_im:
+                    # reset lamps when display settings has changed
+                    if self.changed_display:
                         self.reset_lamp_all()
-                        self.changed_im = False
+                        self.changed_display = False
                     # Break if animation turned off.
                     # Change this accordingly to wait for animation
                     # to finish before turning off/changing animation
@@ -128,11 +136,11 @@ class GifAnimation(lightgames.Game):
 
             self.data = fileinfo['body']
             self.template_vars['animation_file'] = fileinfo['filename']
-            self.changed_im = True
+            self.changed_gif = True
 
         if 'center_hor' in config:
             if config['center_hor'] != self.center_hor:
-                self.changed_im = True
+                self.changed_display = True
                 if config['center_hor'] == 'true':
                     self.center_hor = True
                 else:
@@ -141,7 +149,7 @@ class GifAnimation(lightgames.Game):
 
         if 'center_vert' in config:
             if config['center_vert'] != self.center_vert:
-                self.changed_im = True
+                self.changed_display = True
                 if config['center_vert'] == 'true':
                     self.center_vert = True
                 else:
@@ -152,7 +160,7 @@ class GifAnimation(lightgames.Game):
             try:
                 offsx = int(config['offset_hor'])
                 if offsx != self.offset_x:
-                    self.changed_im = True
+                    self.changed_display = True
                 self.template_vars['offset_hor'] = offsx # remove later
                 self.offset_x = offsx
             except ValueError:
@@ -162,7 +170,7 @@ class GifAnimation(lightgames.Game):
             try:
                 offsy = int(config['offset_vert'])
                 if offsy != self.offset_y:
-                    self.changed_im = True
+                    self.changed_display = True
                 self.template_vars['offset_vert'] = offsy # remove later
                 self.offset_y = offsy
             except ValueError:
