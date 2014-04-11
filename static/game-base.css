@@ -7,6 +7,7 @@ body {
 
 h1 {
   margin: 0.4em;
+  padding-top: 2em;
   font-family: sans-serif;
   font-size: 250%;
   text-align: center;
@@ -42,7 +43,7 @@ h1 {
 
 
 #queue {
-    bottom: 0;
+    top: 1;
 }
 #queuemsg {
     margin: 2px;
