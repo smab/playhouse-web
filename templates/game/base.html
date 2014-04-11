@@ -26,6 +26,14 @@
         </script>
     </head>
     <body>
+    	
+    	{% block queue %}
+        <div id="queue" class="box">
+            <p id="queuemsg">Connecting to queue...</p>
+            <input type=button id="queuebtn" value="Join queue" />
+        </div>
+        {% end %}
+        
         <h1>{{ title }}</h1>
 
 		{%block rules%}
@@ -44,12 +52,6 @@
         </div>
         {% end %}
 
-        {% end %}
-        {% block queue %}
-        <div id="queue" class="box">
-            <p id="queuemsg">Connecting to queue...</p>
-            <input type=button id="queuebtn" value="Join queue" />
-        </div>
         {% end %}
 
         <script>
