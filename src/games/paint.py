@@ -7,11 +7,6 @@ def create(client):
     print("Creating paint game")
     return Paint(client)
 
-def set_description(self, handler):
-    message = '<p><p><b>Name:</b> Paint</p><p><b>Players:</b> Any</p><p><b>Rules & Goals:</b> No rules, no goals, only paint. By clicking a cell the player will fill it with their assigned colour, thus painting the grid. Refresh the page to get a new colour.</p></p>'
-
-    lightgames.send_msg(handler,   {'rulemessage': (message)})
-
 
 class Paint(lightgames.Game):
     config_file = "paintconfig.html"
@@ -29,7 +24,7 @@ class Paint(lightgames.Game):
         self.reset_lamp_all()
 
     def on_connect(self, handler):
-        set_description(self, handler)
+        self.set_description(handler)
         self.playerColors[handler] = (
             random.randint(0,255),
             random.randint(0,255),
@@ -63,7 +58,7 @@ class Paint(lightgames.Game):
             del self.playerColors[handler]
 
     def set_options(self, config):
-        m = 50;
+        m = 50
         self.template_vars['grid_y'] = max(2,min(m,int(config['grid_y'])))
         self.template_vars['grid_x'] = max(2,min(m,int(config['grid_x'])))
         self.template_vars['cell_w'] = max(2,min(500,int(config['cell_w'])))
@@ -71,3 +66,8 @@ class Paint(lightgames.Game):
         self.template_vars['color_empty'] = config['color_empty']
 
         self.reset()
+
+    def set_description(self, handler):
+        message = '<p><p><b>Name:</b> Paint</p><p><b>Players:</b> Any</p><p><b>Rules & Goals:</b> No rules, no goals, only paint. By clicking a cell the player will fill it with their assigned colour, thus painting the grid. Refresh the page to get a new colour.</p></p>'
+
+        lightgames.send_msg(handler,   {'rulemessage': (message)})

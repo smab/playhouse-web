@@ -85,25 +85,25 @@ class GifAnimation(lightgames.Game):
 
                             # center the image horizontally
                             x_im = x_grid = x
-                            if(self.center_hor and width > self.grid[0]):
+                            if self.center_hor and width > self.grid[0]:
                                 x_im = int( (width - self.grid[0])/2 + x)
-                            elif(self.center_hor and width < self.grid[0]):
+                            elif self.center_hor and width < self.grid[0]:
                                 x_grid = int( (self.grid[0] - width)/2 + x)
                             # center the image vertically
                             y_im = y_grid = y 
-                            if(self.center_vert and height > self.grid[1]):
+                            if self.center_vert and height > self.grid[1]:
                                 y_im = int( (height - self.grid[1])/2 + y)
-                            elif(self.center_vert and height < self.grid[0]):
+                            elif self.center_vert and height < self.grid[0]:
                                 y_grid = int( (self.grid[0] - height)/2 + y)
                             # offset image horizontally
-                            if(self.offset_x != 0 and width <= self.grid[0]):
+                            if self.offset_x != 0 and width <= self.grid[0]:
                                 x_grid += self.offset_x
-                            elif(self.offset_x != 0 and width > self.grid[0]):
+                            elif self.offset_x != 0 and width > self.grid[0]:
                                 x_im -= self.offset_x
                             # offset image vertically
-                            if(self.offset_y != 0 and height <= self.grid[1]):
+                            if self.offset_y != 0 and height <= self.grid[1]:
                                 y_grid += self.offset_y
-                            elif(self.offset_y != 0 and height > self.grid[1]):
+                            elif self.offset_y != 0 and height > self.grid[1]:
                                 y_im -= self.offset_y
 
                             # check boundaries that might be off after offset

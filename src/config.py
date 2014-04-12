@@ -1,7 +1,6 @@
 import tornado.ioloop
 import tornado.web
 
-import time
 import traceback
 
 import lightgames
@@ -278,7 +277,7 @@ class BridgeConfigHandler(RequestHandler):
                     BridgeConfigHandler.bridges[mac]['lights'] = -1 
                 self.write({'state': 'success'}) 
             else: 
-                response['errormessage'] = response['errormessage'].capitalize(); 
+                response['errormessage'] = response['errormessage'].capitalize() 
                 self.write(response) 
 
         elif 'search' in data: 
@@ -428,10 +427,10 @@ class GridConfigHandler(RequestHandler):
             skip_name = self.get_argument('skip_name', 'skip')
             try:
                 if skip_name == 'skip':
-                        lamp = tornado.escape.json_decode(
-                            self.get_argument('lamp'))
-                        GridConfigHandler.skipped.append(lamp)
-                        msg = 'Skipped lamp %s%%23%s' % (lamp['mac'], lamp['lamp'])
+                    lamp = tornado.escape.json_decode(
+                        self.get_argument('lamp'))
+                    GridConfigHandler.skipped.append(lamp)
+                    msg = 'Skipped lamp %s%%23%s' % (lamp['mac'], lamp['lamp'])
                 else:
                     skip_data = skip_name.split('#')
                     skip_lamp = { 'mac': skip_data[0], 'lamp':int(skip_data[1]) }

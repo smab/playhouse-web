@@ -8,12 +8,6 @@ def create(client):
     print("Creating memory game")
     return Memory(client)
 
-def set_description(self, handler):
-    
-    	message = '<p><p><b>Name:</b> Memory</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> Each player takes turns flipping over a card. If a player manages to flip over two identical cards that player recieve one point, and the cards stay revealed. When all the cards have been revealed the game is over and the player with highest score wins.</p></p>'
-
-    lightgames.send_msg(handler,   {'rulemessage': (message)})
-
 
 class Memory(lightgames.Game):
     template_file = "memory.html"
@@ -63,7 +57,7 @@ class Memory(lightgames.Game):
       # self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0 })
 
     def sync(self, handler):
-        set_description(self, handler)
+        self.set_description(handler)
         print("Syncing %s" % handler)
         for y in range(self.height):
             for x in range(self.width):
@@ -149,5 +143,11 @@ class Memory(lightgames.Game):
         vars['cell_h'] = clamp(2, int(config['cell_h']), 500)
 
         self.reset()
+
+
+    def set_description(self, handler):
+        message = '<p><p><b>Name:</b> Memory</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> Each player takes turns flipping over a card. If a player manages to flip over two identical cards that player recieve one point, and the cards stay revealed. When all the cards have been revealed the game is over and the player with highest score wins.</p></p>'
+
+        lightgames.send_msg(handler, {'rulemessage': (message)})
 
 # vim: set sw=4:

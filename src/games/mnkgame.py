@@ -5,12 +5,6 @@ def create(client):
     print("Creating m,n,k-game")
     return MnkGame(client)
 
-def set_description(self, handler):
-
-    rules = '<p><b>Name: Tic-Tac-Toe</b></p><p><b>Players:</b> 2</p><p><b>Description:</b>The goal of this game is to, on a ' + str(self.template_vars['grid_x'])+ ' by ' + str(self.template_vars['grid_y']) + ' grid, connect ' + str(self.template_vars['winner_req']) + ' dots. Each player takes turn to place a dot anywhere on the grid where there is not already another dot and the first player to get '+ str(self.template_vars['winner_req']) +' dots in a row horizontally, vertically or diagonally wins the game </p>'
-    
-    lightgames.send_msg(handler,   {'rulemessage': (rules)})
-
 
 class MnkGame(lightgames.Game):
     config_file = "mnkconfig.html"
@@ -47,10 +41,9 @@ class MnkGame(lightgames.Game):
         self.reset_lamp_all()
 
     def sync(self, handler):
-        global winning_req
         print("Syncing %s" % handler)
         #Send the game description
-        set_description(self, handler)
+        self.set_description(handler)
         for y in range(len(self.board)):
             for x in range(len(self.board[y])):
                 button_color = self.button_colors[self.board[y][x]]
@@ -59,7 +52,7 @@ class MnkGame(lightgames.Game):
     def search_winner_lamps(self, x, y):
         def search(cx, cy, dx, dy):
             lamps = []
-            for i in range(self.winning_req-1):
+            for _ in range(self.winning_req-1):
                 cx += dx
                 cy += dy
                 if cx >= 0 and cy >= 0 and \
@@ -84,10 +77,6 @@ class MnkGame(lightgames.Game):
 
 
     def on_message(self, handler, coords):
-
-		
-        
-
         playerH   = self.players[self.player]
         opponentH = self.players[1 - self.player]
         
@@ -157,3 +146,9 @@ class MnkGame(lightgames.Game):
                                       else '%d-in-a-row' % self.winning_req
 
         self.reset()
+
+
+    def set_description(self, handler):
+        rules = '<p><b>Name: Tic-Tac-Toe</b></p><p><b>Players:</b> 2</p><p><b>Description:</b>The goal of this game is to, on a ' + str(self.template_vars['grid_x'])+ ' by ' + str(self.template_vars['grid_y']) + ' grid, connect ' + str(self.template_vars['winner_req']) + ' dots. Each player takes turn to place a dot anywhere on the grid where there is not already another dot and the first player to get '+ str(self.template_vars['winner_req']) +' dots in a row horizontally, vertically or diagonally wins the game </p>'
+
+        lightgames.send_msg(handler, {'rulemessage': (rules)})
