@@ -3,7 +3,7 @@ import tornado.escape
 import http.client
 import ssl
 
-import queue as gamequeue
+import gamequeue
 import lightgames
 import config as webconfig
 
