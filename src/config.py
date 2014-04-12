@@ -401,23 +401,27 @@ class GridConfigHandler(RequestHandler):
             if len(coords) == 2 and coords[0].isdigit() and coords[1].isdigit():
                 y,x = int(coords[0]), int(coords[1])
 
-                if GridConfigHandler.grid['grid'][y][x] != None:
-                    GridConfigHandler.grid['grid'][y][x] = None
-                    print('Lamp removed from %s' % coords)
-                    msg = 'Lamp removed from %d,%d' % (y,x)
-                    GridConfigHandler.changed = True
-                elif self.get_argument('lamp') == '':
-                    status,msg = ('error','No activated lamp')
+                if y >= GridConfigHandler.grid['height'] or \
+                    x >= GridConfigHandler.grid['width']:
+                    status,msg = ('error','Invalid position')
                 else:
-                    try:
-                        lamp = tornado.escape.json_decode(
-                            self.get_argument('lamp'))
-                        GridConfigHandler.grid['grid'][y][x] = lamp
-                        print('Lamp %s placed at %s' % (lamp, coords))
-                        msg = 'Lamp placed at %d,%d' % (y,x)
+                    if GridConfigHandler.grid['grid'][y][x] != None:
+                        GridConfigHandler.grid['grid'][y][x] = None
+                        print('Lamp removed from %s' % coords)
+                        msg = 'Lamp removed from %d,%d' % (y,x)
                         GridConfigHandler.changed = True
-                    except ValueError:
-                        status,msg = ('error','Invalid lamp')
+                    elif self.get_argument('lamp') == '':
+                        status,msg = ('error','No activated lamp')
+                    else:
+                        try:
+                            lamp = tornado.escape.json_decode(
+                                self.get_argument('lamp'))
+                            GridConfigHandler.grid['grid'][y][x] = lamp
+                            print('Lamp %s placed at %s' % (lamp, coords))
+                            msg = 'Lamp placed at %d,%d' % (y,x)
+                            GridConfigHandler.changed = True
+                        except ValueError:
+                            status,msg = ('error','Invalid lamp')
             else:
                 status,msg = ('error','Invalid position')
         elif 'skip' in args:

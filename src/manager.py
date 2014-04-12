@@ -39,10 +39,10 @@ def connect_lampserver(print_msg=True):
         print("Connecting to lamp server (%s:%d)" %
             (config['lampdest'], config['lampport']))
 
-    if config.get('ssl', False):
+    if config.get('light_ssl', False):
         context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
         context.verify_mode = ssl.CERT_REQUIRED
-        context.load_cert_chain(config['certfile'])
+        context.load_cert_chain(config['light_certfile'])
         conn = http.client.HTTPSConnection(
             config['lampdest'], config['lampport'], context=context)
     else:
