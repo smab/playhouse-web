@@ -70,6 +70,8 @@ def initialize():
         manager.config.update(cfg)
     except FileNotFoundError:
         print("Config file '%s' not found" % config_file)
+    except ValueError as e:
+        print("Error loading config: %s" % e.args[0])
 
     try:
         manager.client = manager.connect_lampserver()

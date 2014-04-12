@@ -1,5 +1,4 @@
-import tornado.escape
-
+import json
 import http.client
 import ssl
 
@@ -128,4 +127,4 @@ def save_config():
         cfg['config_pwd'] = webconfig.password
 
     with open(CONFIG_FILE, 'w') as f:
-        f.write(tornado.escape.json_encode(cfg))
+        f.write(json.dumps(cfg, sort_keys=True, indent=4))
