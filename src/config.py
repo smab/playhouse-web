@@ -301,6 +301,7 @@ class BridgeConfigHandler(RequestHandler):
 class GridConfigHandler(RequestHandler):
     grid = None
     bridges = None
+    skipped = None
     changed = False
 
     def get_lights(self, client):
@@ -329,6 +330,7 @@ class GridConfigHandler(RequestHandler):
                 GridConfigHandler.grid = {
                     k: response[k] for k in ('width', 'height', 'grid')
                 }
+                GridConfigHandler.skipped = []
             grid = GridConfigHandler.grid
 
             lights = self.get_lights(client)
@@ -337,7 +339,8 @@ class GridConfigHandler(RequestHandler):
             return
         ingrid = [cell for row in grid['grid'] for cell in row if cell != None]
 
-        free    = [c for c in lights if c not in ingrid]
+        free    = [c for c in lights if c not in ingrid
+                    and c not in GridConfigHandler.skipped]
         invalid = [c for c in ingrid if c not in lights]
 
         tvars['activated'] = ''
@@ -362,6 +365,7 @@ class GridConfigHandler(RequestHandler):
 
         tvars['free'] = free
         tvars['invalid'] = invalid
+        tvars['skipped'] = GridConfigHandler.skipped
         tvars['grid'] = GridConfigHandler.grid
         tvars['json_encode'] = tornado.escape.json_encode
         tvars['changed'] = GridConfigHandler.changed
@@ -416,6 +420,22 @@ class GridConfigHandler(RequestHandler):
                         status,msg = ('error','Invalid lamp')
             else:
                 status,msg = ('error','Invalid position')
+        elif 'skip' in args:
+            skip_name = self.get_argument('skip_name', 'skip')
+            try:
+                if skip_name == 'skip':
+                        lamp = tornado.escape.json_decode(
+                            self.get_argument('lamp'))
+                        GridConfigHandler.skipped.append(lamp)
+                        msg = 'Skipped lamp %s%%23%s' % (lamp['mac'], lamp['lamp'])
+                else:
+                    skip_data = skip_name.split('#')
+                    skip_lamp = { 'mac': skip_data[0], 'lamp':int(skip_data[1]) }
+
+                    GridConfigHandler.skipped.remove(skip_lamp)
+                    msg = 'Unkipped lamp %s%%23%s' % (skip_lamp['mac'], skip_lamp['lamp'])
+            except ValueError:
+                status,msg = ('error','Invalid lamp')
         elif 'save' in args:
             request = tornado.escape.json_encode(
                 GridConfigHandler.grid['grid']

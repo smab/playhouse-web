@@ -94,6 +94,18 @@
             {% end %}
         </table>
 
+        <div class="center">
+        {% if len(skipped) > 0 %}
+        <select id="name" name="skip_name" onchange="onnamechange(this)">
+            <option value="skip"selected>Select to unskip</option>
+        {% for skip in skipped %}
+            <option value="{{ skip['mac'] }}#{{ skip['lamp'] }}">{{ skip['mac'] }}#{{ skip['lamp'] }}</option>
+        {% end %}
+        </select>
+        {% end %}
+        <input type="submit" name="skip" value="Skip Lamp" title="Skip activated lamp or unskip selected lamp" {% if lamp == '' and len(skipped) == 0 %} disabled {% end %} />
+        </div>
+
         <!-- todo: move or something -->
         <div id="miscinput" class="center">
             <div style="width:100%"> 
