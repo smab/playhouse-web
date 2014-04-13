@@ -26,8 +26,6 @@ class Connect4(lightgames.Game):
 
     width, height = template_vars['grid_x'], template_vars['grid_y']
 
-  # colors = [0, 50000, 65000]
-
     def reset(self):
         print("New game!")
         print("Size: %d %d" % (self.template_vars['grid_x'], self.template_vars['grid_y']))
@@ -74,7 +72,6 @@ class Connect4(lightgames.Game):
         x, y = message['x'], message['y']
         hue  = self.colors[self.player]
 
-        
         def grab_ray(pos, delta):
             x, y   = pos
             dx, dy = delta
@@ -82,19 +79,14 @@ class Connect4(lightgames.Game):
 
             def within_bounds(x,y):
                 return 0 <= x < self.width and 0 <= y < self.height
-            #this was always false when player was set to none since we compared self.board[y][x] with none
             while within_bounds(x,y) and self.board[y][x] == self.player:
-                
                 res.add((x,y))
                 x,y = x + dx, y + dy
 
             return res
 
         if self.board[y][x] == 2 and (y == self.height - 1 or self.board[y + 1][x] != 2):
-            player = self.player 
-            #this is what caused the error 
-            #self.player = None
-
+            player = self.player
             self.board[y][x] = player
 
             def done():
@@ -107,7 +99,6 @@ class Connect4(lightgames.Game):
                 for (dx,dy) in [(0, 1), (1, 0), (1, 1), (1, -1)]:
                     lefts  = grab_ray((x,y), ( dx, dy))
                     rights = grab_ray((x,y), (-dx,-dy))
-                    print(len(lefts) + len(rights))
 
                     if len(lefts) + len(rights) - 1 >= 4:
                         winner_lamps.update(lefts)
