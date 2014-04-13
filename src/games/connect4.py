@@ -54,7 +54,7 @@ class Connect4(lightgames.Game):
             for x in range(self.width):
                 hue     = self.colors[self.board[y][x]]
                 powered = self.board[y][x] != 2
-                lightgames.send_msg(handler, {'x':x, 'y':y, 'hue':hue, 'power':powered})
+                lightgames.send_msg(handler, {'x':x, 'y':y, 'hue':hue, 'power':powered, 'move':True})
 
     def on_message(self, handler, message):
         if self.player == None:
