@@ -1,5 +1,5 @@
 {
-    "game_name": "othello", 
+    "game_name": "paint", 
     "_lampdest": "smab.csc.kth.se",
     "lampport": 4711
 }

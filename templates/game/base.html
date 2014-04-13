@@ -36,8 +36,7 @@
         
         <h1>{{ title }}</h1>
 
-		{%block rules%}
-		{%end%}
+
 
         {% block grid %}
             {% block message-area %}
@@ -52,6 +51,9 @@
         </div>
         {% end %}
 
+		{%block rules%}
+		{%end%}
+
         {% end %}
 
         <script>
@@ -64,6 +66,7 @@
 				function showButton(){
 					if(document.getElementById("rules").style.display != 'block'){
 						document.getElementById("rules").style.display='block';
+						document.getElementById("rules").scrollIntoView();
 				}else{
 					document.getElementById("rules").style.display='none';
 				}
