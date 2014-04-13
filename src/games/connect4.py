@@ -67,14 +67,14 @@ class Connect4(lightgames.Game):
         x, y = message['x'], message['y']
         hue  = self.colors[self.player]
 
-        def grab_ray(pos, delta):
+        def grab_ray(pos, delta, player):
             x, y   = pos
             dx, dy = delta
             res    = set()
 
             def within_bounds(x,y):
                 return 0 <= x < self.width and 0 <= y < self.height
-            while within_bounds(x,y) and self.board[y][x] == self.player:
+            while within_bounds(x,y) and self.board[y][x] == player:
                 res.add((x,y))
                 x,y = x + dx, y + dy
 
@@ -82,6 +82,8 @@ class Connect4(lightgames.Game):
 
         if self.board[y][x] == 2 and (y == self.height - 1 or self.board[y + 1][x] != 2):
             player = self.player
+            self.player = None  # Temporarily set to None to prevent players
+                                # from making moves until animation has finished
             self.board[y][x] = player
 
             def done():
@@ -92,8 +94,8 @@ class Connect4(lightgames.Game):
                 # Check if this move caused a win
                 winner_lamps = set()
                 for (dx,dy) in [(0, 1), (1, 0), (1, 1), (1, -1)]:
-                    lefts  = grab_ray((x,y), ( dx, dy))
-                    rights = grab_ray((x,y), (-dx,-dy))
+                    lefts  = grab_ray((x,y), ( dx, dy), player)
+                    rights = grab_ray((x,y), (-dx,-dy), player)
 
                     if len(lefts) + len(rights) - 1 >= 4:
                         winner_lamps.update(lefts)
