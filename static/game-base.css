@@ -32,6 +32,7 @@ h1 {
 
 #message {
     top: 0;
+    transition: background-color 600ms;
 }
 #message.type-message {
     /* no overriding necessary */

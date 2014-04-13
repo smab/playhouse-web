@@ -1,10 +1,22 @@
+function replaceClass(el, pattern, newClass) {
+  el.className = el.className.replace(new RegExp(" ?" + pattern + "|$"), " " + newClass)
+}
+
+var savedMessage = "Loading..."
 function setMessage(msg, type) {
     var el = document.getElementById('message')
-    el.className = el.className.replace(/ ?type-\w+/g, '')
-    el.className += ' type-' + type
+    el.style.transition = ''
+    replaceClass(el, 'type-\\w+', 'type-' + type)
     el.innerHTML = msg
-    el.removeChild(el.firstChild)
-    el.appendChild(document.createTextNode(String(msg)))
+
+    if (type != 'error') {
+      savedMessage = el.innerHTML
+    } else {
+      setTimeout(function () {
+        replaceClass(el, 'type-\\w+', 'type-message')
+        el.innerHTML = savedMessage
+      }, 3500)
+    }
 }
 
 var wsHost = document.location.hostname + ":" + socketport,
