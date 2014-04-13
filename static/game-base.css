@@ -2,7 +2,7 @@ body {
     margin: 0;
     padding-top: 4em;
     padding-bottom: 4em;
-    background: #235;
+    background: #9AC;
 }
 
 h1 {
@@ -27,7 +27,7 @@ h1 {
     font-family: sans-serif;
     color: black;
     box-shadow: 0 0 8px #222;
-    background: #568;
+    background: rgba(180,210,230, 0.8);
 }
 
 #message {
@@ -59,20 +59,13 @@ h1 {
     z-index: 10;
     width: 40%;
 
-    padding: 1em 0;
-
+    padding: 0.5em 0.8em;
     text-align: center;
-    font-family: sans-serif;
-    color: black;
-    box-shadow: 0 0 8px #222;
-    background: #568;
+    border-radius: 0.3em;
 }
 
 .rulebutton {
-
-
-
-    margin: 0 auto; /* centers, provided there's a width set */
+    margin: 0.5em auto; /* centers, provided there's a width set */
     display: block;
     position: relative;
     text-align: left;
