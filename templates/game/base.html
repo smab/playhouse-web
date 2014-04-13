@@ -26,77 +26,50 @@
         </script>
     </head>
     <body>
-    	
-    	{% block queue %}
+        {% block queue %}
         <div id="queue" class="box">
             <p id="queuemsg">Connecting to queue...</p>
             <input type=button id="queuebtn" value="Join queue" />
         </div>
         {% end %}
-        
+
         <h1>{{ title }}</h1>
-
-
 
         {% block grid %}
             {% block message-area %}
             <div id="message" class="box">Connecting...</div>
             {% end %}
 
-        <table id="grid"></table>
+            <table id="grid"></table>
 
-        {% block postgrid %}
-        <div style="text-align:center">
-            {% raw stream_embedcode %}
-        </div>
-        {% end %}
+            {% block postgrid %}
+            <div style="text-align:center">
+                {% raw stream_embedcode %}
+            </div>
+            {% end %}
 
-		{%block rules%}
-		{%end%}
+            {% block rules %}
+            {% end %}
 
         {% end %}
 
         <script>
-
-
-			window.onload=function(){
-					document.getElementById("rules").style.display='none';
-
-				}
-				function showButton(){
-					if(document.getElementById("rules").style.display != 'block'){
-						document.getElementById("rules").style.display='block';
-						document.getElementById("rules").scrollIntoView();
-				}else{
-					document.getElementById("rules").style.display='none';
-				}
-			}
-
-
-            socketport = {{ socketport }}
-
+            var socketport = {{ socketport }}
             function on_message(obj) {
                 {% block rulemessage%}
-				{% end %}
-                
-                
-                {% block message %}	
                 {% end %}
-				
-				
-			
+
+                {% block message %}
+                {% end %}
+
                 {% block queuemsg %}
                 session = "{{ gamesession }}" // to lazy to use the cookie value
                 handle_queue_msg(obj)
                 {% end %}
             }
 
-
-
-
-
             function play() {
-                coords = this.id.split("-")
+                var coords = this.id.split("-")
 
                 function reply(response) {
                     ws.send(JSON.stringify(extend({ gameaction: true }, response)))
@@ -114,7 +87,6 @@
             {% block script %}
             {% end %}
         </script>
-
         <script src="/static/game-base.js"></script>
     </body>
 </html>

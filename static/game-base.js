@@ -1,24 +1,4 @@
-function replaceClass(el, pattern, newClass) {
-  el.className = el.className.replace(new RegExp(" ?" + pattern + "|$"), " " + newClass)
-}
-
-var savedMessage = "Loading..."
-function setMessage(msg, type) {
-    var el = document.getElementById('message')
-    el.style.transition = ''
-    replaceClass(el, 'type-\\w+', 'type-' + type)
-    el.innerHTML = msg
-
-    if (type != 'error') {
-      savedMessage = el.innerHTML
-    } else {
-      setTimeout(function () {
-        replaceClass(el, 'type-\\w+', 'type-message')
-        el.innerHTML = savedMessage
-      }, 3500)
-    }
-}
-
+//-- Websocket/grid setup -----------------------
 var wsHost = document.location.hostname + ":" + socketport,
     ws     = new WebSocket("ws://{}/websocket".replace(/{}/, wsHost))
 
@@ -64,6 +44,31 @@ for(var i=0; i < config.grid_y; i++) {
     table.appendChild(tr);
 }
 
+
+//-- Messages -----------------------------------
+function replaceClass(el, pattern, newClass) {
+  el.className = el.className.replace(new RegExp(" ?" + pattern + "|$"), " " + newClass)
+}
+
+var savedMessage = "Loading..."
+function setMessage(msg, type) {
+    var el = document.getElementById('message')
+    el.style.transition = ''
+    replaceClass(el, 'type-\\w+', 'type-' + type)
+    el.innerHTML = msg
+
+    if (type != 'error') {
+      savedMessage = el.innerHTML
+    } else {
+      setTimeout(function () {
+        replaceClass(el, 'type-\\w+', 'type-message')
+        el.innerHTML = savedMessage
+      }, 3500)
+    }
+}
+
+
+//-- Queue --------------------------------------
 function handle_queue_msg(obj) {
     qmsg = document.getElementById("queuemsg")
     qbtn = document.getElementById("queuebtn")
@@ -91,5 +96,19 @@ function handle_queue_msg(obj) {
                 ws.send(JSON.stringify({ session : session, queueaction : 1 }));
             }
         }
+    }
+}
+
+
+//-- Rules --------------------------------------
+var rulesEl = document.getElementById('rules')
+rules.style.display = 'none'
+
+function showButton() {
+    if (rulesEl.style.display != 'block') {
+        rulesEl.style.display = 'block'
+        rulesEl.scrollIntoView()
+    } else {
+        rulesEl.style.display = 'none'
     }
 }
