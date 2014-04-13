@@ -30,14 +30,14 @@ h1 {
     background: rgba(180,210,230, 0.8);
 }
 
-#message {
+#message-box {
     top: 0;
     transition: background-color 600ms;
 }
-#message.type-message {
+#message-box.type-message {
     /* no overriding necessary */
 }
-#message.type-error {
+#message-box.type-error {
     font-weight: bold;
     background: #A12;
 }

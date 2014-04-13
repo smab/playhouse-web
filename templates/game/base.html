@@ -26,18 +26,24 @@
         </script>
     </head>
     <body>
+        <!--
         {% block queue %}
         <div id="queue" class="box">
             <p id="queuemsg">Connecting to queue...</p>
-            <input type=button id="queuebtn" value="Join queue" />
         </div>
         {% end %}
+        -->
 
         <h1>{{ title }}</h1>
 
         {% block grid %}
             {% block message-area %}
-            <div id="message" class="box">Connecting...</div>
+            <div id="message-box" class="box">
+                <div id="message">Connecting...</div>
+                {% block queue-btn %}
+                <input type="button" id="queuebtn" value="Join queue" />
+                {% end %}
+            </div>
             {% end %}
 
             <table id="grid"></table>

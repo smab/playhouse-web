@@ -52,17 +52,17 @@ function replaceClass(el, pattern, newClass) {
 
 var savedMessage = "Loading..."
 function setMessage(msg, type) {
-    var el = document.getElementById('message')
-    el.style.transition = ''
-    replaceClass(el, 'type-\\w+', 'type-' + type)
-    el.innerHTML = msg
+    var boxEl = document.getElementById('message-box'),
+        msgEl = document.getElementById('message')
+    replaceClass(boxEl, 'type-\\w+', 'type-' + type)
+    msgEl.innerHTML = msg
 
     if (type != 'error') {
-      savedMessage = el.innerHTML
+      savedMessage = msgEl.innerHTML
     } else {
       setTimeout(function () {
-        replaceClass(el, 'type-\\w+', 'type-message')
-        el.innerHTML = savedMessage
+        replaceClass(boxEl, 'type-\\w+', 'type-message')
+        msgEl.innerHTML = savedMessage
       }, 3500)
     }
 }
@@ -70,32 +70,26 @@ function setMessage(msg, type) {
 
 //-- Queue --------------------------------------
 function handle_queue_msg(obj) {
-    qmsg = document.getElementById("queuemsg")
-    qbtn = document.getElementById("queuebtn")
-    if (obj.state != null) {
-        qbtn.disabled = state == 'playing'
-        if (state == 'playing') {
-            qmsg.innerHTML = "You are currently playing";
-            qbtn.value = "Leave game";
-            qbtn.onclick = function() {}
-        } else if (obj.queuepos == undefined) {
-            obj.queuepos = 0
+    var qbtn = document.getElementById("queuebtn")
+
+    qbtn.disabled = (state == 'playing')
+
+    if (state == 'playing') {
+        qbtn.value = "In game";
+        qbtn.onclick = function() {}
+
+    } else if (obj.queuepos > 0) {
+        setMessage("Your place in queue: " + obj.queuepos, 'message')
+        qbtn.value = "Leave queue";
+        qbtn.onclick = function() {
+            ws.send(JSON.stringify({ session : session, queueaction : 0 }));
         }
-    }
-    if (obj.queuepos != undefined) {
-        if (obj.queuepos > 0) {
-            qmsg.innerHTML = "Your place in queue: " + obj.queuepos;
-            qbtn.value = "Leave queue";
-            qbtn.onclick = function() {
-                ws.send(JSON.stringify({ session : session, queueaction : 0 }));
-            }
-        } else {
-            qmsg.innerHTML = "You are not in the queue";
-            qbtn.value = "Join queue";
-            qbtn.onclick = function() {
-                ws.send(JSON.stringify({ session : session, queueaction : 1 }));
-            }
-        }
+
+    } else {
+      qbtn.value = "Join queue";
+      qbtn.onclick = function() {
+          ws.send(JSON.stringify({ session : session, queueaction : 1 }));
+      }
     }
 }
 
