@@ -8,7 +8,7 @@ server in the playhouse project.
 Quick links
 -----------
 
-* `Source (github) <https://github.com/smab/playhouse-web>`_
+* `Source (github) <https://github.com/smab/playhouse-web>`
 
 
 
