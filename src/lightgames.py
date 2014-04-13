@@ -37,7 +37,6 @@ def send_msgs(handlers, msg):
         send_msg(h, msg)
 
 def send_msgs_animation(handlers, coords, message, callback = None, revert = False):
-    changes = []
     for i, (x,y) in enumerate(coords):
         send_msgs(handlers, dict(message, x = x, y = y, delay = i * 500, transitiontime = 10))
         if revert:
@@ -54,7 +53,7 @@ def reply_wrong_player(game, handler):
         print("Spectator")
         send_msg(handler, {'error':'You are not a player!'})
 
-def game_over(game, winnerH, coords = set()):
+def game_over(game, winnerH, coords = frozenset()):
     if winnerH == None:
         send_msgs(game.players,     {'state': 'gameover'})
         send_msgs(game.connections, {'message': 'The game tied'})
@@ -193,7 +192,7 @@ class Game:
             self.sync(handler)
 
     def try_get_new_players(game, n):
-        for i in range(n):
+        for _ in range(n):
             game.add_player(game.queue.get_first())
 
     def get_spectators(self):

@@ -1,3 +1,4 @@
+import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
@@ -69,6 +70,8 @@ def initialize():
         manager.config.update(cfg)
     except FileNotFoundError:
         print("Config file '%s' not found" % config_file)
+    except ValueError as e:
+        print("Error loading config: %s" % e.args[0])
 
     try:
         manager.client = manager.connect_lampserver()
@@ -120,7 +123,15 @@ def init_http():
         game_app.listen(manager.config['serverport'])
 
     print("Starting config web server (port %d)" % manager.config['configport'])
-    config_app.listen(manager.config['configport'])
+    if manager.config.get('config_ssl', None):
+        print("Using SSL")
+        config_server = tornado.httpserver.HTTPServer(config_app, ssl_options={
+            "certfile": manager.config['config_certfile'],
+            "keyfile": manager.config['config_keyfile']
+        })
+    else:
+        config_server = tornado.httpserver.HTTPServer(config_app)
+    config_server.listen(manager.config['configport'])
 
 
 if __name__ == "__main__":

@@ -29,6 +29,9 @@
         background-color: #f44;
     }
 
+    .info {
+        font-size: 80%;
+    }
     .center {
         text-align: center;
     }
@@ -64,6 +67,16 @@
 <div id="settings">
     <h1>Grid</h1>
     <form name="gridform" action="/config/grid" method="post">
+        <div class="center info">
+            Activated lamp: <br/>
+            {% if lamp != '' %}
+                {{ lamp['mac'] }}#{{ lamp['lamp'] }}<br/>
+                Place the activated lamp where it belongs
+            {% else %}
+                none<br/><br/>
+            {% end %}
+        </div>
+
         <table id="grid">
             {% for r in range(grid['height']) %}
                 <tr>
@@ -81,11 +94,23 @@
             {% end %}
         </table>
 
+        <div class="center">
+        {% if len(skipped) > 0 %}
+        <select id="name" name="skip_name" onchange="onnamechange(this)">
+            <option value="skip"selected>Select to unskip</option>
+        {% for skip in skipped %}
+            <option value="{{ skip['mac'] }}#{{ skip['lamp'] }}">{{ skip['mac'] }}#{{ skip['lamp'] }}</option>
+        {% end %}
+        </select>
+        {% end %}
+        <input type="submit" name="skip" value="Skip Lamp" title="Skip activated lamp or unskip selected lamp" {% if lamp == '' and len(skipped) == 0 %} disabled {% end %} />
+        </div>
+
         <!-- todo: move or something -->
         <div id="miscinput" class="center">
             <div style="width:100%"> 
                 <input id="coords" name="coords" type="text" value="" placeholder="x,y" />
-                <input type="submit" name="placelamp" value="Place Lamp" />
+                <input type="submit" name="placelamp" {% if lamp == '' %} value="Remove Lamp" title="No activated lamp, can only remove lamp" {% else %} value="Place Lamp" title="Place or remove lamp" {% end %} />
                 <input type="hidden" name="lamp" value="{{ activated }}" />
             </div>
             <div style="width:100%">
@@ -95,9 +120,9 @@
         </div>
 
         <ul id="buttons">
-            <li><input type="submit" name="save" value="Save" {% if not changed %} title="No changes made" disabled {% end %}></li>
-            <li><input type="submit" name="refresh" value="Refresh"></li>
-            <li><input type="submit" name="off" value="Turn Off"></li>
+            <li><input type="submit" name="save" value="Save" {% if not changed %} title="No changes made" disabled {% else %} title="Save and use on lamp server" {% end %}></li>
+            <li><input type="submit" name="refresh" value="Refresh" title="Discard local grid and retrieve the one on the lamp server"></li>
+            <li><input type="submit" name="off" value="Turn Off" title="Turn off current game and all lamps"></li>
             <li><input type="submit" name="test" value="Run Diagnostics"></li>
         </ul>
         <div class="center">
