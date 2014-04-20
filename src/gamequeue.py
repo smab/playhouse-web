@@ -38,11 +38,12 @@ class Queue:
             action = msg['queueaction']
             session = msg['session']
 
-            if self.sessions.get(session) != None:
+            if self.sessions.get(session) != None and self.sessions.get(session) != handler:
                 lightgames.send_msg(self.sessions[session], {'queuepos':0})
             self.sessions[session] = handler
 
             if action == 0:
+                del self.sessions[session]
                 self.queue.remove(session)
                 self.refresh()
                 lightgames.send_msg(handler, {'queuepos':0})
@@ -69,7 +70,9 @@ class Queue:
         player = None
         # find first connected client
         while player==None and self.size() > 0:
-            player = self.sessions[self.queue.popleft()]
+            session = self.queue.popleft()
+            player = self.sessions[session]
+            del self.sessions[session]
         if player == None:
             return None
 

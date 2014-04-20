@@ -85,11 +85,14 @@ function handle_queue_msg(obj) {
             ws.send(JSON.stringify({ session : session, queueaction : 0 }));
         }
 
-    } else {
-      qbtn.value = "Join queue";
-      qbtn.onclick = function() {
-          ws.send(JSON.stringify({ session : session, queueaction : 1 }));
-      }
+    } else if (state == 'gameover' || obj.queuepos == 0) {
+        if (obj.queuepos == 0) {
+            setMessage("You are a spectator!", 'message')
+        }
+        qbtn.value = "Join queue";
+        qbtn.onclick = function() {
+            ws.send(JSON.stringify({ session : session, queueaction : 1 }));
+        }
     }
 }
 
