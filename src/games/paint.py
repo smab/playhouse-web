@@ -12,7 +12,7 @@ class Paint(lightgames.Game):
     config_file = "paintconfig.html"
     template_file = "paint.html"
     template_vars = {
-        'module_name': 'Paint'
+        'module_name': 'Paint',
         'grid_x':      2,
         'grid_y':      2,
     }
