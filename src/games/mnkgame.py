@@ -149,6 +149,6 @@ class MnkGame(lightgames.Game):
 
 
     def set_description(self, handler):
-        rules = '<p><b>Name: Tic-Tac-Toe</b></p><p><b>Players:</b> 2</p><p><b>Description:</b>The goal of this game is to, on a ' + str(self.template_vars['grid_x'])+ ' by ' + str(self.template_vars['grid_y']) + ' grid, connect ' + str(self.template_vars['winner_req']) + ' dots. Each player takes turn to place a dot anywhere on the grid where there is not already another dot and the first player to get '+ str(self.template_vars['winner_req']) +' dots in a row horizontally, vertically or diagonally wins the game </p>'
+        rules = '<p><b>Name: '+self.template_vars['title']+'</b></p><p><b>Players:</b> 2</p><p><b>Description:</b> The goal of this game is to, on a ' + str(self.template_vars['grid_x'])+ ' by ' + str(self.template_vars['grid_y']) + ' grid, connect ' + str(self.template_vars['winner_req']) + ' dots. Each player takes turn to place a dot anywhere on the grid where there is not already another dot and the first player to get '+ str(self.template_vars['winner_req']) +' dots in a row horizontally, vertically or diagonally wins the game </p>'
 
         lightgames.send_msg(handler, {'rulemessage': (rules)})

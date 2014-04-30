@@ -1,0 +1,186 @@
+@media only screen and (orientation : portrait) {
+    /* Portrait styles */
+
+    body {
+	margin: 0;
+	padding-top: 4em;
+	padding-bottom: 4em;
+	background: #9AC;
+	position:relative; /* Works with large playfields, not with small*/
+    }
+
+    h1 {
+	margin: 0.4em;
+	font-family: sans-serif;
+	font-size: 250%;
+	text-align: center;
+	color: rgba(0,0,0, 0.8);
+	text-shadow: 0 0 8px rgba(255,255,255,0.2);
+    }
+
+    /*** Messages & Queue ************************/
+    .box {
+	position: absolute;
+	z-index: 10;
+	width: 100%;
+	margin: 0;
+	padding: 0.3em;
+
+	text-align: center;
+	font-family: sans-serif;
+	color: black;
+	box-shadow: 0 0 8px #222;
+	background: #568;
+    }
+
+    #message {
+	top: 0;
+	font-size: 270%;
+	float: left;
+	margin: 0px 0px 0px 30px;
+    }
+    #message.type-message {
+    /* no overriding necessary */
+    }
+    #message.type-error {
+	font-weight: bold;
+	background: #A12;
+    }
+
+    #queuebtn {
+	font-weight: bold;
+	font-size: 200%;
+	height: 70px;
+	width: 220px;
+	margin: 0px 30px 0px 0px;
+	float: right;
+    }
+    
+    #userText.rulebutton {
+	font-size: 170%;
+    }
+    
+
+    /*** Grid ************************************/
+    #grid {
+	position: relative;
+	margin: 2em auto;
+	padding: 0.5em 2em;
+
+	border-radius: 8px;
+	box-shadow: 0 0 16px #000;
+	background: #000;
+
+	-khtml-user-select: none;
+	-moz-user-select: none;
+        -ms-user-select: none;
+	-webkit-user-select: none;
+        user-select: none;
+    }
+
+    #grid td {
+	position: relative;
+	margin: 0;
+	padding: 0;
+    }
+    #grid td > img {
+	width: 100%;
+	height: 100%;
+    }
+
+}
+
+/****************************************************************************/
+
+
+@media only screen and (orientation : landscape) {
+    /* Landscape styles */
+    body {
+	position:relative;
+	margin: 0;
+	padding-top: 4em;
+	padding-bottom: 4em;
+	background: #fff;
+    }
+
+    h1 {
+	margin: 0.4em;
+	font-family: sans-serif;
+	font-size: 250%;
+	text-align: center;
+	color: rgba(0,0,0, 0.8);
+	text-shadow: 0 0 8px rgba(255,255,255,0.2);
+    }
+
+    /*** Messages & Queue ************************/
+    .box {
+	position: absolute;
+	z-index: 10;
+	width: 100%;
+	margin: 0;
+	padding: 0.3em;
+
+	text-align: center;
+	font-family: sans-serif;
+	color: black;
+	box-shadow: 0 0 8px #222;
+	background: #568;
+    }
+
+    #message {
+	top: 0;
+	font-size: 270%;
+	float: left;
+	margin: 0px 0px 0px 30px;
+    }
+    #message.type-message {
+    /* no overriding necessary */
+    }
+    #message.type-error {
+	font-weight: bold;
+	background: #A12;
+    }
+
+    #queuebtn {
+	font-weight: bold;
+	font-size: 200%;
+	height: 70px;
+	width: 220px;
+	margin: 0px 30px 0px 0px;
+	float: right;
+    }
+
+    #userText.rulebutton {
+	font-size: 170%;
+    }
+
+
+    /*** Grid ************************************/
+    #grid {
+	position: relative;
+	margin: 2em auto;
+	padding: 0.5em 2em;
+
+	border-radius: 8px;
+	box-shadow: 0 0 16px #000;
+	background: #000;
+
+	-khtml-user-select: none;
+	-moz-user-select: none;
+        -ms-user-select: none;
+	-webkit-user-select: none;
+        user-select: none;
+    }
+
+    #grid td {
+	position: relative;
+	margin: 0;
+	padding: 0;
+    }
+    #grid td > img {
+	width: 100%;
+	height: 100%;
+    }
+
+
+}

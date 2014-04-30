@@ -155,6 +155,22 @@ class Othello(lightgames.Game):
 
             # Neither player has any legal move; game over
             self.game_over()
+            
+
+
+    def set_options(self, config):
+        def clamp(low, x, high):
+            return max(low, min(high, x))
+
+        m = 50
+        vars = self.template_vars
+        vars['grid_y'] = clamp(5, int(config['grid_y']),   m)
+        vars['grid_x'] = clamp(5, int(config['grid_x']),   m)
+        vars['cell_w'] = clamp(2, int(config['cell_w']), 500)
+        vars['cell_h'] = clamp(2, int(config['cell_h']), 500)
+
+        self.reset()
+
 
     def set_description(self, handler):
         message = '<p><p><b>Name:</b> Othello</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> Each player takes turns placing their disks. Disks may only be placed so that at least one of the opposing players disks is between the placed disk and another of the placers disks. If a player manages to place their disk so that there is a straigh line (it may run diagonally) between the placed disk and another of the players disks, all the disks belonging to the other player that is inbetween them gets turned into the placers colour. In the end, when the board has been filled, the player with the most disks win.</p></p>'
