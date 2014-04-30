@@ -1,7 +1,8 @@
 import random
 import itertools
 import time
-
+from tornado import gen
+from tornado.ioloop import IOLoop
 import lightgames
 
 
@@ -66,7 +67,13 @@ class Memory(lightgames.Game):
                 hue     = self.board[y][x] if powered else 0
                 lightgames.send_msg(handler, {'x':x, 'y':y, 'hue':hue, 'power':powered})
 
+    @gen.engine
     def on_message(self, handler, message):
+        # player == -1 when in animation
+        if self.player == -1:
+            lightgames.reply_wrong_player(self, handler)
+            return
+
         playerH   = self.players[self.player]
         opponentH = self.players[1 - self.player]
 
@@ -108,10 +115,13 @@ class Memory(lightgames.Game):
                     self.send_lamp(x2, y2, {'sat': 0, 'hue': 0})
 
                     # Switch over to opponent
-                    time.sleep(2)
                     lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
+                    tmp = 1 - self.player                    
+                    self.player = -1
+                    yield gen.Task(IOLoop.instance().add_timeout, time.time() + 2)
+                    self.player = tmp
                     lightgames.send_msg(opponentH, {'message':'Your turn!'})
-                    self.player = 1 - self.player
+
 
                 self.active_tiles = []
 
