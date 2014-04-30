@@ -117,10 +117,14 @@ def rgb_to_hsl(r, g, b):
     M, m = max(r,g,b), min(r,g,b)
     c = M - m
 
-    if   c == 0: hue = 0
-    elif M == r: hue = (g - b)/c * 256
-    elif M == g: hue = (b - r)/c * 256 + (256 * 3)
-    elif M == b: hue = (r - g)/c * 256 + (256 * 6)
+    if c == 0:
+        hue = 0
+    elif M == r: # ↓ may be <0, so use + and % to make sure that it is in [0,360]
+        hue = ((g - b)/c * 360 + 6) * 360 % (360 * 6)
+    elif M == g:
+        hue =  (b - r)/c * 360 + (360 * 2)
+    elif M == b:
+        hue =  (r - g)/c * 360 + (360 * 4)
 
     hue /= 6
     lum = M/2 + m/2
@@ -128,6 +132,9 @@ def rgb_to_hsl(r, g, b):
     sat = c / divisor * 256
 
     return (int(hue), int(sat), int(lum))
+
+def to_lamp_hue(hsl):
+  return int(hsl[0] * 65536 / 360)
 
 
 class Game:

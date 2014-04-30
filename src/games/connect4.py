@@ -67,7 +67,7 @@ class Connect4(lightgames.Game):
         # playerH == handler	
         x, y = message['x'], message['y']
         hsl  = self.colors[self.player]
-        hue  = hsl[0] * 256
+        hue  = lightgames.to_lamp_hue(hsl)
 
         def grab_ray(pos, delta, player):
             x, y   = pos
