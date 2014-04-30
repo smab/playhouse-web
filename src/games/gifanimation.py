@@ -23,7 +23,8 @@ class GifAnimation(lightgames.Game):
         'center_vert': False,
         'offset_hor': 0,
         'offset_vert': 0,
-        'transition_time': 4
+        'transition_time': 4,
+        'off_color': '#000000',
     }
 
     def init(self):
@@ -38,6 +39,7 @@ class GifAnimation(lightgames.Game):
         self.transition_time = self.template_vars['transition_time']
         self.offset_x = self.template_vars['offset_hor']
         self.offset_y = self.template_vars['offset_vert']
+        self.transp_color = (0,0,0)
 
         # keep track of if anything that changed how the image is displayed has changed
         # needed to reset lamps when changing gif or grid offset
@@ -112,8 +114,15 @@ class GifAnimation(lightgames.Game):
                             and 0 <= y_im < height
                             and 0 <= y_grid < self.grid[1]):
                                 r, g, b = rgb_im.getpixel((x_im, y_im))
-                                buffer += [{'x': x_grid, 'y': y_grid, 'change': {'rgb': (r,g,b), 'transitiontime':tt}}]
-                                lightgames.send_msgs(self.connections, {'x':x_grid, 'y':y_grid, 'color':(r,g,b)})
+                                if (r, g, b) != self.transp_color:
+                                    buffer += [{'x': x_grid, 'y': y_grid, \
+                                                'change': {'rgb': (r,g,b), 'transitiontime':tt, 'on': True}}]
+                                    lightgames.send_msgs(self.connections, \
+                                                {'x':x_grid, 'y':y_grid, 'color':(r,g,b), 'power':True})
+                                else:
+                                    buffer += [{'x': x_grid, 'y': y_grid, 'change': {'on': False}}]
+                                    lightgames.send_msgs(self.connections, \
+                                                {'x':x_grid, 'y':y_grid, 'color':(r,g,b), 'power':False})
 
                     # only send if theres a lamp to be changed
                     if buffer:
@@ -190,6 +199,25 @@ class GifAnimation(lightgames.Game):
             elif config['playgif'] == 'off':
                 self.play = False
             self.template_vars['playgif'] = self.play
+
+        # Taken from http://code.activestate.com/recipes/266466/
+        # Edited for Python 3
+        def HTMLColorToRGB(colorstring):
+            """ convert #RRGGBB to an (R, G, B) tuple """
+            colorstring = colorstring.strip()
+            if colorstring[0] == '#': colorstring = colorstring[1:]
+            if len(colorstring) != 6:
+                raise ValueError("input #%s is not in #RRGGBB format" % colorstring)
+            r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
+            r, g, b = [int(n, 16) for n in (r, g, b)]
+            return (r, g, b)
+
+        if 'offcolor' in config:
+            try:
+                self.transp_color = HTMLColorToRGB(config['offcolor'])
+                self.template_vars['off_color'] = config['offcolor']
+            except ValueError:
+                print("Couldn't convert HTML color to RGB")
 
 
 class ImageSequence:

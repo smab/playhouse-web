@@ -9,7 +9,9 @@
 {% block message %}
     if (obj.x != undefined) {
         e = document.getElementById(obj.x + "-" + obj.y)
-        e.style.backgroundColor = "rgb("+obj.color[0]+","+obj.color[1]+","+obj.color[2]+")"
+        var color  = "rgb("+obj.color[0]+","+obj.color[1]+","+obj.color[2]+")"
+        e.style.backgroundColor = obj.power? color : ''
+        e.style.className       = obj.power? 'on'  : 'off'
     }
 {% end %}
 
