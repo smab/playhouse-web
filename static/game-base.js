@@ -80,6 +80,7 @@ function handle_queue_msg(obj) {
 
     } else if (obj.queuepos > 0) {
         setMessage("Your place in queue: " + obj.queuepos, 'message')
+        state = 'spectating'
         qbtn.value = "Leave queue";
         qbtn.onclick = function() {
             ws.send(JSON.stringify({ session : session, queueaction : 0 }));
@@ -88,6 +89,7 @@ function handle_queue_msg(obj) {
     } else if (state == 'gameover' || obj.queuepos == 0) {
         if (obj.queuepos == 0) {
             setMessage("You are a spectator!", 'message')
+            state = 'spectating'
         }
         qbtn.value = "Join queue";
         qbtn.onclick = function() {
