@@ -1,3 +1,5 @@
+import math
+
 import lightgames
 
 
@@ -23,13 +25,20 @@ class Othello(lightgames.Game):
     def reset(self):
         print("New game!")
 
+        width, height = self.template_vars['grid_x'], self.template_vars['grid_y']
+
         self.player  = 0
         self.players = [None, None]
-        self.board   = [[2 for _ in range(self.template_vars['grid_x'])]
-                           for _ in range(self.template_vars['grid_y'])]
+        self.board   = [[2 for _ in range(width)]  # initialize empty board
+                           for _ in range(height)]
 
-        self.board[3][4] = self.board[4][3] = 0
-        self.board[3][3] = self.board[4][4] = 1
+        # Place the initial cross configuration:
+        #   1 0
+        #   0 1
+        mx = math.floor(width  / 2) - 1
+        my = math.floor(height / 2) - 1
+        self.board[my][mx+1] = self.board[my+1][mx  ] = 0
+        self.board[my][mx  ] = self.board[my+1][mx+1] = 1
 
         self.try_get_new_players(2)
         self.sync_all()
@@ -155,7 +164,6 @@ class Othello(lightgames.Game):
 
             # Neither player has any legal move; game over
             self.game_over()
-            
 
 
     def set_options(self, config):
@@ -164,8 +172,8 @@ class Othello(lightgames.Game):
 
         m = 50
         vars = self.template_vars
-        vars['grid_y'] = clamp(5, int(config['grid_y']),   m)
-        vars['grid_x'] = clamp(5, int(config['grid_x']),   m)
+        vars['grid_y'] = clamp(2, int(config['grid_y']),   m)
+        vars['grid_x'] = clamp(2, int(config['grid_x']),   m)
         vars['cell_w'] = clamp(2, int(config['cell_w']), 500)
         vars['cell_h'] = clamp(2, int(config['cell_h']), 500)
 
