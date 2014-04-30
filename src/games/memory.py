@@ -115,7 +115,6 @@ class Memory(lightgames.Game):
                     self.send_lamp(x2, y2, {'sat': 0, 'hue': 0})
 
                     # Switch over to opponent
-                    #time.sleep(2)
                     lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
                     tmp = 1 - self.player                    
                     self.player = -1
