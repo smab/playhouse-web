@@ -377,6 +377,8 @@ class GridConfigHandler(RequestHandler):
         args = self.request.arguments
         status,msg = ('message','')
 
+        load_game = None
+
         if 'changesize' in args:
             size = self.get_argument('grid_size').split('x')
 
@@ -462,16 +464,21 @@ class GridConfigHandler(RequestHandler):
             GridConfigHandler.bridges = None
             GridConfigHandler.changed = False
         elif 'off' in args:
-            manager.config['game_name'] = 'off'
+            load_game = 'off'
+        elif 'test' in args:
+            load_game = 'diagnostics'
+        else:
+            status,msg = ('error','Unknown request')
+
+        if load_game:
+            manager.config['game_name'] = load_game
             try:
                 manager.load_game()
-                msg = 'Game changed to: off'
+                msg = 'Game changed to: %s' % load_game
             except Exception as e:
                 msg = 'Loading failed: %s' % e
                 status = 'error'
                 traceback.print_exc()
-        else:
-            status,msg = ('error','Unknown request')
 
         self.redirect('grid?status=%s&msg=%s' % (status,msg))
 
