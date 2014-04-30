@@ -25,7 +25,7 @@ class Paint(lightgames.Game):
 
         self.reset_lamp_all()
 
-    def on_connect(self, handler):
+    def sync(self, handler):
         self.set_description(handler)
         self.playerColors[handler] = (
             random.randint(0,255),
@@ -56,6 +56,8 @@ class Paint(lightgames.Game):
         self.send_lamp(x, y, { 'rgb': color })
 
     def on_close(self, handler):
+        super(Paint, self).on_close(handler)
+
         if handler in self.playerColors:
             del self.playerColors[handler]
 

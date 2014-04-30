@@ -43,6 +43,12 @@
         <h1>{{ title }}</h1>
 
         {% block grid %}
+            {% block overlay %}
+            <div id="overlay" class="hidden">
+                <div>The game got destroyed!</div>
+            </div>
+            {% end %}
+
             {% block message-area %}
             <div id="message-box" class="box">
                 <div id="message">Connecting...</div>
