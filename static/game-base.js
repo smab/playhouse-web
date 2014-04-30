@@ -108,7 +108,7 @@ function handle_queue_msg(obj) {
 
 
 //-- Rules --------------------------------------
-var rulesEl = document.getElementById('rules')
+/*var rulesEl = document.getElementById('rules')
 rules.style.display = 'none'
 
 function showButton() {
@@ -118,4 +118,4 @@ function showButton() {
     } else {
         rulesEl.style.display = 'none'
     }
-}
+}*/
