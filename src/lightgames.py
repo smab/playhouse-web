@@ -38,9 +38,13 @@ def send_msgs(handlers, msg):
 
 def send_msgs_animation(handlers, coords, message, callback = None, revert = False):
     for i, (x,y) in enumerate(coords):
-        send_msgs(handlers, dict(message, x = x, y = y, delay = i * 500, transitiontime = 10))
+        send_msgs(handlers, dict(message, x = x, y = y,
+                                          delay = i * 500,
+                                          transitiontime = 10))
         if revert:
-            send_msgs(handlers, dict(message, power = False, x = x, y = y, delay = i*500 + 1000, transitiontime = 10))
+            send_msgs(handlers, dict(message, power = False, x = x, y = y,
+                                              delay = i*500 + 1000,
+                                              transitiontime = 10))
 
     if callback:
         set_timeout(datetime.timedelta(seconds = len(coords)/2 + (0.5 if revert else 0)), callback)
@@ -183,7 +187,7 @@ class Game:
         for i, (x,y) in enumerate(coords):
             changes += [ { 'x': x, 'y': y, 'delay': i*0.5, 'change': dict(change, transitiontime = 10) } ]
             if revert:
-                changes += [ { 'x': x, 'y': y, 'delay': i*0.5 + 1, 'change': { 'bri':0, 'transitiontime':10 } } ]
+                changes += [ { 'x': x, 'y': y, 'delay': i*0.5 + 1, 'change': { 'sat':0, 'bri':0, 'transitiontime':10 } } ]
         self.send_lamp_multi(changes)
 
         if callback:
