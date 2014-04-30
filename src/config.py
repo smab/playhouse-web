@@ -377,11 +377,13 @@ class GridConfigHandler(RequestHandler):
         args = self.request.arguments
         status,msg = ('message','')
 
+        load_game = None
+
         if 'changesize' in args:
             size = self.get_argument('grid_size').split('x')
 
             if len(size) == 2 and size[0].isdigit() and size[1].isdigit():
-                h, w = int(size[0]), int(size[1])
+                w, h = int(size[0]), int(size[1])
 
                 newgrid = [[None for _ in range(w)] for _ in range(h)]
 
@@ -398,7 +400,7 @@ class GridConfigHandler(RequestHandler):
             coords = self.get_argument('coords').split(',')
 
             if len(coords) == 2 and coords[0].isdigit() and coords[1].isdigit():
-                y,x = int(coords[0]), int(coords[1])
+                x,y = int(coords[0]), int(coords[1])
 
                 if y >= GridConfigHandler.grid['height'] or \
                     x >= GridConfigHandler.grid['width']:
@@ -407,7 +409,7 @@ class GridConfigHandler(RequestHandler):
                     if GridConfigHandler.grid['grid'][y][x] != None:
                         GridConfigHandler.grid['grid'][y][x] = None
                         print('Lamp removed from %s' % coords)
-                        msg = 'Lamp removed from %d,%d' % (y,x)
+                        msg = 'Lamp removed from %d,%d' % (x,y)
                         GridConfigHandler.changed = True
                     elif self.get_argument('lamp') == '':
                         status,msg = ('error','No activated lamp')
@@ -417,7 +419,7 @@ class GridConfigHandler(RequestHandler):
                                 self.get_argument('lamp'))
                             GridConfigHandler.grid['grid'][y][x] = lamp
                             print('Lamp %s placed at %s' % (lamp, coords))
-                            msg = 'Lamp placed at %d,%d' % (y,x)
+                            msg = 'Lamp placed at %d,%d' % (x,y)
                             GridConfigHandler.changed = True
                         except ValueError:
                             status,msg = ('error','Invalid lamp')
@@ -462,16 +464,21 @@ class GridConfigHandler(RequestHandler):
             GridConfigHandler.bridges = None
             GridConfigHandler.changed = False
         elif 'off' in args:
-            manager.config['game_name'] = 'off'
+            load_game = 'off'
+        elif 'test' in args:
+            load_game = 'diagnostics'
+        else:
+            status,msg = ('error','Unknown request')
+
+        if load_game:
+            manager.config['game_name'] = load_game
             try:
                 manager.load_game()
-                msg = 'Game changed to: off'
+                msg = 'Game changed to: %s' % load_game
             except Exception as e:
                 msg = 'Loading failed: %s' % e
                 status = 'error'
                 traceback.print_exc()
-        else:
-            status,msg = ('error','Unknown request')
 
         self.redirect('grid?status=%s&msg=%s' % (status,msg))
 
