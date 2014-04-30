@@ -36,18 +36,25 @@ def send_msgs(handlers, msg):
     for h in handlers:
         send_msg(h, msg)
 
-def send_msgs_animation(handlers, coords, message, callback = None, revert = False):
+def send_msgs_animation(handlers, coords, message, callback = None, revert = False,
+                            ms_between = 500, ms_transition = 600, ms_revert = 500):
     for i, (x,y) in enumerate(coords):
-        send_msgs(handlers, dict(message, x = x, y = y,
-                                          delay = i * 500,
-                                          transitiontime = 10))
+        send_msgs(handlers, dict(message,
+                                 x = x,
+                                 y = y,
+                                 delay = i * ms_between,
+                                 transitiontime = ms_transition // 100))
         if revert:
-            send_msgs(handlers, dict(message, power = False, x = x, y = y,
-                                              delay = i*500 + 1000,
-                                              transitiontime = 10))
+            send_msgs(handlers, dict(message,
+                                     power = False,
+                                     x = x,
+                                     y = y,
+                                     delay = i*ms_between + ms_revert,
+                                     transitiontime = ms_transition // 100))
 
     if callback:
-        set_timeout(datetime.timedelta(seconds = len(coords)/2 + (0.5 if revert else 0)), callback)
+        ms = (len(coords) - 1)*ms_between + (ms_revert if revert else 0)
+        set_timeout(datetime.timedelta(milliseconds = ms), callback)
 
 def reply_wrong_player(game, handler):
     if handler in game.players:
@@ -189,16 +196,25 @@ class Game:
     def reset_lamp_all(self):
         self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0 })
 
-    def send_lamp_animation(self, coords, change, callback = None, revert = False):
+    def send_lamp_animation(self, coords, change, callback = None, revert = False,
+                            ms_between = 500, ms_transition = 600, ms_revert = 500):
         changes = []
         for i, (x,y) in enumerate(coords):
-            changes += [ { 'x': x, 'y': y, 'delay': i*0.5, 'change': dict(change, transitiontime = 10) } ]
+            changes += [ { 'x': x,
+                           'y': y,
+                           'delay': i * ms_between / 1000,
+                           'change': dict(change, transitiontime = ms_transition // 100) } ]
             if revert:
-                changes += [ { 'x': x, 'y': y, 'delay': i*0.5 + 1, 'change': { 'sat':0, 'bri':0, 'transitiontime':10 } } ]
+                changes += [ { 'x': x,
+                               'y': y,
+                               'delay': i * ms_between / 1000 + ms_revert / 1000,
+                               'change': { 'sat':0, 'bri':0,
+                                           'transitiontime': ms_transition // 100} } ]
         self.send_lamp_multi(changes)
 
         if callback:
-            set_timeout(datetime.timedelta(seconds = len(coords)/2 + (0.5 if revert else 0)), callback)
+            ms = (len(coords) - 1)*ms_between + (ms_revert if revert else 0)
+            set_timeout(datetime.timedelta(milliseconds = ms), callback)
 
 
     # Other utility methods for abstracting snippets commonly used in games
