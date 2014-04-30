@@ -20,28 +20,6 @@ class Connect4(simplegame.SimpleGame):
         self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
 
 
-    #def reset(self):
-        #pass 
-        #print("New game!")
-        #print("Size: %d %d" % (self.template_vars['grid_x'], self.template_vars['grid_y']))
-        ##self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
-
-        #lg, vars = lightgames, self.template_vars
-        #self.colors = [ lg.rgb_to_hsl(*lg.parse_color(vars['color_1'])),
-        #                lg.rgb_to_hsl(*lg.parse_color(vars['color_2'])),
-        #                lg.rgb_to_hsl(*lg.parse_color(vars['color_empty'])) ]
-
-        #self.player  = 0
-        #self.players = [None, None]
-        #self.board   = [[2 for x in range(self.width)] for y in range(self.height)]
-
-        #for h in self.connections:
-        #    lightgames.send_msg(h, {'gamestate': 'reset'})
-
-        #self.try_get_new_players(2)
-        #self.sync_all()
-        #self.reset_lamp_all()
-
     def sync(self, handler):
         self.set_description(handler)
         print("Syncing %s" % handler)
@@ -52,15 +30,6 @@ class Connect4(simplegame.SimpleGame):
                 lightgames.send_msg(handler, {'x':x, 'y':y, 'hsl':hsl, 'power':powered, 'move':True})
 
     def on_message(self, handler, message):
-        #if self.player == None:
-        #    lightgames.reply_wrong_player(self, handler)
-        #    return
-
-        #if playerH != handler:
-        #    lightgames.reply_wrong_player(self, handler)
-        #    return
-
-        # playerH == handler	
         if not self.correctPlayer(handler): 
             return 
 
@@ -116,9 +85,6 @@ class Connect4(simplegame.SimpleGame):
                     return
 
                 # Switch player
-                #self.player = 1 - player
-                #lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
-                #lightgames.send_msg(opponentH, {'message':'Your turn!'})
                 self.player = player # Set it back. May cause problems? Probably not.  
                 self.turnover() 
 
@@ -131,24 +97,6 @@ class Connect4(simplegame.SimpleGame):
 
         else:
             lightgames.send_msg(playerH, {'error':'Invalid move!'})
-
-
-    #def set_options(self, config):
-        #def clamp(low, x, high):
-        #    return max(low, min(high, x))
-
-        #m = 50
-        #vars = self.template_vars
-        #vars['grid_y'] = clamp(2, int(config['grid_y']),   m)
-        #vars['grid_x'] = clamp(2, int(config['grid_x']),   m)
-        #vars['cell_w'] = clamp(2, int(config['cell_w']), 500)
-        #vars['cell_h'] = clamp(2, int(config['cell_h']), 500)
-
-        #vars['color_1']     = config['color_1']
-        #vars['color_2']     = config['color_2']
-        #vars['color_empty'] = config['color_empty']
-
-        #self.reset()
 
 
     def set_description(self, handler):

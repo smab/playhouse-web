@@ -16,6 +16,7 @@ class SimpleGame(lightgames.Game):
         self.template_vars['color_2'] = '#0000FF'
         self.template_vars['timelimit'] = 20 
 
+
     def reset(self): 
         # Sets up the board and tries to fetch two new players. 
         self.player = 0 
@@ -23,9 +24,9 @@ class SimpleGame(lightgames.Game):
         self.board   = [[2 for x in range(self.width)] for y in range(self.height)]
 
         lg, vars = lightgames, self.template_vars
-        self.colors = [ lg.rgb_to_hue(*lg.parse_color(vars['color_1'])),
-                        lg.rgb_to_hue(*lg.parse_color(vars['color_2'])),
-                        lg.rgb_to_hue(*lg.parse_color(vars['color_empty'])) ]
+        self.colors = [ lg.rgb_to_hsl(*lg.parse_color(vars['color_1'])),
+                        lg.rgb_to_hsl(*lg.parse_color(vars['color_2'])),
+                        lg.rgb_to_hsl(*lg.parse_color(vars['color_empty'])) ]
 
         for h in self.connections:
             lightgames.send_msg(h, {'gamestate': 'reset'})
@@ -35,16 +36,11 @@ class SimpleGame(lightgames.Game):
         self.reset_lamp_all()
 
     def sync(self, handler):  
-        self.set_description(handler)
-        print("Syncing %s" % handler)
-        for y in range(self.height):
-            for x in range(self.width):
-                hue     = self.colors[self.board[y][x]]
-                powered = self.board[y][x] != 2
-                # FIXME? 
-                lightgames.send_msg(handler, {'x':x, 'y':y, 'hue':hue, 'power':powered, 'move':True})
+        # TODO Should be implemented here in some kind of standard format to 
+        # decrease code repetition between games 
+        pass 
 
-    # Returns True if it is this player's turn currently 
+    # Returns True if it is this player's turn 
     def correctPlayer(self, handler): 
         if self.player == None or handler != self.players[self.player]: 
             lightgames.reply_wrong_player(self, handler)
