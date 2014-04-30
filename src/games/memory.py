@@ -3,6 +3,8 @@ import itertools
 import time
 from tornado import gen
 from tornado.ioloop import IOLoop
+
+import simplegame 
 import lightgames
 
 
@@ -11,25 +13,24 @@ def create(client):
     return Memory(client)
 
 
-class Memory(lightgames.Game):
+class Memory(simplegame.SimpleGame):
     template_file = "memory.html"
-    config_file   = "baseconfig.html"
-    template_vars = {
-        'module_name': 'Memory',
-        'grid_x':      6,
-        'grid_y':      4,
-    }
+    config_file   = "memoryconfig.html"
 
     hues = itertools.cycle([5000, 15000, 25000, 35000, 45000, 55000, 65000])
 
-    def reset(self):
-        print("New game!")
-        self.width  = self.template_vars['grid_x']
-        self.height = self.template_vars['grid_y']
+    def __init__(self, client): 
+        super().__init__(client) 
+        self.template_vars['module_name'] = 'Memory'
+        self.template_vars['title'] = 'Memory' 
+        self.template_vars['grid_x'] = 8
+        self.template_vars['grid_y'] = 6
+        self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
 
-        # Reset game state
-        self.player = 0
-        self.players = [None, None]
+    def reset(self):
+        # Unfortunatly we generate two seperate boards and trashes one
+        super().reset() 
+
         self.scores  = [0, 0]
         self.active_tiles = []
 
@@ -46,17 +47,6 @@ class Memory(lightgames.Game):
             self.board[y1][x1] = -hue
             self.board[y2][x2] = -hue
 
-        self.try_get_new_players(2)
-        self.sync_all()
-        self.reset_lamp_all()
-      # # try to get two new players from queue
-      # self.add_player(self.queue.get_first())
-      # self.add_player(self.queue.get_first())
-
-      # for handler in self.connections:
-      #     self.sync(handler)
-
-      # self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0 })
 
     def sync(self, handler):
         self.set_description(handler)
@@ -69,19 +59,13 @@ class Memory(lightgames.Game):
 
     @gen.engine
     def on_message(self, handler, message):
-        # player == -1 when in animation
-        if self.player == -1:
-            lightgames.reply_wrong_player(self, handler)
+        # Checks that it's the correct player. 
+        if not self.correctPlayer(handler):
             return
 
         playerH   = self.players[self.player]
         opponentH = self.players[1 - self.player]
 
-        if playerH != handler:
-            lightgames.reply_wrong_player(self, handler)
-            return
-
-        # playerH == handler
         x, y = message['x'], message['y']
 
         if self.board[y][x] < 0:
@@ -114,10 +98,10 @@ class Memory(lightgames.Game):
                     self.send_lamp(x1, y1, {'sat': 0, 'hue': 0})
                     self.send_lamp(x2, y2, {'sat': 0, 'hue': 0})
 
-                    # Switch over to opponent
+                    # Switch over to opponent. Since there is a delay we do not use SimpleGame's turnover. 
                     lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
                     tmp = 1 - self.player                    
-                    self.player = -1
+                    self.player = None 
                     yield gen.Task(IOLoop.instance().add_timeout, time.time() + 2)
                     self.player = tmp
                     lightgames.send_msg(opponentH, {'message':'Your turn!'})
@@ -139,27 +123,21 @@ class Memory(lightgames.Game):
 
 
     def set_options(self, config):
-        def clamp(low, x, high):
-            return max(low, min(high, x))
 
         def is_even(n): return n % 2 == 0
-
         if not is_even(int(config['grid_x']) * int(config['grid_y'])):
             return "Bad grid size: must have even number of bricks"
-
-        m = 50
-        vars = self.template_vars
-        vars['grid_y'] = clamp(2, int(config['grid_y']),   m)
-        vars['grid_x'] = clamp(2, int(config['grid_x']),   m)
-        vars['cell_w'] = clamp(2, int(config['cell_w']), 500)
-        vars['cell_h'] = clamp(2, int(config['cell_h']), 500)
-
-        self.reset()
+        
+        # Since these variables are expected in super-methods we have to add 
+        # them here. A bit ugly. Could also be added as a hidden element in 
+        # the templates if that is prettier. 
+        config['color_1'] = '#CCCCCC' 
+        config['color_2'] = '#CCCCCC' 
+        super().set_options(config) 
 
 
     def set_description(self, handler):
         message = '<p><p><b>Name:</b> Memory</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> Each player takes turns flipping over a card. If a player manages to flip over two identical cards that player recieve one point, and the cards stay revealed. When all the cards have been revealed the game is over and the player with highest score wins.</p></p>'
-
         lightgames.send_msg(handler, {'rulemessage': (message)})
 
 # vim: set sw=4:

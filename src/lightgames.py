@@ -149,8 +149,11 @@ class Game:
     template_file = "default.html"
     template_vars = {
         'module_name': '<name not set>',
+        'title':       'Default', 
         'cell_w':      64,
         'cell_h':      64,
+        'grid_x':       3, 
+        'grid_y':       3, 
         'color_empty': "#222222",
         'color_hover': "#999999"
     }
@@ -163,11 +166,6 @@ class Game:
 
         # Internal variables
         self.client      = client
-
-        if 'grid_x' not in self.template_vars or \
-           'grid_y' not in self.template_vars:
-            self.template_vars['grid_x'] = get_grid_size()[1]
-            self.template_vars['grid_y'] = get_grid_size()[0]
 
     # Internal, do not override/use
     def set_queue(self, queue):
@@ -341,7 +339,14 @@ class Game:
         this here.  Return a string with an error message if the configuration
         is bad/invalid.
         """
-        pass
+        vars = self.template_vars 
+        vars['grid_x'] = max(0, int(config['grid_x']))
+        vars['grid_y'] = max(0, int(config['grid_y']))
+        vars['cell_w'] = max(0, int(config['cell_w']))
+        vars['cell_h'] = max(0, int(config['cell_h']))
+        vars['color_empty'] = config['color_empty']
+        self.reset() 
+
         
     def send_description(self, handler):
         """

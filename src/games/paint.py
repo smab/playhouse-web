@@ -11,11 +11,13 @@ def create(client):
 class Paint(lightgames.Game):
     config_file = "paintconfig.html"
     template_file = "paint.html"
-    template_vars = {
-        'module_name': 'Paint',
-        #'grid_x':      2,
-        #'grid_y':      2,
-    }
+
+    def __init__(self, client): 
+        super().__init__(client) 
+        self.template_vars['module_name'] = 'paint.html'
+        self.template_vars['title'] = 'Paint'
+        self.template_vars['grid_x'] = lightgames.get_grid_size()[1]
+        self.template_vars['grid_y'] = lightgames.get_grid_size()[0]
 
 
     def reset(self):

@@ -13,21 +13,30 @@ def create(client):
 class GifAnimation(lightgames.Game):
     config_file = "gifconfig.html"
     template_file = "gifanimation.html"
-    template_vars = {
-        'module_name': 'GIF Animation',
-        'grid_x': 3,
-        'grid_y': 3,
-        'animation_file': 'animations/test3x3.gif',
-        'playgif': False,
-        'center_hor': False,
-        'center_vert': False,
-        'offset_hor': 0,
-        'offset_vert': 0,
-        'transition_time': 4,
-        'off_color': '#000000',
-    }
+    #template_vars = {
+    #    'module_name': 'GIF Animation',
+    #    'grid_x': 3,
+    #    'grid_y': 3,
+    #    'animation_file': 'animations/test3x3.gif',
+    #    'playgif': False,
+    #    'center_hor': False,
+    #    'center_vert': False,
+    #    'offset_hor': 0,
+    #    'offset_vert': 0,
+    #    'transition_time': 4,
+    #    'off_color': '#000000',
+    #}
 
     def init(self):
+        self.template_vars['module_name'] = 'GIF Animation'
+        self.template_vars['animation_file'] = 'animations/test3x3.gif' 
+        self.template_vars['playgif'] = False 
+        self.template_vars['center_hor'] = False 
+        self.template_vars['center_vert'] = False 
+        self.template_vars['offset_hor'] = 0 
+        self.template_vars['offset_vert'] = 0 
+        self.template_vars['transition_time'] = 4 
+        
         self.play = False
         self.data = open(self.template_vars['animation_file'], 'rb').read()
 
@@ -134,8 +143,8 @@ class GifAnimation(lightgames.Game):
         self.send_lamp_all({ 'on': False })
 
     def set_options(self, config):
-        self.template_vars['cell_w'] = max(2,min(500,int(config['cell_w'])))
-        self.template_vars['cell_h'] = max(2,min(500,int(config['cell_h'])))
+        #self.template_vars['cell_w'] = max(2,min(500,int(config['cell_w'])))
+        #self.template_vars['cell_h'] = max(2,min(500,int(config['cell_h'])))
 
         files = config['files']
         if 'animation_file' in files:
@@ -212,10 +221,10 @@ class GifAnimation(lightgames.Game):
             r, g, b = [int(n, 16) for n in (r, g, b)]
             return (r, g, b)
 
-        if 'offcolor' in config:
+        if 'color_empty' in config:
             try:
-                self.transp_color = HTMLColorToRGB(config['offcolor'])
-                self.template_vars['off_color'] = config['offcolor']
+                self.transp_color = HTMLColorToRGB(config['color_empty'])
+                self.template_vars['color_empty'] = config['color_empty']
             except ValueError:
                 print("Couldn't convert HTML color to RGB")
 

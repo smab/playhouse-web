@@ -1,3 +1,4 @@
+import simplegame 
 import lightgames
 
 
@@ -6,39 +7,22 @@ def create(client):
     return MnkGame(client)
 
 
-class MnkGame(lightgames.Game):
+class MnkGame(simplegame.SimpleGame):
     config_file = "mnkconfig.html"
     template_file = "mnkgame.html"
-    template_vars = {
-        'module_name': 'm,n,k-game',
-        'title':       'Tic-tac-toe',
-        'grid_x':      3,
-        'grid_y':      3,
-        'winner_req':  3,
-        'color_1':    '#FF3333',
-        'color_2':    '#3333FF',
-    }
-    # note: concept/idea
-    options = {
-        'winner_req': ('integer',            'Stones in a row required to win'),
-        'size':       ('(integer, integer)', 'Grid size')
-    }
 
     winning_req   = 3
     colors        = [         0,      45000, 65000]
     button_colors = ["player_1", "player_2",    ""]
-
-    def reset(self):        
-        print("New game!")
-        
-        self.player  = 0
-        self.players = [None, None]
-        self.board   = [[2 for _ in range(self.template_vars['grid_x'])]
-                           for _ in range(self.template_vars['grid_y'])]
-
-        self.try_get_new_players(2)
-        self.sync_all()
-        self.reset_lamp_all()
+    
+    def __init__(self, client): 
+        super().__init__(client) 
+        self.template_vars['module_name'] = 'm,n,k-game' 
+        self.template_vars['title'] = 'Tic-tac-toe'
+        self.template_vars['grid_x'] = 3 
+        self.template_vars['grid_y'] = 3 
+        self.template_vars['winner_req'] = self.winning_req 
+        self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y'] 
 
     def sync(self, handler):
         print("Syncing %s" % handler)
@@ -77,14 +61,14 @@ class MnkGame(lightgames.Game):
 
 
     def on_message(self, handler, coords):
+
+        # Check it's the correct player 
+        if not self.correctPlayer(handler):
+            return 
+        
         playerH   = self.players[self.player]
         opponentH = self.players[1 - self.player]
         
-        if playerH != handler:
-            lightgames.reply_wrong_player(self, handler)
-            return
-
-        # playerH == handler
         x, y = coords['x'], coords['y']
         button_color = self.button_colors[self.player]
 
@@ -114,28 +98,11 @@ class MnkGame(lightgames.Game):
                 return
 
             # Switch player
-            self.player = 1 - self.player
-
+            self.turnover() 
 
     def set_options(self, config):
-        def clamp(low, x, high):
-            return max(low, min(high, x))
-
-        m = 50
         vars = self.template_vars
-        vars['grid_y']      = clamp(2, int(config['grid_y']),            m)
-        vars['grid_x']      = clamp(2, int(config['grid_x']),            m)
-        vars['cell_w']      = clamp(2, int(config['cell_w']),          500)
-        vars['cell_h']      = clamp(2, int(config['cell_h']),          500)
-
-        # Make sure that it's not possible to configure completely impossible
-        # games.
-        grid_max = max(vars['grid_x'], vars['grid_x'])
-        vars['winner_req']  = clamp(2, int(config['winner_req']), grid_max)
-
-        vars['color_1']     = config['color_1']
-        vars['color_2']     = config['color_2']
-        vars['color_empty'] = config['color_empty']
+        vars['winner_req']  = max(2, int(config['winner_req']))
 
         self.winning_req = vars['winner_req']
 
@@ -145,10 +112,11 @@ class MnkGame(lightgames.Game):
         vars['title'] = 'Tic-tac-toe' if is_tic_tac_toe \
                                       else '%d-in-a-row' % self.winning_req
 
-        self.reset()
+        super().set_options(config) 
 
 
     def set_description(self, handler):
         rules = '<p><b>Name: '+self.template_vars['title']+'</b></p><p><b>Players:</b> 2</p><p><b>Description:</b> The goal of this game is to, on a ' + str(self.template_vars['grid_x'])+ ' by ' + str(self.template_vars['grid_y']) + ' grid, connect ' + str(self.template_vars['winner_req']) + ' dots. Each player takes turn to place a dot anywhere on the grid where there is not already another dot and the first player to get '+ str(self.template_vars['winner_req']) +' dots in a row horizontally, vertically or diagonally wins the game </p>'
-
         lightgames.send_msg(handler, {'rulemessage': (rules)})
+
+

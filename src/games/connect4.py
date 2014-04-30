@@ -8,7 +8,7 @@ def create(client):
 
 class Connect4(simplegame.SimpleGame):
     template_file = "connect4.html"
-    config_file   = "connect4.html"
+    config_file   = "simplegameconfig.html" 
 
     def __init__(self, client):
         simplegame.SimpleGame.__init__(self, client) 
@@ -28,6 +28,7 @@ class Connect4(simplegame.SimpleGame):
                 hsl     = self.colors[self.board[y][x]]
                 powered = self.board[y][x] != 2
                 lightgames.send_msg(handler, {'x':x, 'y':y, 'hsl':hsl, 'power':powered, 'move':True})
+
 
     def on_message(self, handler, message):
         if not self.correctPlayer(handler): 

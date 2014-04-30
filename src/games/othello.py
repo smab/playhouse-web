@@ -8,7 +8,6 @@ def create(client):
 
 class Othello(simplegame.SimpleGame):
     template_file = "mnkgame.html"
-    config_file   = "baseconfig.html"
 
     colors        = [         0,      45000, 65000]
     button_colors = ["player_1", "player_2",    ""]
@@ -149,21 +148,6 @@ class Othello(simplegame.SimpleGame):
 
             # Neither player has any legal move; game over
             self.game_over()
-
-    def set_options(self, config):
-        def clamp(low, x, high):
-            return max(low, min(high, x))
-
-        m = 50
-        vars = self.template_vars
-
-        vars['grid_y'] = clamp(2, int(config['grid_y']),   m)
-        vars['grid_x'] = clamp(2, int(config['grid_x']),   m)
-
-        vars['cell_w'] = clamp(2, int(config['cell_w']), 500)
-        vars['cell_h'] = clamp(2, int(config['cell_h']), 500)
-
-        self.reset()
 
 
     def set_description(self, handler):

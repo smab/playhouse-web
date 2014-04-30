@@ -1,0 +1,16 @@
+{% extends "simplegameconfig.html" %}
+
+{% block setting %}
+    <h2>Colors</h2> 
+    <dl>
+        <dt>Empty color:</dt>
+        <dd><input type="color" size="8" name="color_empty" value="{{ color_empty }}" /></dd>
+    </dl>
+
+    <h2>Misc</h2> 
+    <dl>
+        <dt>Timelimit (s):</dt> 
+        <dd><input type="number" size="8" name="timelimit" value="{{ timelimit }}" /></dd>
+    </dl>
+{% end %}
+

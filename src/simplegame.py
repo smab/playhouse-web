@@ -5,6 +5,8 @@ import lightgames
 # a color, score, and a timelimit. 
 # Examples include Tic-tac-toe, Connect4, and Othello. 
 class SimpleGame(lightgames.Game): 
+    config_file = "simplegameconfig.html" 
+
     def __init__(self, client): 
         lightgames.Game.__init__(self, client) 
 
@@ -21,6 +23,8 @@ class SimpleGame(lightgames.Game):
         # Sets up the board and tries to fetch two new players. 
         self.player = 0 
         self.players = [None, None]  
+        self.width = self.template_vars['grid_x'] 
+        self.height = self.template_vars['grid_y'] 
         self.board   = [[2 for x in range(self.width)] for y in range(self.height)]
 
         lg, vars = lightgames, self.template_vars
@@ -54,23 +58,11 @@ class SimpleGame(lightgames.Game):
         lightgames.send_msg(self.players[1-self.player], {'message':'Waiting on other player...'})
             
     def set_options(self, config):  
-        def clamp(low, x, high):
-            return max(low, min(high, x))
-
-        m = 50
-        vars = self.template_vars
-        vars['grid_x'] = clamp(2, int(config['grid_x']),   m)
-        vars['grid_y'] = clamp(2, int(config['grid_y']),   m)
-        vars['cell_w'] = clamp(2, int(config['cell_w']), 500)
-        vars['cell_h'] = clamp(2, int(config['cell_h']), 500)
-
+        vars = self.template_vars 
         vars['color_1']     = config['color_1']
         vars['color_2']     = config['color_2']
-        vars['color_empty'] = config['color_empty']
-
-        #vars['timelimit']   = clamp(0, int(config['timelimit'])) 
-
-        self.reset() 
+        vars['timelimit']   = max(0, int(config['timelimit']))  
+        super().set_options(config) 
 
     def set_description(self, handler): 
         pass 
