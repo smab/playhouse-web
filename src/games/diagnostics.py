@@ -11,7 +11,7 @@ class Diagnostics(lightgames.Game):
     config_file = "diagnosticsconfig.html"
     template_vars = {
         'module_name': 'Diagnostics tool',
-        'run': False,
+        'run': True,
         'delay': 500
     }
 

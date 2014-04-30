@@ -101,29 +101,14 @@
           updateShadow()
       }
 
-      var color = 'hsl(' + Math.floor(obj.hue / 255) + ',100%,50%)'
-      el.style.backgroundColor = obj.power? color : ''
-      el.style.className       = obj.power? 'on'  : 'off'
+   // var color = 'hsl(' + Math.floor(obj.hue / 255) + ',100%,50%)'
+      el.style.backgroundColor = obj.power? toHSL(obj.hsl) : ''
+      el.style.className       = obj.power? 'on'           : 'off'
+
+      function toHSL(a) {
+        return "hsl(" + a[0] + ","
+                      + Math.floor(a[1] / 256 * 100) + "%,"
+                      + Math.floor(a[2] / 256 * 100) + "%)"
+      }
     }
 {% end %}
-
-{%block rulemessage%}
-
-    if (obj.rulemessage != null){
-        document.getElementById('therules').innerHTML = obj.rulemessage;
-    }
-
-
-{% end %}
-
-{%block rules%}
-<input type="button" id="userText" value="Rules" onclick="showButton()" class = "rulebutton"/>
-	<div id="rules" class="rules box">
-			
-<p id="therules" ><p>
-	
-
-</div>
-
-{%end%}
-

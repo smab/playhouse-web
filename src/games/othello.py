@@ -1,3 +1,5 @@
+import math
+
 import simplegame 
 import lightgames
 
@@ -34,8 +36,10 @@ class Othello(simplegame.SimpleGame):
         super().reset() 
 
         # Set the start pattern 
-        self.board[self.height//2][self.width//2] = self.board[self.height//2-1][self.width//2-1] = 1 
-        self.board[self.height//2][self.width//2-1] = self.board[self.height//2-1][self.width//2] = 0 
+        mx = math.floor(width  / 2) - 1
+        my = math.floor(height / 2) - 1
+        self.board[my][mx+1] = self.board[my+1][mx  ] = 0
+        self.board[my][mx  ] = self.board[my+1][mx+1] = 1
     #    print("New game!")
 
     #    self.player  = 0
@@ -173,7 +177,6 @@ class Othello(simplegame.SimpleGame):
 
             # Neither player has any legal move; game over
             self.game_over()
-            
 
     def set_options(self, config):
         def clamp(low, x, high):
@@ -181,8 +184,10 @@ class Othello(simplegame.SimpleGame):
 
         m = 50
         vars = self.template_vars
-        vars['grid_y'] = clamp(4, int(config['grid_y']),   m)
-        vars['grid_x'] = clamp(4, int(config['grid_x']),   m)
+
+        vars['grid_y'] = clamp(2, int(config['grid_y']),   m)
+        vars['grid_x'] = clamp(2, int(config['grid_x']),   m)
+
         vars['cell_w'] = clamp(2, int(config['cell_w']), 500)
         vars['cell_h'] = clamp(2, int(config['cell_h']), 500)
 

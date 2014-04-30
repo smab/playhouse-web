@@ -7,13 +7,18 @@ var state = 'spectating'
 ws.onmessage = function (evt) {
     var obj = JSON.parse(evt.data)
 
+    if (obj.state != null) {
+        state = obj.state
+        if (state == 'destroyed') {
+            var over = document.getElementById("overlay")
+            over.className = ""
+        }
+    }
+
     if      (obj.error   != null) setMessage(obj.error,   'error')
     else if (obj.message != null) setMessage(obj.message, 'message')
 
-    if      (obj.state   != null) state = obj.state
-
     on_message(obj)
-    handle_queue_msg(obj)
 };
 
 function ignoreEvent(ev) {
@@ -72,14 +77,18 @@ function setMessage(msg, type) {
 function handle_queue_msg(obj) {
     var qbtn = document.getElementById("queuebtn")
 
-    qbtn.disabled = (state == 'playing')
+    qbtn.disabled = (state == 'playing' || state == 'destroyed')
 
-    if (state == 'playing') {
+    if (state == 'destroyed') {
+        qbtn.onclick = function() {}
+
+    } else if (state == 'playing') {
         qbtn.value = "In game";
         qbtn.onclick = function() {}
 
     } else if (obj.queuepos > 0) {
         setMessage("Your place in queue: " + obj.queuepos, 'message')
+        state = 'spectating'
         qbtn.value = "Leave queue";
         qbtn.onclick = function() {
             ws.send(JSON.stringify({ session : session, queueaction : 0 }));
@@ -88,6 +97,7 @@ function handle_queue_msg(obj) {
     } else if (state == 'gameover' || obj.queuepos == 0) {
         if (obj.queuepos == 0) {
             setMessage("You are a spectator!", 'message')
+            state = 'spectating'
         }
         qbtn.value = "Join queue";
         qbtn.onclick = function() {
@@ -98,7 +108,7 @@ function handle_queue_msg(obj) {
 
 
 //-- Rules --------------------------------------
-var rulesEl = document.getElementById('rules')
+/*var rulesEl = document.getElementById('rules')
 rules.style.display = 'none'
 
 function showButton() {
@@ -108,4 +118,4 @@ function showButton() {
     } else {
         rulesEl.style.display = 'none'
     }
-}
+}*/

@@ -36,14 +36,25 @@ def send_msgs(handlers, msg):
     for h in handlers:
         send_msg(h, msg)
 
-def send_msgs_animation(handlers, coords, message, callback = None, revert = False):
+def send_msgs_animation(handlers, coords, message, callback = None, revert = False,
+                            ms_between = 500, ms_transition = 600, ms_revert = 500):
     for i, (x,y) in enumerate(coords):
-        send_msgs(handlers, dict(message, x = x, y = y, delay = i * 500, transitiontime = 10))
+        send_msgs(handlers, dict(message,
+                                 x = x,
+                                 y = y,
+                                 delay = i * ms_between,
+                                 transitiontime = ms_transition // 100))
         if revert:
-            send_msgs(handlers, dict(message, power = False, x = x, y = y, delay = i*500 + 1000, transitiontime = 10))
+            send_msgs(handlers, dict(message,
+                                     power = False,
+                                     x = x,
+                                     y = y,
+                                     delay = i*ms_between + ms_revert,
+                                     transitiontime = ms_transition // 100))
 
     if callback:
-        set_timeout(datetime.timedelta(seconds = len(coords)/2 + (0.5 if revert else 0)), callback)
+        ms = (len(coords) - 1)*ms_between + (ms_revert if revert else 0)
+        set_timeout(datetime.timedelta(milliseconds = ms), callback)
 
 def reply_wrong_player(game, handler):
     if handler in game.players:
@@ -108,18 +119,29 @@ def rgb_to_xyz(r, g, b):
 def parse_color(color):
     return int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
 
-def rgb_to_hue(r, g, b):
+def rgb_to_hsl(r, g, b):
     # via http://en.wikipedia.org/wiki/HSL_and_HSV
     M, m = max(r,g,b), min(r,g,b)
     c = M - m
 
-    if   c == 0: h_ = 0
-    elif M == r: h_ = (g - b)/c % (256 * 6)
-    elif M == g: h_ = (b - r)/c + (256 * 2)
-    elif M == b: h_ = (r - g)/c + (256 * 4)
+    if c == 0:
+        hue = 0
+    elif M == r: # ↓ may be <0, so use + and % to make sure that it is in [0,360]
+        hue = ((g - b)/c * 360 + 6) * 360 % (360 * 6)
+    elif M == g:
+        hue =  (b - r)/c * 360 + (360 * 2)
+    elif M == b:
+        hue =  (r - g)/c * 360 + (360 * 4)
 
-    print(r, g, b, h_ / 6)
-    return int(h_ * 256 / 6)
+    hue /= 6
+    lum = M/2 + m/2
+    divisor = 2 * (lum if lum < 128 else 256 - lum)
+    sat = c / divisor * 256
+
+    return (int(hue), int(sat), int(lum))
+
+def to_lamp_hue(hsl):
+  return int(hsl[0] * 65536 / 360)
 
 
 class Game:
@@ -174,16 +196,25 @@ class Game:
     def reset_lamp_all(self):
         self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0 })
 
-    def send_lamp_animation(self, coords, change, callback = None, revert = False):
+    def send_lamp_animation(self, coords, change, callback = None, revert = False,
+                            ms_between = 500, ms_transition = 600, ms_revert = 500):
         changes = []
         for i, (x,y) in enumerate(coords):
-            changes += [ { 'x': x, 'y': y, 'delay': i*0.5, 'change': dict(change, transitiontime = 10) } ]
+            changes += [ { 'x': x,
+                           'y': y,
+                           'delay': i * ms_between / 1000,
+                           'change': dict(change, transitiontime = ms_transition // 100) } ]
             if revert:
-                changes += [ { 'x': x, 'y': y, 'delay': i*0.5 + 1, 'change': { 'bri':0, 'transitiontime':10 } } ]
+                changes += [ { 'x': x,
+                               'y': y,
+                               'delay': i * ms_between / 1000 + ms_revert / 1000,
+                               'change': { 'sat':0, 'bri':0,
+                                           'transitiontime': ms_transition // 100} } ]
         self.send_lamp_multi(changes)
 
         if callback:
-            set_timeout(datetime.timedelta(seconds = len(coords)/2 + (0.5 if revert else 0)), callback)
+            ms = (len(coords) - 1)*ms_between + (ms_revert if revert else 0)
+            set_timeout(datetime.timedelta(milliseconds = ms), callback)
 
 
     # Other utility methods for abstracting snippets commonly used in games
@@ -286,7 +317,8 @@ class Game:
         """
         print("lightgames: destroy", self.connections)
         for h in self.connections:
-            send_msg(h, {'message':"The game got destroyed!"})
+            send_msg(h, {'state'  : "destroyed",
+                         'message': "The game got destroyed!"})
 
     def on_message(self, handler, message):
         """
