@@ -88,7 +88,7 @@
                     {% else %}
                         {% set cell_class = "claimed" %}
                     {% end %}
-                    <td id="{{ r }}-{{ c }}" class="{{ cell_class }}" onclick="gridclick(this)"></td>
+                    <td id="{{ c }}-{{ r }}" class="{{ cell_class }}" onclick="gridclick(this)"></td>
                 {% end %}
                 </tr>
             {% end %}
@@ -114,7 +114,7 @@
                 <input type="hidden" name="lamp" value="{{ activated }}" />
             </div>
             <div style="width:100%">
-                <input name="grid_size" type="text" value="{{ grid['height'] }}x{{ grid['width'] }}" placeholder="HxW" {% if changed %} title="Save or refresh to enable" disabled {% end %} />
+                <input name="grid_size" type="text" value="{{ grid['width'] }}x{{ grid['height'] }}" placeholder="WxH" {% if changed %} title="Save or refresh to enable" disabled {% end %} />
                 <input type="submit" name="changesize" value="Change Size" {% if changed %} title="Save or refresh to enable" disabled {% end %} />
             </div> 
         </div>

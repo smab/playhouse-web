@@ -290,7 +290,8 @@ class Game:
         """
         print("lightgames: destroy", self.connections)
         for h in self.connections:
-            send_msg(h, {'message':"The game got destroyed!"})
+            send_msg(h, {'state'  : "destroyed",
+                         'message': "The game got destroyed!"})
 
     def on_message(self, handler, message):
         """

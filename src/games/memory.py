@@ -1,5 +1,6 @@
 import random
 import itertools
+import time
 
 import lightgames
 
@@ -107,6 +108,7 @@ class Memory(lightgames.Game):
                     self.send_lamp(x2, y2, {'sat': 0, 'hue': 0})
 
                     # Switch over to opponent
+                    time.sleep(2)
                     lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
                     lightgames.send_msg(opponentH, {'message':'Your turn!'})
                     self.player = 1 - self.player
