@@ -1,69 +1,72 @@
+import simplegame 
 import lightgames
-
 
 def create(client):
     print("Creating connect-4 game")
     return Connect4(client)
 
 
-class Connect4(lightgames.Game):
+class Connect4(simplegame.SimpleGame):
     template_file = "connect4.html"
     config_file   = "connect4.html"
-    template_vars = {
-        'module_name': 'Connect 4',
-        'grid_x':      7,
-        'grid_y':      6,
 
-        'color_1':     '#FF0000',
-        'color_2':     '#0000FF',
-        'color_empty': '#222222',
-    }
+    def __init__(self, client):
+        simplegame.SimpleGame.__init__(self, client) 
 
-    width, height = template_vars['grid_x'], template_vars['grid_y']
-
-    def reset(self):
-        print("New game!")
-        print("Size: %d %d" % (self.template_vars['grid_x'], self.template_vars['grid_y']))
+        self.template_vars['module_name'] = 'Connect4' 
+        self.template_vars['title'] = 'Connect4' 
+        self.template_vars['grid_x'] = 7 
+        self.template_vars['grid_y'] = 6 
         self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
 
-        lg, vars = lightgames, self.template_vars
-        self.colors = [ lg.rgb_to_hue(*lg.parse_color(vars['color_1'])),
-                        lg.rgb_to_hue(*lg.parse_color(vars['color_2'])),
-                        lg.rgb_to_hue(*lg.parse_color(vars['color_empty'])) ]
 
-        self.player  = 0
-        self.players = [None, None]
-        self.board   = [[2 for x in range(self.width)] for y in range(self.height)]
+    #def reset(self):
+        #pass 
+        #print("New game!")
+        #print("Size: %d %d" % (self.template_vars['grid_x'], self.template_vars['grid_y']))
+        ##self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
 
-        for h in self.connections:
-            lightgames.send_msg(h, {'gamestate': 'reset'})
+        #lg, vars = lightgames, self.template_vars
+        #self.colors = [ lg.rgb_to_hue(*lg.parse_color(vars['color_1'])),
+        #                lg.rgb_to_hue(*lg.parse_color(vars['color_2'])),
+        #                lg.rgb_to_hue(*lg.parse_color(vars['color_empty'])) ]
 
-        self.try_get_new_players(2)
-        self.sync_all()
-        self.reset_lamp_all()
+        #self.player  = 0
+        #self.players = [None, None]
+        #self.board   = [[2 for x in range(self.width)] for y in range(self.height)]
 
-    def sync(self, handler):
-        self.set_description(handler)
-        print("Syncing %s" % handler)
-        for y in range(self.height):
-            for x in range(self.width):
-                hue     = self.colors[self.board[y][x]]
-                powered = self.board[y][x] != 2
-                lightgames.send_msg(handler, {'x':x, 'y':y, 'hue':hue, 'power':powered, 'move':True})
+        #for h in self.connections:
+        #    lightgames.send_msg(h, {'gamestate': 'reset'})
+
+        #self.try_get_new_players(2)
+        #self.sync_all()
+        #self.reset_lamp_all()
+
+    #def sync(self, handler):
+    #    self.set_description(handler)
+    #    print("Syncing %s" % handler)
+    #    for y in range(self.height):
+    #        for x in range(self.width):
+    #            hue     = self.colors[self.board[y][x]]
+    #            powered = self.board[y][x] != 2
+    #            lightgames.send_msg(handler, {'x':x, 'y':y, 'hue':hue, 'power':powered, 'move':True})
 
     def on_message(self, handler, message):
-        if self.player == None:
-            lightgames.reply_wrong_player(self, handler)
-            return
+        #if self.player == None:
+        #    lightgames.reply_wrong_player(self, handler)
+        #    return
+
+        #if playerH != handler:
+        #    lightgames.reply_wrong_player(self, handler)
+        #    return
+
+        # playerH == handler	
+        if not self.correctPlayer(handler): 
+            return 
 
         playerH   = self.players[self.player]
         opponentH = self.players[1 - self.player]
 
-        if playerH != handler:
-            lightgames.reply_wrong_player(self, handler)
-            return
-
-        # playerH == handler	
         x, y = message['x'], message['y']
         hue  = self.colors[self.player]
 
@@ -112,11 +115,13 @@ class Connect4(lightgames.Game):
                     return
 
                 # Switch player
-                self.player = 1 - player
-                lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
-                lightgames.send_msg(opponentH, {'message':'Your turn!'})
+                #self.player = 1 - player
+                #lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
+                #lightgames.send_msg(opponentH, {'message':'Your turn!'})
+                self.player = player # Set it back. May cause problems? Probably not.  
+                self.turnover() 
 
-            # Perform piece-dropping animation
+            # Perform jaw-dropping animation
             coords = []
             for ty in range(0, y):
                 coords += [ (x, ty) ]
@@ -127,27 +132,27 @@ class Connect4(lightgames.Game):
             lightgames.send_msg(playerH, {'error':'Invalid move!'})
 
 
-    def set_options(self, config):
-        def clamp(low, x, high):
-            return max(low, min(high, x))
+    #def set_options(self, config):
+        #def clamp(low, x, high):
+        #    return max(low, min(high, x))
 
-        m = 50
-        vars = self.template_vars
-        vars['grid_y'] = clamp(2, int(config['grid_y']),   m)
-        vars['grid_x'] = clamp(2, int(config['grid_x']),   m)
-        vars['cell_w'] = clamp(2, int(config['cell_w']), 500)
-        vars['cell_h'] = clamp(2, int(config['cell_h']), 500)
+        #m = 50
+        #vars = self.template_vars
+        #vars['grid_y'] = clamp(2, int(config['grid_y']),   m)
+        #vars['grid_x'] = clamp(2, int(config['grid_x']),   m)
+        #vars['cell_w'] = clamp(2, int(config['cell_w']), 500)
+        #vars['cell_h'] = clamp(2, int(config['cell_h']), 500)
 
-        vars['color_1']     = config['color_1']
-        vars['color_2']     = config['color_2']
-        vars['color_empty'] = config['color_empty']
+        #vars['color_1']     = config['color_1']
+        #vars['color_2']     = config['color_2']
+        #vars['color_empty'] = config['color_empty']
 
-        self.reset()
+        #self.reset()
 
 
     def set_description(self, handler):
-        message ='<p><p><b>Name:</b> Connect four</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> Each player takes turns to drop their coloured circles from the top straight down in a chosen column. The first player to connect four circles vertically, horizontally or diagonally wins the game.</p></p>'
-
+        message ='<p><p><b>Name:</b> Connect4</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> Each player takes turns to drop their coloured circles from the top straight down in a chosen column. The first player to connect four circles vertically, horizontally or diagonally wins the game.</p></p>'
         lightgames.send_msg(handler, {'rulemessage': (message)})
+
 
 # vim: set sw=4:
