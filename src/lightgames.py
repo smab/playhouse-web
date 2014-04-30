@@ -108,18 +108,22 @@ def rgb_to_xyz(r, g, b):
 def parse_color(color):
     return int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
 
-def rgb_to_hue(r, g, b):
+def rgb_to_hsl(r, g, b):
     # via http://en.wikipedia.org/wiki/HSL_and_HSV
     M, m = max(r,g,b), min(r,g,b)
     c = M - m
 
-    if   c == 0: h_ = 0
-    elif M == r: h_ = (g - b)/c % (256 * 6)
-    elif M == g: h_ = (b - r)/c + (256 * 2)
-    elif M == b: h_ = (r - g)/c + (256 * 4)
+    if   c == 0: hue = 0
+    elif M == r: hue = (g - b)/c * 256
+    elif M == g: hue = (b - r)/c * 256 + (256 * 3)
+    elif M == b: hue = (r - g)/c * 256 + (256 * 6)
 
-    print(r, g, b, h_ / 6)
-    return int(h_ * 256 / 6)
+    hue /= 6
+    lum = M/2 + m/2
+    divisor = 2 * (lum if lum < 128 else 256 - lum)
+    sat = c / divisor * 256
+
+    return (int(hue), int(sat), int(lum))
 
 
 class Game:

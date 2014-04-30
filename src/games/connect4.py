@@ -27,9 +27,9 @@ class Connect4(lightgames.Game):
         self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
 
         lg, vars = lightgames, self.template_vars
-        self.colors = [ lg.rgb_to_hue(*lg.parse_color(vars['color_1'])),
-                        lg.rgb_to_hue(*lg.parse_color(vars['color_2'])),
-                        lg.rgb_to_hue(*lg.parse_color(vars['color_empty'])) ]
+        self.colors = [ lg.rgb_to_hsl(*lg.parse_color(vars['color_1'])),
+                        lg.rgb_to_hsl(*lg.parse_color(vars['color_2'])),
+                        lg.rgb_to_hsl(*lg.parse_color(vars['color_empty'])) ]
 
         self.player  = 0
         self.players = [None, None]
@@ -48,9 +48,9 @@ class Connect4(lightgames.Game):
         print("Syncing %s" % handler)
         for y in range(self.height):
             for x in range(self.width):
-                hue     = self.colors[self.board[y][x]]
+                hsl     = self.colors[self.board[y][x]]
                 powered = self.board[y][x] != 2
-                lightgames.send_msg(handler, {'x':x, 'y':y, 'hue':hue, 'power':powered, 'move':True})
+                lightgames.send_msg(handler, {'x':x, 'y':y, 'hsl':hsl, 'power':powered, 'move':True})
 
     def on_message(self, handler, message):
         if self.player == None:
@@ -66,7 +66,8 @@ class Connect4(lightgames.Game):
 
         # playerH == handler	
         x, y = message['x'], message['y']
-        hue  = self.colors[self.player]
+        hsl  = self.colors[self.player]
+        hue  = hsl[0] * 256
 
         def grab_ray(pos, delta, player):
             x, y   = pos
@@ -90,7 +91,7 @@ class Connect4(lightgames.Game):
             def done():
                 # Turn the final lamps on
                 self.send_lamp(x, y, {'sat': 255, 'hue': hue, 'transitiontime': 10})
-                lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hue':hue, 'power':True, 'transitiontime':10, 'move':True})
+                lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hsl':hsl, 'power':True, 'transitiontime':10, 'move':True})
 
                 # Check if this move caused a win
                 winner_lamps = set()
@@ -122,7 +123,7 @@ class Connect4(lightgames.Game):
             for ty in range(0, y):
                 coords += [ (x, ty) ]
             self.send_lamp_animation(coords, { 'sat': 255, 'hue': hue }, revert = True, callback = done)
-            lightgames.send_msgs_animation(self.connections, coords, { 'hue':hue, 'power':True }, revert = True)
+            lightgames.send_msgs_animation(self.connections, coords, { 'hsl':hsl, 'power':True }, revert = True)
 
         else:
             lightgames.send_msg(playerH, {'error':'Invalid move!'})
