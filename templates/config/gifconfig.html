@@ -53,7 +53,7 @@
         <dt>Offset horizontally:</dt>
         <dd>
             <label>
-                <input type="text" size="2" name="offset_hor" value="{{ offset_hor }}" />
+                <input type="number" size="2" name="offset_hor" value="{{ offset_hor }}" />
                 pixels (or lamps)
             </label>
         </dd>
@@ -61,7 +61,7 @@
         <dt>Offset vertically:</dt>
         <dd>
             <label>
-                <input type="text" size="2" name="offset_vert" value="{{ offset_vert }}" />
+                <input type="number" size="2" name="offset_vert" value="{{ offset_vert }}" />
                 pixels (or lamps)
             </label>
         </dd>
@@ -69,8 +69,15 @@
         <dt>Transition time:</dt>
         <dd>
             <label>
-                <input type="text" size="4" name="transitiontime" value="{{ transition_time }}" />
+                <input type="number" size="4" name="transitiontime" value="{{ transition_time }}" />
                 (in 10ths of a second)
+            </label>
+        </dd>
+
+        <dt>Off color:</dt>
+        <dd>
+            <label>
+                <input type="color" size="8" name="offcolor" value="{{ off_color }}" />
             </label>
         </dd>
     </dl>
