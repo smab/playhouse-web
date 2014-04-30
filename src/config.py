@@ -381,7 +381,7 @@ class GridConfigHandler(RequestHandler):
             size = self.get_argument('grid_size').split('x')
 
             if len(size) == 2 and size[0].isdigit() and size[1].isdigit():
-                h, w = int(size[0]), int(size[1])
+                w, h = int(size[0]), int(size[1])
 
                 newgrid = [[None for _ in range(w)] for _ in range(h)]
 
@@ -398,7 +398,7 @@ class GridConfigHandler(RequestHandler):
             coords = self.get_argument('coords').split(',')
 
             if len(coords) == 2 and coords[0].isdigit() and coords[1].isdigit():
-                y,x = int(coords[0]), int(coords[1])
+                x,y = int(coords[0]), int(coords[1])
 
                 if y >= GridConfigHandler.grid['height'] or \
                     x >= GridConfigHandler.grid['width']:
@@ -407,7 +407,7 @@ class GridConfigHandler(RequestHandler):
                     if GridConfigHandler.grid['grid'][y][x] != None:
                         GridConfigHandler.grid['grid'][y][x] = None
                         print('Lamp removed from %s' % coords)
-                        msg = 'Lamp removed from %d,%d' % (y,x)
+                        msg = 'Lamp removed from %d,%d' % (x,y)
                         GridConfigHandler.changed = True
                     elif self.get_argument('lamp') == '':
                         status,msg = ('error','No activated lamp')
@@ -417,7 +417,7 @@ class GridConfigHandler(RequestHandler):
                                 self.get_argument('lamp'))
                             GridConfigHandler.grid['grid'][y][x] = lamp
                             print('Lamp %s placed at %s' % (lamp, coords))
-                            msg = 'Lamp placed at %d,%d' % (y,x)
+                            msg = 'Lamp placed at %d,%d' % (x,y)
                             GridConfigHandler.changed = True
                         except ValueError:
                             status,msg = ('error','Invalid lamp')

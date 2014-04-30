@@ -13,8 +13,8 @@ class Paint(lightgames.Game):
     template_file = "paint.html"
     template_vars = {
         'module_name': 'Paint',
-        'grid_x':      2,
-        'grid_y':      2,
+        #'grid_x':      2,
+        #'grid_y':      2,
     }
 
 
