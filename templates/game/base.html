@@ -13,8 +13,10 @@
               /><!-- Could move to game-base.css  with viewports instead of retina.css-->
         <style>
             #grid td {
-                width:  {{ cell_w }}px;
-                height: {{ cell_h }}px;
+                min-width:  {{ cell_w }}px;
+                width:      {{ cell_w }}px;
+                min-height: {{ cell_h }}px;
+                height:     {{ cell_h }}px;
             }
 
             #grid           { background: #000;                    }
