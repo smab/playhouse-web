@@ -24,6 +24,7 @@ class GifAnimation(lightgames.Game):
         self.template_vars['offset_hor'] = 0 
         self.template_vars['offset_vert'] = 0 
         self.template_vars['transition_time'] = 4 
+        self.template_vars['color_off'] = '#000000'
         
         self.play = False
         self.data = open(self.template_vars['animation_file'], 'rb').read()
@@ -209,10 +210,10 @@ class GifAnimation(lightgames.Game):
             r, g, b = [int(n, 16) for n in (r, g, b)]
             return (r, g, b)
 
-        if 'color_empty' in config:
+        if 'color_off' in config:
             try:
-                self.transp_color = HTMLColorToRGB(config['color_empty'])
-                self.template_vars['color_empty'] = config['color_empty']
+                self.transp_color = HTMLColorToRGB(config['color_off'])
+                self.template_vars['color_off'] = config['color_off']
             except ValueError:
                 print("Couldn't convert HTML color to RGB")
 
