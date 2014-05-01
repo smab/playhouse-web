@@ -152,8 +152,8 @@ class Game:
         'title':       'Default', 
         'cell_w':      64,
         'cell_h':      64,
-        'grid_x':       3, 
-        'grid_y':       3, 
+        'grid_x':       None, 
+        'grid_y':       None, 
         'color_empty': "#222222",
         'color_hover': "#999999"
     }
