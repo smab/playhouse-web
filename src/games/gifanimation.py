@@ -16,6 +16,7 @@ class GifAnimation(lightgames.Game):
 
     def init(self):
         self.template_vars['module_name'] = 'GIF Animation'
+        self.template_vars['title'] = 'GIF Animation' 
         self.template_vars['animation_file'] = 'animations/test3x3.gif' 
         self.template_vars['playgif'] = False 
         self.template_vars['center_hor'] = False 
