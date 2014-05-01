@@ -190,7 +190,9 @@ class BridgeConfigHandler(RequestHandler):
         headers = add_auth_cookie({'Content-Type': 'application/json'})
 
         data = self.request.arguments 
-        if 'identify' in data and 'select' in data:
+        if 'identify' in data: 
+            if not 'select' in data:
+                self.redirect("bridges?status=message&msg=%s" % "You need to select a bridge.")  
             request = {'alert': 'select'}
             request = tornado.escape.json_encode(request) 
             for mac in data['select']: 
@@ -206,17 +208,13 @@ class BridgeConfigHandler(RequestHandler):
                 else: 
                     print('Error when blinking', mac, response) 
                     self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
-            self.redirect('bridges') 
 
         elif 'add' in data: 
             # Remove unneccesary whitespace and decode to utf-8 
             data['ip'] = data['ip'][0].strip().decode() 
-            data['username'] = data['username'][0].strip().decode() 
 
             if data['ip'] != '': 
                 request = {'ip': data['ip']}
-                if data['username'] != '': 
-                    request['username'] = data['username'] 
 
                 print('Add bridge:', request)
                 json = tornado.escape.json_encode(request) 
@@ -235,7 +233,9 @@ class BridgeConfigHandler(RequestHandler):
                 print('No IP specified') 
                 self.redirect('bridges') 
 
-        elif 'remove' in data and 'select' in data: 
+        elif 'remove' in data: 
+            if not 'select' in data:
+                self.redirect("bridges?status=message&msg=%s" % "You need to select a bridge.")  
             for mac in data['select']: 
                 print('Remove bridge', mac.decode()) 
                 client.request("DELETE", "/bridges/"+mac.decode(), {}, headers)
@@ -250,7 +250,6 @@ class BridgeConfigHandler(RequestHandler):
                     print('Could not remove bridge.')
                     print(response['errorcode'], response['errormessage']) 
                     self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
-            self.redirect('bridges') 
 
         # Set bridges to None, to force it to get them in get() 
         elif 'refresh' in data: 
@@ -289,12 +288,13 @@ class BridgeConfigHandler(RequestHandler):
             print(response) 
             response = tornado.escape.json_decode(response) 
             if response['state'] == 'success': 
-                self.redirect("bridges?status=message&msg=%s" % "Server begun searching, refresh bridges (using the button) after 20 s") 
+                self.redirect("bridges?status=message&msg=%s" % "Server begun searching, refresh bridges (using the button) after 20 s.") 
             else: 
                 print(response['errorcode'], response['errormessage']) 
                 self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
         else: 
             print('Unknown request. What did you do?') 
+            self.redirect("bridges?status=message&msg=%s" % "Unknown request.") 
 
 
 class GridConfigHandler(RequestHandler):
