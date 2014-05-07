@@ -15,6 +15,10 @@ class GetException(Exception):
         self.msg = msg
         self.response = response
 
+class ConfigException(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
 def add_auth_cookie(headers):
     if manager.light_cookie and 'user' in manager.light_cookie:
         headers['Cookie'] = manager.light_cookie['user'].output(attrs=[], header='')
@@ -24,9 +28,9 @@ def get_data(client, path):
     print("GET %s" % path)
     try: 
         client.request("GET", path, headers=add_auth_cookie({}))
-    except ConnectionRefusedError: 
+    except ConnectionRefusedError as e: 
         print("ConnectionRefusedError: [Errno 111] Connection refused")
-        raise GetException("<p>ConnectionRefusedError: [Errno 111] Connection refused</p>")
+        raise ConfigException(e)
 
     json = client.getresponse().read().decode()
     print("GET %s response:" % path, json)
@@ -173,15 +177,14 @@ class BridgeConfigHandler(RequestHandler):
                 client = manager.connect_lampserver()
                 response = get_data(client, "/bridges")
                 BridgeConfigHandler.bridges = response['bridges']
+            except ConfigException as e:
+                tvars['status']  = "error"
+                tvars['message'] = e.msg
             except GetException as e:
                 self.write(e.msg)
                 return 
-             
-            tvars['bridges'] = BridgeConfigHandler.bridges 
-            self.render('config_bridges.html', **tvars)
-        else: 
-            tvars['bridges'] = BridgeConfigHandler.bridges 
-            self.render('config_bridges.html', **tvars) 
+        tvars['bridges'] = BridgeConfigHandler.bridges 
+        self.render('config_bridges.html', **tvars) 
 
     @tornado.web.authenticated
     def post(self):
@@ -190,111 +193,115 @@ class BridgeConfigHandler(RequestHandler):
         headers = add_auth_cookie({'Content-Type': 'application/json'})
 
         data = self.request.arguments 
-        if 'identify' in data: 
-            if not 'select' in data:
-                self.redirect("bridges?status=message&msg=%s" % "You need to select a bridge.")  
-            request = {'alert': 'select'}
-            request = tornado.escape.json_encode(request) 
-            for mac in data['select']: 
-                print("Identify POST:", "/bridges/"+mac.decode('utf-8')+"/lights/all", request) 
-                client.request("POST", "/bridges/"+mac.decode('utf-8')+"/lights/all", request, headers)
+        try:
+            if 'identify' in data: 
+                if not 'select' in data:
+                    self.redirect("bridges?status=message&msg=%s" % "You need to select a bridge.")  
+                request = {'alert': 'select'}
+                request = tornado.escape.json_encode(request) 
+                for mac in data['select']: 
+                    print("Identify POST:", "/bridges/"+mac.decode('utf-8')+"/lights/all", request) 
+                    client.request("POST", "/bridges/"+mac.decode('utf-8')+"/lights/all", request, headers)
 
-                response = client.getresponse().read().decode() 
-                print('Identify response:', response) 
+                    response = client.getresponse().read().decode() 
+                    print('Identify response:', response) 
 
-                response = tornado.escape.json_decode(response) 
-                if response['state'] == 'success': 
-                    pass
+                    response = tornado.escape.json_decode(response) 
+                    if response['state'] == 'success': 
+                        pass
+                    else: 
+                        print('Error when blinking', mac, response) 
+                        self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
+
+            elif 'add' in data: 
+                # Remove unneccesary whitespace and decode to utf-8 
+                data['ip'] = data['ip'][0].strip().decode() 
+
+                if data['ip'] != '': 
+                    request = {'ip': data['ip']}
+
+                    print('Add bridge:', request)
+                    json = tornado.escape.json_encode(request) 
+                    client.request("POST", "/bridges/add", json, headers) 
+
+                    response = client.getresponse().read().decode() 
+                    response = tornado.escape.json_decode(response)
+                    if response['state'] == 'success': 
+                        BridgeConfigHandler.bridges.update(response['bridges']) 
+                        print('Added bridge:', response['bridges']) 
+                        self.redirect('bridges') 
+                    else: 
+                        print("ERROR!", response) 
+                        self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
                 else: 
-                    print('Error when blinking', mac, response) 
-                    self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
-
-        elif 'add' in data: 
-            # Remove unneccesary whitespace and decode to utf-8 
-            data['ip'] = data['ip'][0].strip().decode() 
-
-            if data['ip'] != '': 
-                request = {'ip': data['ip']}
-
-                print('Add bridge:', request)
-                json = tornado.escape.json_encode(request) 
-                client.request("POST", "/bridges/add", json, headers) 
-
-                response = client.getresponse().read().decode() 
-                response = tornado.escape.json_decode(response)
-                if response['state'] == 'success': 
-                    BridgeConfigHandler.bridges.update(response['bridges']) 
-                    print('Added bridge:', response['bridges']) 
+                    print('No IP specified') 
                     self.redirect('bridges') 
-                else: 
-                    print("ERROR!", response) 
-                    self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
-            else: 
-                print('No IP specified') 
+
+            elif 'remove' in data: 
+                if not 'select' in data:
+                    self.redirect("bridges?status=message&msg=%s" % "You need to select a bridge.")  
+                for mac in data['select']: 
+                    print('Remove bridge', mac.decode()) 
+                    client.request("DELETE", "/bridges/"+mac.decode(), {}, headers)
+
+                    response = client.getresponse().read().decode() 
+                    print('Remove response:', response) 
+
+                    response = tornado.escape.json_decode(response) 
+                    if response['state'] == 'success': 
+                        del BridgeConfigHandler.bridges[mac.decode()]
+                    else: 
+                        print('Could not remove bridge.')
+                        print(response['errorcode'], response['errormessage']) 
+                        self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
+
+            # Set bridges to None, to force it to get them in get() 
+            elif 'refresh' in data: 
+                BridgeConfigHandler.bridges = {} 
                 self.redirect('bridges') 
 
-        elif 'remove' in data: 
-            if not 'select' in data:
-                self.redirect("bridges?status=message&msg=%s" % "You need to select a bridge.")  
-            for mac in data['select']: 
-                print('Remove bridge', mac.decode()) 
-                client.request("DELETE", "/bridges/"+mac.decode(), {}, headers)
+            elif 'newUsername' in data and 'mac' in data: 
+                mac = data['mac'][0].decode() 
+                print("New username to", mac)
+
+                client.request(
+                    "POST", 
+                    "/bridges/" + mac + "/adduser", 
+                    tornado.escape.json_encode({}),
+                    headers
+                ) 
+                response = client.getresponse().read().decode() 
+                response = tornado.escape.json_decode(response) 
+                print(response) 
+                if response['state'] == 'success': 
+                    BridgeConfigHandler.bridges[mac]['username'] = response['username'] 
+                    BridgeConfigHandler.bridges[mac]['valid_username'] = response['valid_username'] 
+                    if not response['valid_username']: 
+                        BridgeConfigHandler.bridges[mac]['lights'] = -1 
+                    self.write({'state': 'success'}) 
+                else: 
+                    response['errormessage'] = response['errormessage'].capitalize() 
+                    self.write(response) 
+
+            elif 'search' in data: 
+                print('Search') 
+                request = tornado.escape.json_encode({'auto_add': True})
+                client.request('POST', '/bridges/search', request, headers) 
 
                 response = client.getresponse().read().decode() 
-                print('Remove response:', response) 
-
+                print(response) 
                 response = tornado.escape.json_decode(response) 
                 if response['state'] == 'success': 
-                    del BridgeConfigHandler.bridges[mac.decode()]
+                    self.redirect("bridges?status=message&msg=%s" % "Server begun searching, refresh bridges (using the button) after 20 s.") 
                 else: 
-                    print('Could not remove bridge.')
                     print(response['errorcode'], response['errormessage']) 
                     self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
-
-        # Set bridges to None, to force it to get them in get() 
-        elif 'refresh' in data: 
-            BridgeConfigHandler.bridges = {} 
-            self.redirect('bridges') 
-
-        elif 'newUsername' in data and 'mac' in data: 
-            mac = data['mac'][0].decode() 
-            print("New username to", mac)
-
-            client.request(
-                "POST", 
-                "/bridges/" + mac + "/adduser", 
-                tornado.escape.json_encode({}),
-                headers
-            ) 
-            response = client.getresponse().read().decode() 
-            response = tornado.escape.json_decode(response) 
-            print(response) 
-            if response['state'] == 'success': 
-                BridgeConfigHandler.bridges[mac]['username'] = response['username'] 
-                BridgeConfigHandler.bridges[mac]['valid_username'] = response['valid_username'] 
-                if not response['valid_username']: 
-                    BridgeConfigHandler.bridges[mac]['lights'] = -1 
-                self.write({'state': 'success'}) 
             else: 
-                response['errormessage'] = response['errormessage'].capitalize() 
-                self.write(response) 
+                print('Unknown request. What did you do?') 
+                self.redirect("bridges?status=message&msg=%s" % "Unknown request.") 
 
-        elif 'search' in data: 
-            print('Search') 
-            request = tornado.escape.json_encode({'auto_add': True})
-            client.request('POST', '/bridges/search', request, headers) 
-
-            response = client.getresponse().read().decode() 
-            print(response) 
-            response = tornado.escape.json_decode(response) 
-            if response['state'] == 'success': 
-                self.redirect("bridges?status=message&msg=%s" % "Server begun searching, refresh bridges (using the button) after 20 s.") 
-            else: 
-                print(response['errorcode'], response['errormessage']) 
-                self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
-        else: 
-            print('Unknown request. What did you do?') 
-            self.redirect("bridges?status=message&msg=%s" % "Unknown request.") 
+        except ConnectionRefusedError as e: 
+            self.redirect("bridges?status=error&msg=%s" % e) 
 
 
 class GridConfigHandler(RequestHandler):
@@ -336,6 +343,10 @@ class GridConfigHandler(RequestHandler):
     @tornado.web.authenticated
     def get(self, tvars):
         client = manager.connect_lampserver()
+        tvars['activated'] = ''
+        tvars['lamp'] = ''
+        tvars['json_encode'] = tornado.escape.json_encode
+        tvars['changed'] = GridConfigHandler.changed
         try:
             if GridConfigHandler.grid == None:
                 response = get_data(client, '/grid')
@@ -346,6 +357,13 @@ class GridConfigHandler(RequestHandler):
             grid = GridConfigHandler.grid
 
             lights = self.get_lights(client)
+        except ConfigException as e:
+            tvars['status']  = "error"
+            tvars['message'] = e.msg
+            tvars['skipped'] = []
+            tvars['grid'] = { 'width':0, 'height':0, 'grid':[] }
+            self.render('config_grid.html', **tvars)
+            return
         except GetException as e:
             self.write(e.msg)
             return
@@ -355,8 +373,6 @@ class GridConfigHandler(RequestHandler):
                     and c not in GridConfigHandler.skipped]
         invalid = [c for c in ingrid if c not in lights]
 
-        tvars['activated'] = ''
-        tvars['lamp'] = ''
         if len(free) > 0 and not all([all(row) for row in grid['grid']]):
             if GridConfigHandler.activated is None:
                 # choose and activate one of the free lights
@@ -373,8 +389,6 @@ class GridConfigHandler(RequestHandler):
         tvars['invalid'] = invalid
         tvars['skipped'] = GridConfigHandler.skipped
         tvars['grid'] = GridConfigHandler.grid
-        tvars['json_encode'] = tornado.escape.json_encode
-        tvars['changed'] = GridConfigHandler.changed
         self.render('config_grid.html', **tvars)
 
     @tornado.web.authenticated
@@ -387,37 +401,40 @@ class GridConfigHandler(RequestHandler):
         load_game = None
 
         if 'changesize' in args:
-            size = self.get_argument('grid_size').split('x')
+            if GridConfigHandler.grid is not None:
+                size = self.get_argument('grid_size').split('x')
 
-            if len(size) == 2 and size[0].isdigit() and size[1].isdigit():
-                w, h = int(size[0]), int(size[1])
+                if len(size) == 2 and size[0].isdigit() and size[1].isdigit():
+                    w, h = int(size[0]), int(size[1])
+
+                    newgrid = [[None for _ in range(w)] for _ in range(h)]
+
+                    GridConfigHandler.grid['grid'] = newgrid
+                    GridConfigHandler.grid['width'] = w
+                    GridConfigHandler.grid['height'] = h
+
+                    msg = "Grid size changed to %dx%d" % (w,h)
+                    print(msg)
+                    GridConfigHandler.changed = True
+                else:
+                    status,msg = ('error','Invalid size')
+        elif 'clear' in args:
+            if GridConfigHandler.grid is not None:
+                w = GridConfigHandler.grid['width']
+                h = GridConfigHandler.grid['height']
 
                 newgrid = [[None for _ in range(w)] for _ in range(h)]
 
                 GridConfigHandler.grid['grid'] = newgrid
-                GridConfigHandler.grid['width'] = w
-                GridConfigHandler.grid['height'] = h
 
-                msg = "Grid size changed to %dx%d" % (w,h)
-                print(msg)
+                msg = "Grid cleared"
+                GridConfigHandler.activated = None
                 GridConfigHandler.changed = True
-            else:
-                status,msg = ('error','Invalid size')
-        elif 'clear' in args:
-            w = GridConfigHandler.grid['width']
-            h = GridConfigHandler.grid['height']
-
-            newgrid = [[None for _ in range(w)] for _ in range(h)]
-
-            GridConfigHandler.grid['grid'] = newgrid
-
-            msg = "Grid cleared"
-            GridConfigHandler.activated = None
-            GridConfigHandler.changed = True
         elif 'placelamp' in args:
             coords = self.get_argument('coords').split(',')
 
-            if len(coords) == 2 and coords[0].isdigit() and coords[1].isdigit():
+            if GridConfigHandler.grid is not None and \
+                len(coords) == 2 and coords[0].isdigit() and coords[1].isdigit():
                 x,y = int(coords[0]), int(coords[1])
 
                 if y >= GridConfigHandler.grid['height'] or \
