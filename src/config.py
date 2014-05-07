@@ -301,6 +301,7 @@ class GridConfigHandler(RequestHandler):
     grid = None
     bridges = None
     skipped = None
+    activated = None
     changed = False
 
     def get_lights(self, client):
@@ -316,12 +317,24 @@ class GridConfigHandler(RequestHandler):
 
         return lights
 
+    def sendRequest(light, change):
+        headers = add_auth_cookie({'Content-Type': 'application/json'})
+        request = tornado.escape.json_encode(
+            [{'light' : light['lamp'],
+              'change': change}]
+        )
+
+        print(">>> POST:", "/bridges/%s/lights" % light['mac'], request)
+        manager.client.request("POST",
+            "/bridges/%s/lights" % light['mac'], request, headers)
+
+        response = manager.client.getresponse().read().decode()
+        print('POST response:', response)
+
     @use_statusmessage
     @tornado.web.removeslash
     @tornado.web.authenticated
     def get(self, tvars):
-        headers = add_auth_cookie({'Content-Type': 'application/json'})
-
         client = manager.connect_lampserver()
         try:
             if GridConfigHandler.grid == None:
@@ -345,22 +358,16 @@ class GridConfigHandler(RequestHandler):
         tvars['activated'] = ''
         tvars['lamp'] = ''
         if len(free) > 0 and not all([all(row) for row in grid['grid']]):
-            # choose and activate one of the free lights
-            choosen = free[0]
+            if GridConfigHandler.activated is None:
+                # choose and activate one of the free lights
+                GridConfigHandler.activated = free[0]
+            choosen = GridConfigHandler.activated
             tvars['activated'] = tornado.escape.json_encode(choosen)
             tvars['lamp'] = choosen
 
-            request = tornado.escape.json_encode(
-                [{'light' : choosen['lamp'],
-                  'change': {'on':True, 'sat':0, 'hue':0, 'bri':255}}]
-            )
-
-            print(">>> POST:", "/bridges/%s/lights" % choosen['mac'], request)
-            manager.client.request("POST",
-                "/bridges/%s/lights" % choosen['mac'], request, headers)
-
-            response = manager.client.getresponse().read().decode()
-            print('POST response:', response)
+            # set color to white
+            GridConfigHandler.sendRequest(choosen,
+                {'on':True, 'sat':0, 'hue':0, 'bri':255})
 
         tvars['free'] = free
         tvars['invalid'] = invalid
@@ -391,11 +398,22 @@ class GridConfigHandler(RequestHandler):
                 GridConfigHandler.grid['width'] = w
                 GridConfigHandler.grid['height'] = h
 
-                msg = "Grid size changed to %dx%d" % (h,w)
+                msg = "Grid size changed to %dx%d" % (w,h)
                 print(msg)
                 GridConfigHandler.changed = True
             else:
                 status,msg = ('error','Invalid size')
+        elif 'clear' in args:
+            w = GridConfigHandler.grid['width']
+            h = GridConfigHandler.grid['height']
+
+            newgrid = [[None for _ in range(w)] for _ in range(h)]
+
+            GridConfigHandler.grid['grid'] = newgrid
+
+            msg = "Grid cleared"
+            GridConfigHandler.activated = None
+            GridConfigHandler.changed = True
         elif 'placelamp' in args:
             coords = self.get_argument('coords').split(',')
 
@@ -407,17 +425,29 @@ class GridConfigHandler(RequestHandler):
                     status,msg = ('error','Invalid position')
                 else:
                     if GridConfigHandler.grid['grid'][y][x] != None:
+                        lamp = GridConfigHandler.grid['grid'][y][x]
                         GridConfigHandler.grid['grid'][y][x] = None
+
+                        # set color to red
+                        GridConfigHandler.sendRequest(lamp,
+                            {'on':True, 'sat':255, 'hue':0, 'bri':255})
+
                         print('Lamp removed from %s' % coords)
                         msg = 'Lamp removed from %d,%d' % (x,y)
                         GridConfigHandler.changed = True
                     elif self.get_argument('lamp') == '':
                         status,msg = ('error','No activated lamp')
                     else:
+                        GridConfigHandler.activated = None
                         try:
                             lamp = tornado.escape.json_decode(
                                 self.get_argument('lamp'))
                             GridConfigHandler.grid['grid'][y][x] = lamp
+
+                            # set color to blue
+                            GridConfigHandler.sendRequest(lamp,
+                                {'on':True, 'sat':255, 'hue':45000, 'bri':255})
+
                             print('Lamp %s placed at %s' % (lamp, coords))
                             msg = 'Lamp placed at %d,%d' % (x,y)
                             GridConfigHandler.changed = True
@@ -429,9 +459,11 @@ class GridConfigHandler(RequestHandler):
             skip_name = self.get_argument('skip_name', 'skip')
             try:
                 if skip_name == 'skip':
+                    GridConfigHandler.activated = None
                     lamp = tornado.escape.json_decode(
                         self.get_argument('lamp'))
                     GridConfigHandler.skipped.append(lamp)
+                    GridConfigHandler.sendRequest(lamp, {'on':False})  # turn off
                     msg = 'Skipped lamp %s%%23%s' % (lamp['mac'], lamp['lamp'])
                 else:
                     skip_data = skip_name.split('#')
@@ -462,6 +494,7 @@ class GridConfigHandler(RequestHandler):
         elif 'refresh' in args:
             GridConfigHandler.grid = None
             GridConfigHandler.bridges = None
+            GridConfigHandler.activated = None
             GridConfigHandler.changed = False
         elif 'off' in args:
             load_game = 'off'
