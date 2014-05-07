@@ -15,7 +15,7 @@
 
 
 {% block message %}
-    if (obj.x != null && state != 'gameover') {
+    if (obj.x != null) {
         var el = document.getElementById(obj.x + "-" + obj.y)
         el.className = obj.color;
     }
