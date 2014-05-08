@@ -203,11 +203,12 @@ class BridgeConfigHandler(RequestHandler):
                 print('Identify response:', response) 
 
                 response = tornado.escape.json_decode(response) 
-                if response['state'] == 'success': 
-                    pass
-                else: 
+                if not response['state'] == 'success': 
                     print('Error when blinking', mac, response) 
-                    self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
+                    break 
+            else: 
+                self.redirect('bridges') 
+            self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize())      
 
         elif 'add' in data: 
             # Remove unneccesary whitespace and decode to utf-8 
@@ -246,6 +247,7 @@ class BridgeConfigHandler(RequestHandler):
                 response = tornado.escape.json_decode(response) 
                 if response['state'] == 'success': 
                     del BridgeConfigHandler.bridges[mac.decode()]
+                    self.redirect("bridges") 
                 else: 
                     print('Could not remove bridge.')
                     print(response['errorcode'], response['errormessage']) 
@@ -274,10 +276,11 @@ class BridgeConfigHandler(RequestHandler):
                 BridgeConfigHandler.bridges[mac]['valid_username'] = response['valid_username'] 
                 if not response['valid_username']: 
                     BridgeConfigHandler.bridges[mac]['lights'] = -1 
-                self.write({'state': 'success'}) 
+                #self.write({'state': 'success'}) 
+                self.redirect('bridges') 
             else: 
-                response['errormessage'] = response['errormessage'].capitalize() 
-                self.write(response) 
+                print(response['errorcode'], response['errormessage']) 
+                self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
 
         elif 'search' in data: 
             print('Search') 

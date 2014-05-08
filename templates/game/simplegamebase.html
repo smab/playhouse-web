@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+
+{% block playground %}
+<div style="margin: 0 auto;"> 
+    <style> 
+    #player1,#player2 {
+        width: 100px; 
+        height: 175px; 
+        padding: 8px; 
+        margin: 2em; 
+        display: inline-block; 
+        text-align: center; 
+    }
+    #player1 div,#player2 div {
+        width: 64px; 
+        height: 64px; 
+        margin: 0 auto; 
+    }
+    {% if color_1 != None %}
+    #player1color {
+        background-color: {{ color_1 }}
+    }
+    #player2color {
+        background-color: {{ color_2 }}
+    } 
+    {% else %}
+    #player1color, #player2color {
+        display: none; 
+    } 
+    {% end %} 
+    #player1time, #player2time { 
+        {% if timelimit == None %}
+        display: none; 
+        {% end %}
+    }
+    #player1score, #player2score {
+        {% if score_1 == None %}
+        display: none;  
+        {% end %}
+    }
+
+    #grid { 
+        margin: 0 auto; 
+        display: inline-block; 
+    }
+
+    </style> 
+    <div id="player1" style="border: 1px dashed #333">
+        <div id="player1color"></div>
+        <p style="text-align: center; font-weight: bold">Player 1</p> 
+        <p id="player1score">Score: {{ score_1 }}</p> 
+        <p id="player1time">Time: {{ timelimit }}</p> 
+    </div> 
+
+    <table id="grid"></table> 
+
+    <div id="player2" style="border: 0px dashed #333">
+        <div id="player2color"></div>
+        <p style="text-align: center; font-weight: bold">Player 2</p> 
+        <p id="player2score">Score: {{ score_2 }}</p> 
+        <p id="player2time">Time: {{ timelimit }}</p> 
+    </div> 
+</div> 
+{% end %}
+
+{% block timelimits %}
+function changePlayer(p) {
+    var player   = document.getElementById("player"+p)
+    var opponent = document.getElementById("player"+((p%2)+1))
+  
+    // Set current player indication 
+    // TODO Set the opponent's border to 1px (so it does not jump around during turnover 
+    player.setAttribute(  "style", "border: 1px dashed #333!important"); 
+    opponent.setAttribute("style", "border: 0px dashed #333!important"); 
+} 
+
+if(obj.playerId != undefined) {
+    playerId = obj.playerId; 
+    console.log("PlayerId: " + playerId); 
+}
+
+if(obj.turn != undefined) {
+    changePlayer(obj.turn)
+    if(obj.timeleft != undefined && obj.timeleft > 0) {
+        var p = document.getElementById("player"+(obj.turn)+"time")
+        p.innerHTML = "Time: " + obj.timeleft 
+    }
+}
+
+if(obj.turnover != undefined) {
+    // A turnover has occurred 
+    changePlayer(obj.turnover) 
+
+    // Reset the timelimit counter  
+    if(handler != undefined) {
+        window.clearInterval(handler) 
+    }
+    var optime = document.getElementById("player"+((obj.turnover%2)+1)+"time")
+    optime.innerHTML = "Time: " + {{ timelimit }}
+
+    var p = document.getElementById("player"+(obj.turnover)+"time")
+    var time;
+    if(obj.timeleft != undefined) 
+        time = obj.timeleft 
+    else
+        time = {{ timelimit }}
+
+    p.innerHTML = "Time: " + time 
+    handler = window.setInterval(function() {
+        time -= 1; 
+        p.innerHTML = "Time: " + time; 
+    }, 1000);
+}
+
+if(obj.pause != undefined) {
+    if(obj.pause) {
+        window.clearInterval(handler) 
+    }
+}
+
+if(obj.score_1 != undefined) {
+    document.getElementById("player1score").innerHTML = "Score: " + obj.score_1; 
+}
+if(obj.score_2 != undefined) {
+    document.getElementById("player2score").innerHTML = "Score: " + obj.score_2; 
+} 
+{% end %} 
+
+
+
+
+

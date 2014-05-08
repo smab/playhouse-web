@@ -94,7 +94,17 @@ def set_timeout(deadline, callback):
     Thin wrapper over Tornado's `IOLoop.add_timeout`.
     """
     ioloop = tornado.ioloop.IOLoop.instance()
-    ioloop.add_timeout(deadline, callback)
+    return ioloop.add_timeout(deadline, callback)
+
+def remove_timeout(handler): 
+    """ 
+    Removes the given timeout. 
+
+    Thin wrapper over Tornado's `IOLoop.add_timeout`. 
+    """
+    ioloop = tornado.ioloop.IOLoop.instance()
+    ioloop.remove_timeout(handler) 
+    pass
 
 def get_grid_size():
     import manager
@@ -243,6 +253,7 @@ class Game:
 
             print("Connection %s as player %d" % (handler, player))
             send_msg(handler, { 'state':   'playing',
+                                'playerId': player+1, 
                                 'message': 'You are player %d' % (player + 1) })
             self.sync(handler)
 
@@ -352,3 +363,4 @@ class Game:
         """
         Sends the game description to the client
         """
+        pass 

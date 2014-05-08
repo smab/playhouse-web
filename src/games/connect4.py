@@ -11,7 +11,7 @@ class Connect4(simplegame.SimpleGame):
     config_file   = "simplegameconfig.html" 
 
     def __init__(self, client):
-        simplegame.SimpleGame.__init__(self, client) 
+        super().__init__(client) 
 
         self.template_vars['module_name'] = 'Connect4' 
         self.template_vars['title'] = 'Connect4' 
@@ -21,7 +21,7 @@ class Connect4(simplegame.SimpleGame):
 
 
     def sync(self, handler):
-        self.set_description(handler)
+        super().sync(handler) 
         print("Syncing %s" % handler)
         for y in range(self.height):
             for x in range(self.width):
@@ -58,6 +58,7 @@ class Connect4(simplegame.SimpleGame):
             player = self.player
             self.player = None  # Temporarily set to None to prevent players
                                 # from making moves until animation has finished
+            self.pause_turn()   # Pause the timecounter 
             self.board[y][x] = player
 
             def done():

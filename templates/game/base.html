@@ -60,7 +60,9 @@
             </div>
             {% end %}
 
+            {% block playground %}
             <table id="grid"></table>
+            {% end %}
 
             {% block postgrid %}
             <div style="text-align:center">
@@ -77,12 +79,18 @@
 
         <script>
             var socketport = {{ socketport }}
+            var playerId = undefined; 
+            var handler = undefined; 
+
             function on_message(obj) {
                 {% block rulemessage %}
                     if (obj.rulemessage != null) {
                         document.getElementById('therules').innerHTML = obj.rulemessage;
                     }
                 {% end %}
+                
+                {% block timelimits %}
+                {% end %} 
 
                 {% block message %}
                 {% end %}
