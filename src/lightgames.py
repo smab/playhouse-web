@@ -84,6 +84,7 @@ def game_over(game, winnerH, coords = frozenset()):
                      { 'x': x, 'y': y, 'delay': 3, 'change': { 'alert': 'none'    } } ]
     game.send_lamp_multi(changes)
 
+    game.player = None
     set_timeout(datetime.timedelta(seconds = len(coords) + 3), game.reset)
   # game.reset()
 
