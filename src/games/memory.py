@@ -26,7 +26,10 @@ class Memory(simplegame.SimpleGame):
         self.template_vars['title'] = 'Memory' 
         self.template_vars['grid_x'] = 8
         self.template_vars['grid_y'] = 6
+        self.template_vars['score_1'] = 0 
+        self.template_vars['score_2'] = 0 
         self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
+
 
     def reset(self):
         # Unfortunatly we generate two seperate boards and trashes one
@@ -50,7 +53,7 @@ class Memory(simplegame.SimpleGame):
 
 
     def sync(self, handler):
-        self.set_description(handler)
+        super().sync(handler) 
         print("Syncing %s" % handler)
         for y in range(self.height):
             for x in range(self.width):
@@ -61,7 +64,7 @@ class Memory(simplegame.SimpleGame):
     @gen.engine
     def on_message(self, handler, message):
         # Checks that it's the correct player. 
-        if not self.correctPlayer(handler):
+        if not self.correct_player(handler):
             return
 
         playerH   = self.players[self.player]
@@ -85,7 +88,10 @@ class Memory(simplegame.SimpleGame):
 
                 if color1 == color2:
                     self.scores[self.player] += 1
+                    self.template_vars['score_1'], self.template_vars['score_2'] = self.scores
                     # Guessed correctly; player gets to keep going
+                    yield gen.Task(IOLoop.instance().add_timeout, time.time() + 1)
+                    self.turnover(self.player) 
 
                 else:
                     self.board[y1][x1] *= -1
@@ -100,12 +106,14 @@ class Memory(simplegame.SimpleGame):
                     self.send_lamp(x2, y2, {'sat': 0, 'hue': 0})
 
                     # Switch over to opponent. Since there is a delay we do not use SimpleGame's turnover. 
-                    lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
-                    tmp = 1 - self.player                    
-                    self.player = None 
+                    #lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
+                    #tmp = 1 - self.player                    
+                    #self.player = None 
+                    self.pause_turn() 
                     yield gen.Task(IOLoop.instance().add_timeout, time.time() + 2)
-                    self.player = tmp
-                    lightgames.send_msg(opponentH, {'message':'Your turn!'})
+                    #self.player = tmp
+                    #lightgames.send_msg(opponentH, {'message':'Your turn!'})
+                    self.turnover() 
 
 
                 self.active_tiles = []

@@ -56,7 +56,7 @@ class Connect4(simplegame.SimpleGame):
 
         if self.board[y][x] == 2 and (y == self.height - 1 or self.board[y + 1][x] != 2):
             player = self.player
-            self.player = None  # Temporarily set to None to prevent players
+            # self.player = None  # Temporarily set to None to prevent players
                                 # from making moves until animation has finished
             self.pause_turn()   # Pause the timecounter 
             self.board[y][x] = player

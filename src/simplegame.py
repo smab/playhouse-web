@@ -39,6 +39,7 @@ class SimpleGame(lightgames.Game):
         # Sets up the board and tries to fetch two new players. 
         self.timer_counter.stop() 
         self.player = 0 
+        self.tmp_player = None 
         self.players = [None, None]  
         self.player_passes = [0, 0] # refering to how many timelimit's they've triggered (in a row) 
         self.width = self.template_vars['grid_x'] 
@@ -92,7 +93,10 @@ class SimpleGame(lightgames.Game):
         # we start the timer. 
         super().add_player(handler) 
         if handler in self.players and None not in self.players: 
-            self.turnover(self.player) 
+            if self.player == None: 
+                self.turnover(self.tmp_player) 
+            else: 
+                self.turnover(self.player) 
 
     def on_close(self, handler):
         self.connections -= {handler} 
@@ -123,6 +127,11 @@ class SimpleGame(lightgames.Game):
         If the timelimit was paused, this function will start it again. 
         """
         self.timer_counter.stop() 
+
+        if self.player == None: 
+            self.player = self.tmp_player 
+            self.tmp_player = None 
+
         if self.template_vars['timeleft'] > 0: 
             # The turnover was not because of exceeded timelimit; reset the 
             # number of passes that player has done 
@@ -149,12 +158,16 @@ class SimpleGame(lightgames.Game):
         when doing animations. 
         """ 
         self.timer_counter.stop() 
+        self.tmp_player = self.player 
+        self.player = None 
         lightgames.send_msgs(self.connections, {'pause': True}) 
 
     def unpause_turn(self): 
         """
         Tells the client to start the timelimit counter again. 
         """ 
+        if self.player == None: 
+            self.player = self.tmp_player 
         lightgames.send_msgs(self.connections, {'timeleft': self.template_vars['timeleft']})
         self.timer_counter.start() 
 
