@@ -86,7 +86,6 @@ def game_over(game, winnerH, coords = frozenset()):
 
     game.player = None
     set_timeout(datetime.timedelta(seconds = len(coords) + 3), game.reset)
-  # game.reset()
 
 def set_timeout(deadline, callback):
     """
@@ -315,7 +314,8 @@ class Game:
         """
         Reset this game to prepare for a new session.  Try to fetch new
         players for the new game.  This is called after each game has been
-        completed.
+        completed. If you make changes to the start board (e.g. Othello), make 
+        sure to sync all clients. 
         """
         pass
 
@@ -349,7 +349,9 @@ class Game:
         """
         The game options were updated; update instance variables reflecting
         this here.  Return a string with an error message if the configuration
-        is bad/invalid.
+        is bad/invalid. 
+
+        If you override this, you likely want to invoke this method manually!
         """
         vars = self.template_vars 
         vars['grid_x'] = max(0, int(config['grid_x']))
@@ -357,11 +359,12 @@ class Game:
         vars['cell_w'] = max(0, int(config['cell_w']))
         vars['cell_h'] = max(0, int(config['cell_h']))
         vars['color_empty'] = config['color_empty']
+        self.destroy() 
         self.reset() 
 
         
-    def send_description(self, handler):
+    def set_description(self, handler):
         """
-        Sends the game description to the client
+        Sends the game description to the client.
         """
         pass 

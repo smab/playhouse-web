@@ -4,6 +4,11 @@ var wsHost = document.location.hostname + ":" + socketport,
 
 var state = 'spectating'
 
+ws.onclose = function(evt) {
+    var over = document.getElementById("overlay") 
+    over.className = ""
+}; 
+
 ws.onmessage = function (evt) {
     var obj = JSON.parse(evt.data)
 
@@ -16,7 +21,7 @@ ws.onmessage = function (evt) {
     }
 
     if      (obj.error   != null) setMessage(obj.error,   'error')
-    else if (obj.message != null) setMessage(obj.message, 'message')
+    if (obj.message != null) setMessage(obj.message, 'message')
 
     on_message(obj)
 };

@@ -17,7 +17,8 @@ class Memory(simplegame.SimpleGame):
     template_file = "memory.html"
     config_file   = "memoryconfig.html"
 
-    hues = itertools.cycle([5000, 15000, 25000, 35000, 45000, 55000, 65000])
+    #hues = itertools.cycle([5000, 15000, 25000, 35000, 45000, 55000, 65000])
+    hues = itertools.cycle([5000, 15000, 25000, 45000, 55000, 65000, 75000])
 
     def __init__(self, client): 
         super().__init__(client) 

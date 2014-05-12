@@ -19,19 +19,25 @@ class Othello(simplegame.SimpleGame):
         self.template_vars['title'] = 'Othello' 
         self.template_vars['grid_x'] = 8
         self.template_vars['grid_y'] = 8 
+        self.template_vars['score_1'] = 2
+        self.template_vars['score_2'] = 2 
         self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
 
     def reset(self):
         super().reset() 
+        print("Othello, reset") 
 
         # Set the start pattern 
         mx = (self.width  // 2) - 1
         my = (self.height // 2) - 1
         self.board[my][mx+1] = self.board[my+1][mx  ] = 0
         self.board[my][mx  ] = self.board[my+1][mx+1] = 1
-
+        self.template_vars['score_1'] = 2
+        self.template_vars['score_2'] = 2 
+        self.sync_all() 
 
     def sync(self, handler):
+        super().sync(handler) 
         self.set_description(handler)
         print("Syncing %s" % handler)
         for y in range(len(self.board)):
@@ -39,19 +45,21 @@ class Othello(simplegame.SimpleGame):
                 button_color = self.button_colors[self.board[y][x]]
                 lightgames.send_msg(handler, {'x':x, 'y':y, 'color':button_color})
 
-
-    def game_over(self):
-        # The game is over, see who won (or if the game is a tie) and notify
-        # everyone of the result.
+    def count_score(self): 
         scores = [0, 0, 0] # P1, P2, empty
         for y in range(len(self.board)):
             for x in range(len(self.board[y])):
                 player = self.board[y][x]
                 scores[player] += 1
+        return [scores[0], scores[1]] 
 
-        winner = None
+    def game_over(self):
+        # The game is over, see who won (or if the game is a tie) and notify
+        # everyone of the result.
+        scores = self.count_score() 
         if   scores[0] > scores[1]: winner = self.players[0]
         elif scores[0] < scores[1]: winner = self.players[1]
+        else: winner = None 
 
         lightgames.game_over(self, winner)
 
@@ -87,7 +95,7 @@ class Othello(simplegame.SimpleGame):
             return beams
         
         # Check that it is the correct player 
-        if not self.correctPlayer(handler): 
+        if not self.correct_player(handler): 
             return 
 
         opponent  = 1 - self.player
@@ -114,6 +122,9 @@ class Othello(simplegame.SimpleGame):
                     self.board[py][px] = self.player
                     lightgames.send_msgs(self.connections, {'x':px, 'y':py, 'color':button_color})
                     self.send_lamp(px, py, {'sat':255, 'hue':self.colors[self.player]})
+            
+            # Update current score 
+            self.template_vars['score_1'], self.template_vars['score_2'] = self.count_score() 
 
             # Check if the board is full
             if all(all(i != 2 for i in j) for j in self.board):
@@ -142,6 +153,7 @@ class Othello(simplegame.SimpleGame):
             # Opponent has to force-pass.
             # TODO: this should be indicated in the frontend somehow
             if has_any_legal_moves(self.player):
+                self.turnover(self.player) 
                 lightgames.send_msg(playerH,   {'message':'Opponent has to pass; your turn again!'})
                 lightgames.send_msg(opponentH, {'message':'Out of valid moves! You have to pass.'})
                 return

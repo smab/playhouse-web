@@ -4,7 +4,7 @@
 {% block playground %}
 <div style="margin: 0 auto;"> 
     <style> 
-    #player1,#player2 {
+    #player0,#player1 {
         width: 100px; 
         height: 175px; 
         padding: 8px; 
@@ -12,29 +12,29 @@
         display: inline-block; 
         text-align: center; 
     }
-    #player1 div,#player2 div {
+    #player0 div,#player1 div {
         width: 64px; 
         height: 64px; 
         margin: 0 auto; 
     }
     {% if color_1 != None %}
-    #player1color {
+    #player0color {
         background-color: {{ color_1 }}
     }
-    #player2color {
+    #player1color {
         background-color: {{ color_2 }}
     } 
     {% else %}
-    #player1color, #player2color {
+    #player0color, #player1color {
         display: none; 
     } 
     {% end %} 
-    #player1time, #player2time { 
+    #player0time, #player1time { 
         {% if timelimit == None %}
         display: none; 
         {% end %}
     }
-    #player1score, #player2score {
+    #player0score, #player1score {
         {% if score_1 == None %}
         display: none;  
         {% end %}
@@ -46,88 +46,101 @@
     }
 
     </style> 
-    <div id="player1" style="border: 1px dashed #333">
-        <div id="player1color"></div>
+    <div id="player0" style="border: 1px dashed #333">
+        <div id="player0color"></div>
         <p style="text-align: center; font-weight: bold">Player 1</p> 
-        <p id="player1score">Score: {{ score_1 }}</p> 
-        <p id="player1time">Time: {{ timelimit }}</p> 
+        <p id="player0score">Score: {{ score_1 }}</p> 
+        <p id="player0time">Time: {{ timelimit }}</p> 
     </div> 
 
     <table id="grid"></table> 
 
-    <div id="player2" style="border: 0px dashed #333">
-        <div id="player2color"></div>
+    <div id="player1" style="border: 0px dashed #333">
+        <div id="player1color"></div>
         <p style="text-align: center; font-weight: bold">Player 2</p> 
-        <p id="player2score">Score: {{ score_2 }}</p> 
-        <p id="player2time">Time: {{ timelimit }}</p> 
+        <p id="player1score">Score: {{ score_2 }}</p> 
+        <p id="player1time">Time: {{ timelimit }}</p> 
     </div> 
 </div> 
 {% end %}
 
 {% block timelimits %}
-function changePlayer(p) {
-    var player   = document.getElementById("player"+p)
-    var opponent = document.getElementById("player"+((p%2)+1))
+function changeTurn(p) {
+    player = p 
+    var pl   = document.getElementById("player"+p)
+    var op = document.getElementById("player"+(1-p))
   
     // Set current player indication 
     // TODO Set the opponent's border to 1px (so it does not jump around during turnover 
-    player.setAttribute(  "style", "border: 1px dashed #333!important"); 
-    opponent.setAttribute("style", "border: 0px dashed #333!important"); 
+    pl.setAttribute(  "style", "border: 1px dashed #333!important"); 
+    op.setAttribute("style", "border: 0px dashed #333!important"); 
 } 
+function changeTime(p, t) {
+    time = t
+    document.getElementById("player"+p+"time").innerHTML = "Time: " + time 
+}
+function decreaseTime() {
+    time -= 1; 
+    changeTime(player, time); 
+}
 
-if(obj.playerId != undefined) {
-    playerId = obj.playerId; 
-    console.log("PlayerId: " + playerId); 
+if(obj.x == undefined) 
+    console.log(obj) 
+
+function changeScore(p, s) {
+    document.getElementById("player"+p+"score").innerHTML = "Score: " + s
+}
+
+
+if(obj.score_1 != undefined) {
+    changeScore(0, obj.score_1) 
+}
+
+if(obj.score_2 != undefined) {
+    changeScore(1, obj.score_2) 
 }
 
 if(obj.turn != undefined) {
-    changePlayer(obj.turn)
-    if(obj.timeleft != undefined && obj.timeleft > 0) {
-        var p = document.getElementById("player"+(obj.turn)+"time")
-        p.innerHTML = "Time: " + obj.timeleft 
+    if(handler != undefined) {
+        window.clearInterval(handler) 
+        handler = undefined 
+        changeTime(player, {{ timelimit }}) 
     }
+    changeTurn(obj.turn) 
 }
 
-if(obj.turnover != undefined) {
-    // A turnover has occurred 
-    changePlayer(obj.turnover) 
-
-    // Reset the timelimit counter  
+if(obj.timeleft != undefined) {
     if(handler != undefined) {
         window.clearInterval(handler) 
     }
-    var optime = document.getElementById("player"+((obj.turnover%2)+1)+"time")
-    optime.innerHTML = "Time: " + {{ timelimit }}
-
-    var p = document.getElementById("player"+(obj.turnover)+"time")
-    var time;
-    if(obj.timeleft != undefined) 
-        time = obj.timeleft 
-    else
-        time = {{ timelimit }}
-
-    p.innerHTML = "Time: " + time 
-    handler = window.setInterval(function() {
-        time -= 1; 
-        p.innerHTML = "Time: " + time; 
-    }, 1000);
+    changeTime(player, obj.timeleft) 
+    handler = window.setInterval(decreaseTime, 1000); 
 }
+
 
 if(obj.pause != undefined) {
     if(obj.pause) {
         window.clearInterval(handler) 
+        handler = undefined 
+    }
+    else {
+        handler = window.setInterval(decreaseTime, 1000) 
     }
 }
 
-if(obj.score_1 != undefined) {
-    document.getElementById("player1score").innerHTML = "Score: " + obj.score_1; 
-}
-if(obj.score_2 != undefined) {
-    document.getElementById("player2score").innerHTML = "Score: " + obj.score_2; 
+
+if(obj.gamestate == 'reset') {
+    if(handler != undefined) {
+        window.clearInterval(handler) 
+    }
+    changeTime(0, {{ timelimit }}) 
+    changeTime(1, {{ timelimit }}) 
+    changeScore(0, 0) 
+    changeScore(1, 0)
+    changeTurn(0) 
 } 
-{% end %} 
 
-
+{% end %}
 
 
 

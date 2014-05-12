@@ -79,8 +79,11 @@
 
         <script>
             var socketport = {{ socketport }}
-            var playerId = undefined; 
-            var handler = undefined; 
+
+            // For use in simplegame 
+            var player = 0 
+            var handler = undefined
+            var time = {{ timeleft }} 
 
             function on_message(obj) {
                 {% block rulemessage %}
