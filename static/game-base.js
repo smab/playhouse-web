@@ -20,8 +20,8 @@ ws.onmessage = function (evt) {
         }
     }
 
-    if      (obj.error   != null) setMessage(obj.error,   'error')
     if (obj.message != null) setMessage(obj.message, 'message')
+    if (obj.error   != null) setMessage(obj.error,   'error')
 
     on_message(obj)
 };
