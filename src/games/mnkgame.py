@@ -25,9 +25,8 @@ class MnkGame(simplegame.SimpleGame):
         self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y'] 
 
     def sync(self, handler):
+        super().sync(handler) 
         print("Syncing %s" % handler)
-        #Send the game description
-        self.set_description(handler)
         for y in range(len(self.board)):
             for x in range(len(self.board[y])):
                 button_color = self.button_colors[self.board[y][x]]
@@ -63,7 +62,7 @@ class MnkGame(simplegame.SimpleGame):
     def on_message(self, handler, coords):
 
         # Check it's the correct player 
-        if not self.correctPlayer(handler):
+        if not self.correct_player(handler):
             return 
         
         playerH   = self.players[self.player]
@@ -80,9 +79,6 @@ class MnkGame(simplegame.SimpleGame):
             # Tile unoccupied; perform the move
             self.board[y][x] = self.player
             lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'color':button_color})
-
-            lightgames.send_msg(playerH,   {'message':'Waiting on other player...'})
-            lightgames.send_msg(opponentH, {'message':'Your turn!'})
 
             self.send_lamp(x, y, {'sat':255, 'hue':self.colors[self.player]})
 
