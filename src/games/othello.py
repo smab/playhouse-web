@@ -25,7 +25,6 @@ class Othello(simplegame.SimpleGame):
 
     def reset(self):
         super().reset() 
-        print("Othello, reset") 
 
         # Set the start pattern 
         mx = (self.width  // 2) - 1

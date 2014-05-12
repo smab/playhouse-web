@@ -104,8 +104,8 @@ if(obj.turn != undefined) {
     if(handler != undefined) {
         window.clearInterval(handler) 
         handler = undefined 
-        changeTime(player, {{ timelimit }}) 
     }
+    changeTime(player, {{ timelimit }}) 
     changeTurn(obj.turn) 
 }
 

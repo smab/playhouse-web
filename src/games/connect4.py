@@ -31,7 +31,7 @@ class Connect4(simplegame.SimpleGame):
 
 
     def on_message(self, handler, message):
-        if not self.correctPlayer(handler): 
+        if not self.correct_player(handler): 
             return 
 
         playerH   = self.players[self.player]
