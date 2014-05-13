@@ -80,7 +80,8 @@ class MnkGame(simplegame.SimpleGame):
             self.board[y][x] = self.player
             lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'color':button_color})
 
-            self.send_lamp(x, y, {'sat':255, 'hue':self.colors[self.player]})
+            hue = lightgames.to_lamp_hue(self.colors[self.player])
+            self.send_lamp(x, y, {'sat':255, 'hue':hue})
 
             # Check whether this was a winning move for the current player
             winner_lamps = self.search_winner_lamps(x, y)

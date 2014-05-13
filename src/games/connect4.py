@@ -63,7 +63,7 @@ class Connect4(simplegame.SimpleGame):
 
             def done():
                 # Turn the final lamps on
-                self.send_lamp(x, y, {'sat': 255, 'hue': hue, 'transitiontime': 10})
+                self.send_lamp(x, y, {'sat': 255, 'hue': hue, 'transitiontime': 10, 'bri': 255})
                 lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hsl':hsl, 'power':True, 'transitiontime':10, 'move':True})
 
                 # Check if this move caused a win

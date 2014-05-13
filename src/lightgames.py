@@ -127,17 +127,20 @@ def rgb_to_xyz(r, g, b):
     return x, y, Z
 
 def parse_color(color):
+    print("parse_color:", color) 
     return int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
 
 def rgb_to_hsl(r, g, b):
     # via http://en.wikipedia.org/wiki/HSL_and_HSV
+    print("rgb_to_hsl:", r, g, b) 
     M, m = max(r,g,b), min(r,g,b)
     c = M - m
 
+    print("rgb_to_hsl:", M, m, c) 
     if c == 0:
         hue = 0
     elif M == r: # ↓ may be <0, so use + and % to make sure that it is in [0,360]
-        hue = ((g - b)/c * 360 + 6) * 360 % (360 * 6)
+        hue = ((g - b)/c * 360 + 360*6) % (360 * 6)
     elif M == g:
         hue =  (b - r)/c * 360 + (360 * 2)
     elif M == b:
@@ -148,6 +151,7 @@ def rgb_to_hsl(r, g, b):
     divisor = 2 * (lum if lum < 128 else 256 - lum)
     sat = c / divisor * 256
 
+    print("rbg_to_hsl:", [hue, sat, lum]) 
     return (int(hue), int(sat), int(lum))
 
 def to_lamp_hue(hsl):
@@ -192,9 +196,15 @@ class Game:
         print(self.client.getresponse().read().decode())
 
     def send_lamp(self, x, y, change):
+        if 'hue' in change: 
+            if type(change['hue']) is list: 
+                raise TypeError("Aoeu") 
         self.send_lamp_multi([ { 'x': x, 'y': y, 'change': change } ])
 
     def send_lamp_all(self, change):
+        if 'hue' in change: 
+            if type(change['hue']) is list: 
+                raise TypeError("Aoeu") 
         json    = tornado.escape.json_encode(change)
         headers = add_auth_cookie({'Content-Type': 'application/json'})
         self.client.request("POST", "/lights/all", json, headers)
@@ -211,7 +221,7 @@ class Game:
             changes += [ { 'x': x,
                            'y': y,
                            'delay': i * ms_between / 1000,
-                           'change': dict(change, transitiontime = ms_transition // 100) } ]
+                           'change': dict(change, transitiontime = ms_transition // 100, bri=255)} ]
             if revert:
                 changes += [ { 'x': x,
                                'y': y,
@@ -359,7 +369,7 @@ class Game:
         vars['cell_w'] = max(0, int(config['cell_w']))
         vars['cell_h'] = max(0, int(config['cell_h']))
         vars['color_empty'] = config['color_empty']
-        self.destroy() 
+        #self.destroy() 
         self.reset() 
 
         

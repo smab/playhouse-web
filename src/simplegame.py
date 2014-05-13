@@ -56,8 +56,7 @@ class SimpleGame(lightgames.Game):
         for h in self.connections:
             lightgames.send_msg(h, {'gamestate': 'reset'})
 
-        self.try_get_new_players(2)
-
+        self.try_get_new_players(2) 
         self.sync_all()
         self.reset_lamp_all()
 
