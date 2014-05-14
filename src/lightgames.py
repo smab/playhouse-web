@@ -287,11 +287,11 @@ class Game:
         If you override this, you likely want to invoke this method manually!
         """
         vars = self.template_vars 
-        vars['grid_x'] = max(0, int(config['grid_x']))
-        vars['grid_y'] = max(0, int(config['grid_y']))
-        vars['cell_w'] = max(0, int(config['cell_w']))
-        vars['cell_h'] = max(0, int(config['cell_h']))
-        vars['color_empty'] = config['color_empty']
+        if 'grid_x' in config: vars['grid_x'] = max(0, int(config['grid_x']))
+        if 'grid_y' in config: vars['grid_y'] = max(0, int(config['grid_y']))
+        if 'cell_w' in config: vars['cell_w'] = max(0, int(config['cell_w']))
+        if 'cell_h' in config: vars['cell_h'] = max(0, int(config['cell_h']))
+        if 'color_empty' in config: vars['color_empty'] = config['color_empty']
         #self.destroy() 
         self.reset() 
 
