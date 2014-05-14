@@ -1,67 +1,85 @@
 {% extends "base.html" %}
 
 
-{% block playground %}
-<div style="margin: 0 auto;"> 
-    <style> 
-    #player0,#player1 {
-        width: 100px; 
-        height: 175px; 
-        padding: 8px; 
-        margin: 2em; 
-        display: inline-block; 
-        text-align: center; 
+{% block style_simple %}
+    .player-cont {
+        position: absolute;
+        z-index: 4;
+        width: 130px;
+        padding: 1em;
+        border-radius: 1em;
+        bottom: 3em;
+        height: 175px;
+        text-align: center;
+        font-family: sans-serif;
+        background: rgba(0,0,0, 0.2);
     }
-    #player0 div,#player1 div {
-        width: 64px; 
-        height: 64px; 
-        margin: 0 auto; 
+    .player-cont.current {
+        background: rgba(0,200,32, 0.7);
     }
+    #player0 { left: -190px; }
+    #player1 { right: -190px; }
+
+    .wrapper-outer {
+        text-align: center;
+    }
+    .wrapper {
+        display: inline-block;
+        position: relative;
+    }
+
+    .player-cont > .lamp {
+        display: inline-block;
+        padding: 0.6em 0.7em;
+        border-radius: 8px;
+        box-shadow: 0 0 16px rgba(32,32,32, 0.7);
+        background: #000;
+    }
+
     {% if color_1 != None %}
-    #player0color {
-        background-color: {{ color_1 }}
-    }
-    #player1color {
-        background-color: {{ color_2 }}
-    } 
+    #player0color { background-color: {{ color_1 }} }
+    #player1color { background-color: {{ color_2 }} }
     {% else %}
-    #player0color, #player1color {
-        display: none; 
-    } 
-    {% end %} 
-    #player0time, #player1time { 
+    #player0color, #player1color { display: none; }
+    {% end %}
+
+    #player0time, #player1time {
         {% if timelimit == None %}
-        display: none; 
+        display: none;
         {% end %}
     }
     #player0score, #player1score {
         {% if score_1 == None %}
-        display: none;  
+        display: none;
         {% end %}
     }
+{% end %}
 
-    #grid { 
-        margin: 0 auto; 
-        display: inline-block; 
-    }
 
-    </style> 
-    <div id="player0" style="border: 1px dashed #333">
-        <div id="player0color"></div>
-        <p style="text-align: center; font-weight: bold">Player 1</p> 
-        <p id="player0score">Score: {{ score_1 }}</p> 
-        <p id="player0time">Time: {{ timelimit }}</p> 
-    </div> 
+{% block playground %}
+<div class="wrapper-outer">
+    <div class="wrapper">
+        <div id="player0" class="player-cont current">
+            <div class="lamp">
+                <img id="player0color" src="/static/lamp.png" />
+            </div>
+            <p style="text-align: center; font-weight: bold">Player 1</p>
+            <p id="player0score">Score: {{ score_1 }}</p>
+            <p id="player0time">Time: {{ timelimit }}</p>
+        </div>
 
-    <table id="grid"></table> 
+        <div id="player1" class="player-cont">
+            <div class="lamp">
+                <img id="player1color" src="/static/lamp.png" />
+            </div>
+            <p style="text-align: center; font-weight: bold">Player 2</p>
+            <p id="player1score">Score: {{ score_2 }}</p>
+            <p id="player1time">Time: {{ timelimit }}</p>
+        </div>
 
-    <div id="player1" style="border: 0px dashed #333">
-        <div id="player1color"></div>
-        <p style="text-align: center; font-weight: bold">Player 2</p> 
-        <p id="player1score">Score: {{ score_2 }}</p> 
-        <p id="player1time">Time: {{ timelimit }}</p> 
-    </div> 
-</div> 
+        <table id="grid"></table>
+    </div>
+</div>
 {% end %}
 
 {% block timelimits %}
@@ -72,8 +90,13 @@ function changeTurn(p) {
   
     // Set current player indication 
     // TODO Set the opponent's border to 1px (so it does not jump around during turnover 
+    pl.className += " current"
+    op.className = op.className.replace(/ ?current/, "")
+
+    /*
     pl.setAttribute(  "style", "border: 1px dashed #333!important"); 
     op.setAttribute("style", "border: 0px dashed #333!important"); 
+    */
 } 
 function changeTime(p, t) {
     time = t
