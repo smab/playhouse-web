@@ -56,8 +56,8 @@ class Othello(simplegame.SimpleGame):
         # The game is over, see who won (or if the game is a tie) and notify
         # everyone of the result.
         scores = self.count_score() 
-        if   scores[0] > scores[1]: winner = self.players[0]
-        elif scores[0] < scores[1]: winner = self.players[1]
+        if   scores[0] > scores[1]: winner = self.get_player(0)
+        elif scores[0] < scores[1]: winner = self.get_player(1)
         else: winner = None 
 
         lightgames.game_over(self, winner)
@@ -98,8 +98,8 @@ class Othello(simplegame.SimpleGame):
             return 
 
         opponent  = 1 - self.player
-        playerH   = self.players[self.player]
-        opponentH = self.players[opponent]
+        playerH   = self.get_player(self.player)
+        opponentH = self.get_player(opponent)
 
         x, y = coords['x'], coords['y']
         button_color = self.button_colors[self.player]

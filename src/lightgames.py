@@ -56,37 +56,6 @@ def send_msgs_animation(handlers, coords, message, callback = None, revert = Fal
         ms = (len(coords) - 1)*ms_between + (ms_revert if revert else 0)
         set_timeout(datetime.timedelta(milliseconds = ms), callback)
 
-def reply_wrong_player(game, handler):
-    if handler in game.players:
-        print("Wrong player")
-        send_msg(handler, {'error':'Not your turn!'})
-    else:
-        print("Spectator")
-        send_msg(handler, {'error':'You are not a player!'})
-
-def game_over(game, winnerH, coords = frozenset()):
-    if winnerH == None:
-        send_msgs(game.players,     {'state': 'gameover'})
-        send_msgs(game.connections, {'message': 'The game tied'})
-        print("The game tied")
-
-    else:
-        winner = game.players.index(winnerH)
-        send_msg(winnerH, {'state': 'gameover', 'message': 'You won!'})
-        send_msgs((p for p in game.players if p != winnerH),
-                          {'state': 'gameover', 'message': 'You lost!'})
-        send_msgs(game.get_spectators(), {'message': "Player %d won" % (winner + 1)})
-        print("Player %d wins!" % winner)
-
-    changes = []
-    for (x,y) in coords:
-        changes += [ { 'x': x, 'y': y,             'change': { 'alert': 'lselect' } },
-                     { 'x': x, 'y': y, 'delay': 3, 'change': { 'alert': 'none'    } } ]
-    game.send_lamp_multi(changes)
-
-    game.player = None
-    set_timeout(datetime.timedelta(seconds = len(coords) + 3), game.reset)
-
 def set_timeout(deadline, callback):
     """
     Runs `callback` at the time `deadline` from Tornado's I/O loop.
@@ -104,7 +73,6 @@ def remove_timeout(handler):
     """
     ioloop = tornado.ioloop.IOLoop.instance()
     ioloop.remove_timeout(handler) 
-    pass
 
 def get_grid_size():
     import manager
@@ -127,16 +95,13 @@ def rgb_to_xyz(r, g, b):
     return x, y, Z
 
 def parse_color(color):
-    print("parse_color:", color) 
     return int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
 
 def rgb_to_hsl(r, g, b):
     # via http://en.wikipedia.org/wiki/HSL_and_HSV
-    print("rgb_to_hsl:", r, g, b) 
     M, m = max(r,g,b), min(r,g,b)
     c = M - m
 
-    print("rgb_to_hsl:", M, m, c) 
     if c == 0:
         hue = 0
     elif M == r: # ↓ may be <0, so use + and % to make sure that it is in [0,360]
@@ -151,11 +116,10 @@ def rgb_to_hsl(r, g, b):
     divisor = 2 * (lum if lum < 128 else 256 - lum)
     sat = c / divisor * 256
 
-    print("rbg_to_hsl:", [hue, sat, lum]) 
     return (int(hue), int(sat), int(lum))
 
 def to_lamp_hue(hsl):
-  return int(hsl[0] * 65536 / 360)
+    return int(hsl[0] * 65536 / 360)
 
 
 class Game:
@@ -176,7 +140,6 @@ class Game:
         # State variables, to be used by the game
         self.queue       = None
         self.connections = set()
-        self.players     = []
 
         # Internal variables
         self.client      = client
@@ -240,40 +203,8 @@ class Game:
         for handler in self.connections:
             self.sync(handler)
 
-    def try_get_new_players(game, n):
-        for _ in range(n):
-            game.add_player(game.queue.get_first())
-
-    def get_spectators(self):
-        """
-        Generator for spectators, handy for use with `send_msg_many`.
-        """
-        for h in self.connections:
-            if h not in self.players:
-                yield h
-
     # Feel free to override these, but make sure to call the super function
     # directly if you do, so that the connection-managing logic still works.
-    def add_player(self, handler):
-        print("Add player: %s" % handler)
-
-        if handler != None:
-            player = self.players.index(None)
-            self.players[player] = handler
-
-            print("Connection %s as player %d" % (handler, player))
-            send_msg(handler, { 'state':   'playing',
-                                'playerId': player+1, 
-                                'message': 'You are player %d' % (player + 1) })
-            self.sync(handler)
-
-    def remove_player(self, handler):
-        player = self.players.index(handler)
-        self.players[player] = None
-        # try to replace the player with one from the queue
-        self.add_player(self.queue.get_first())
-
-
     def on_connect(self, handler):
         """
         Event: a client has connected
@@ -292,12 +223,7 @@ class Game:
 
         If you override this, you likely want to invoke this method manually!
         """
-        if handler not in self.players:
-            self.sync(handler)
-
-            if None in self.players:
-                top = self.queue.get_first()
-                self.add_player(top)
+        pass
 
 
     def on_close(self, handler):
@@ -307,9 +233,6 @@ class Game:
         If you override this, you likely want to invoke this method manually!
         """
         self.connections -= {handler}
-
-        if handler in self.players:
-            self.remove_player(handler)
            
 
     # Override these to implement the actual game

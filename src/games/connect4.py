@@ -34,8 +34,8 @@ class Connect4(simplegame.SimpleGame):
         if not self.correct_player(handler): 
             return 
 
-        playerH   = self.players[self.player]
-        opponentH = self.players[1 - self.player]
+        playerH   = self.get_player(self.player)
+        opponentH = self.get_player(1 - self.player)
 
         x, y = message['x'], message['y']
         hsl  = self.colors[self.player]

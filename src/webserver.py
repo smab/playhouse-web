@@ -49,8 +49,8 @@ class CommunicationHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         print("Client disconnected (%s)" % self)
         if self in manager.connections:
-            manager.queue.on_close(self)
             manager.game.on_close(self)
+            manager.queue.on_close(self)
             manager.connections.remove(self)
 
 

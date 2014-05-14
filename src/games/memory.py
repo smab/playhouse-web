@@ -67,8 +67,8 @@ class Memory(simplegame.SimpleGame):
         if not self.correct_player(handler):
             return
 
-        playerH   = self.players[self.player]
-        opponentH = self.players[1 - self.player]
+        playerH   = self.get_player(self.player)
+        opponentH = self.get_player(1 - self.player)
 
         x, y = message['x'], message['y']
 
@@ -121,8 +121,8 @@ class Memory(simplegame.SimpleGame):
             # Check if the board is full
             if all(all(hue >= 0 for hue in row) for row in self.board):
                 winner = None
-                if   self.scores[0] > self.scores[1]: winner = self.players[0]
-                elif self.scores[0] < self.scores[1]: winner = self.players[1]
+                if   self.scores[0] > self.scores[1]: winner = self.get_player(0)
+                elif self.scores[0] < self.scores[1]: winner = self.get_player(1)
 
                 lightgames.game_over(self, winner)
                 return
@@ -142,7 +142,7 @@ class Memory(simplegame.SimpleGame):
         # the templates if that is prettier. 
         config['color_1'] = '#CCCCCC' 
         config['color_2'] = '#CCCCCC' 
-        super().set_options(config) 
+        return super().set_options(config) 
 
 
     def set_description(self, handler):

@@ -18,11 +18,10 @@ class MnkGame(simplegame.SimpleGame):
     def __init__(self, client): 
         super().__init__(client) 
         self.template_vars['module_name'] = 'm,n,k-game' 
-        self.template_vars['title'] = 'Tic-tac-toe'
         self.template_vars['grid_x'] = 3 
         self.template_vars['grid_y'] = 3 
         self.template_vars['winner_req'] = self.winning_req 
-        self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y'] 
+        self.template_vars['title'] = self.get_title(self.template_vars)
 
     def sync(self, handler):
         super().sync(handler) 
@@ -65,8 +64,8 @@ class MnkGame(simplegame.SimpleGame):
         if not self.correct_player(handler):
             return 
         
-        playerH   = self.players[self.player]
-        opponentH = self.players[1 - self.player]
+        playerH   = self.get_player(self.player)
+        opponentH = self.get_player(1 - self.player)
         
         x, y = coords['x'], coords['y']
         button_color = self.button_colors[self.player]
@@ -86,12 +85,12 @@ class MnkGame(simplegame.SimpleGame):
             # Check whether this was a winning move for the current player
             winner_lamps = self.search_winner_lamps(x, y)
             if len(winner_lamps) > 0:
-                lightgames.game_over(self, playerH)
+                simplegame.game_over(self, playerH)
                 return
 
             # Check if the board is full
             if all(all(i != 2 for i in j) for j in self.board):
-                lightgames.game_over(self, None)
+                simplegame.game_over(self, None)
                 return
 
             # Switch player
@@ -104,12 +103,9 @@ class MnkGame(simplegame.SimpleGame):
         self.winning_req = vars['winner_req']
 
         # Update title
-        is_tic_tac_toe = (vars['grid_x'] == 3 and vars['grid_y'] == 3 
-                                              and self.winning_req == 3)
-        vars['title'] = 'Tic-tac-toe' if is_tic_tac_toe \
-                                      else '%d-in-a-row' % self.winning_req
+        vars['title'] = self.get_title(vars)
 
-        super().set_options(config) 
+        return super().set_options(config) 
 
 
     def set_description(self, handler):
@@ -117,3 +113,8 @@ class MnkGame(simplegame.SimpleGame):
         lightgames.send_msg(handler, {'rulemessage': (rules)})
 
 
+    def get_title(self, tvars):
+        is_tic_tac_toe = (tvars['grid_x'] == 3 and tvars['grid_y'] == 3 
+                                               and tvars['winner_req'] == 3)
+        return 'Tic-tac-toe' if is_tic_tac_toe \
+                                      else '%d-in-a-row' % self.winning_req

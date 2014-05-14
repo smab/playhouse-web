@@ -1,8 +1,41 @@
 import datetime
 
-import tornado.ioloop  
+import tornado.ioloop
 
 import lightgames 
+
+
+def reply_wrong_player(game, handler):
+    if handler in game.get_players():
+        print("Wrong player")
+        lightgames.send_msg(handler, {'error':'Not your turn!'})
+    else:
+        print("Spectator")
+        lightgames.send_msg(handler, {'error':'You are not a player!'})
+
+def game_over(game, winnerH, coords = frozenset()):
+    if winnerH == None:
+        lightgames.send_msgs(game.get_players(), {'state': 'gameover'})
+        lightgames.send_msgs(game.connections,   {'message': 'The game tied'})
+        print("The game tied")
+
+    else:
+        winner = game.get_players().index(winnerH)
+        lightgames.send_msg(winnerH, {'state': 'gameover', 'message': 'You won!'})
+        lightgames.send_msgs((p for p in game.get_players() if p != winnerH),
+                          {'state': 'gameover', 'message': 'You lost!'})
+        lightgames.send_msgs(game.get_spectators(), 
+                          {'message': "Player %d won" % (winner + 1)})
+        print("Player %d wins!" % winner)
+
+    changes = []
+    for (x,y) in coords:
+        changes += [ { 'x': x, 'y': y,             'change': { 'alert': 'lselect' } },
+                     { 'x': x, 'y': y, 'delay': 3, 'change': { 'alert': 'none'    } } ]
+    game.send_lamp_multi(changes)
+
+    game.player = None
+    lightgames.set_timeout(datetime.timedelta(seconds = len(coords) + 3), game.reset)
 
 
 # A SimpleGame is a turnbased board game between two players who each may have 
@@ -15,20 +48,23 @@ class SimpleGame(lightgames.Game):
         lightgames.Game.__init__(self, client) 
 
         # Default board, colors, and timelimits 
-        self.template_vars['grid_x'] = 3 
-        self.template_vars['grid_y'] = 3 
-        self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
-        self.template_vars['color_1'] = '#FF0000' 
-        self.template_vars['color_2'] = '#0000FF'
+        self.template_vars['color_1']   = '#FF0000' 
+        self.template_vars['color_2']   = '#0000FF'
         self.template_vars['timelimit'] = 20 
-        self.template_vars['timeleft'] = self.template_vars['timelimit']
-        self.template_vars['score_1'] = None 
-        self.template_vars['score_2'] = None 
+        self.template_vars['timeleft']  = self.template_vars['timelimit']
+        self.template_vars['score_1']   = None 
+        self.template_vars['score_2']   = None 
 
         # A handler for the timer and a handler that keeps track of the 
         # timelimit counter server side. 
         self.timer_counter = tornado.ioloop.PeriodicCallback(self.timelimit_counter, 1000)
 
+    def init(self):
+        super().init()
+
+        self.queue.addplayer_callback = self.on_add_player
+        self.queue.removeplayer_callback = self.on_remove_player
+        self.queue.set_num_players(2)
 
     def reset(self): 
         """
@@ -37,14 +73,15 @@ class SimpleGame(lightgames.Game):
         If you override this, you likely want to invoke this method manually!
         """
         # Sets up the board and tries to fetch two new players. 
+        self.game_started = False
         self.timer_counter.stop() 
         self.player = 0 
         self.tmp_player = None 
-        self.players = [None, None]  
         self.player_passes = [0, 0] # refering to how many timelimit's they've triggered (in a row) 
-        self.width = self.template_vars['grid_x'] 
+        self.width  = self.template_vars['grid_x'] 
         self.height = self.template_vars['grid_y'] 
-        self.board   = [[2 for x in range(self.width)] for y in range(self.height)]
+        self.board  = [[2 for x in range(self.width)] for y in range(self.height)]
+        self.queue.remove_all_players()
 
         self.template_vars['timeleft'] = self.template_vars['timelimit']
 
@@ -56,9 +93,9 @@ class SimpleGame(lightgames.Game):
         for h in self.connections:
             lightgames.send_msg(h, {'gamestate': 'reset'})
 
-        self.try_get_new_players(2) 
         self.sync_all()
         self.reset_lamp_all()
+        self.queue.try_get_new_players()
 
     def sync_turn(self, handler): 
         """
@@ -71,7 +108,7 @@ class SimpleGame(lightgames.Game):
             'score_1': self.template_vars['score_1'], 
             'score_2': self.template_vars['score_2']
         }
-        if None not in self.players: 
+        if None not in self.get_players(): 
             msg['timeleft'] = self.template_vars['timeleft'] 
         lightgames.send_msg(handler, msg) 
         
@@ -87,25 +124,56 @@ class SimpleGame(lightgames.Game):
         self.sync_turn(handler) 
         super().sync(handler) 
 
-    def add_player(self, handler): 
-        # A player has been added. If this is the second player, 
-        # we start the timer. 
-        super().add_player(handler) 
-        if handler in self.players and None not in self.players: 
-            if self.player == None: 
-                self.turnover(self.tmp_player) 
-            else: 
-                self.turnover(self.player) 
 
-    def on_close(self, handler):
-        self.connections -= {handler} 
-        if handler in self.players: 
-            i = self.players.index(handler) 
-            lightgames.send_msg(self.players[1-i], { "message": "You are a spectator!", 
-                                                     "error": "Your opponent left", 
-                                                     "state": "gameover", 
+    def get_player(self, idx):
+        return self.get_players()[idx]
+
+    def get_players(self):
+        return self.queue.get_player_handlers()
+
+    def get_spectators(self):
+        """
+        Generator for spectators, handy for use with `send_msg_many`.
+        """
+        for h in self.connections:
+            if h not in self.get_players():
+                yield h
+
+    def on_add_player(self, player):
+        handler = self.get_player(player)
+        print("Add player: %s" % handler)
+
+        print("Connection %s as player %d" % (handler, player))
+        lightgames.send_msg(handler, { 
+                            'state':   'playing',
+                            'playerId': player+1, 
+                            'message': 'You are player %d' % (player + 1) })
+        self.sync(handler)
+
+        if not self.game_started:
+            # A player has been added. If this is the second player, 
+            # we start the timer. 
+            if handler in self.get_players() and None not in self.get_players(): 
+                self.game_started = True
+                if self.player == None: 
+                    self.turnover(self.tmp_player) 
+                else: 
+                    self.turnover(self.player) 
+
+    def on_remove_player(self, player):
+        if self.game_started:
+            lightgames.send_msg(self.get_player(1-player), { 
+                                "message": "You are a spectator!", 
+                                "error": "Your opponent left", 
+                                "state": "gameover", 
             })
-            self.reset() 
+            self.reset()
+
+    def on_enqueue(self, handler):
+        super().on_enqueue(handler)
+
+        self.queue.try_get_new_players()
+
 
     # Returns True if it is this player's turn 
     def correct_player(self, handler): 
@@ -115,8 +183,8 @@ class SimpleGame(lightgames.Game):
         """
         if self.player == None:
             return False 
-        elif handler != self.players[self.player]: 
-            lightgames.reply_wrong_player(self, handler)
+        elif handler != self.get_player(self.player): 
+            reply_wrong_player(self, handler)
             return False 
         return True 
 
@@ -143,12 +211,12 @@ class SimpleGame(lightgames.Game):
         else: 
             self.player = to_player 
 
-        lightgames.send_msg(self.players[self.player],   {'message':'Your turn!'}) 
-        lightgames.send_msg(self.players[1-self.player], {'message':'Waiting on other player...'})
+        lightgames.send_msg(self.get_player(self.player),   {'message':'Your turn!'}) 
+        lightgames.send_msg(self.get_player(1-self.player), {'message':'Waiting on other player...'})
 
         self.timer_counter = tornado.ioloop.PeriodicCallback(self.timelimit_counter, 1000)
         self.sync_all() 
-        if None not in self.players: 
+        if None not in self.get_players(): 
             self.timer_counter.start() 
 
     def pause_turn(self): 
@@ -188,9 +256,10 @@ class SimpleGame(lightgames.Game):
         """ 
         self.player_passes[self.player] += 1 
         if self.player_passes[self.player] >= 3: 
-            lightgames.send_msgs(self.players, { "message": "You are a spectator!", 
-                                                 "error": "Kicked due to inactivity", 
-                                                 "state": "gameover", 
+            lightgames.send_msgs(self.get_players(), {
+                                "message": "You are a spectator!", 
+                                "error": "Kicked due to inactivity", 
+                                "state": "gameover", 
             })
             self.reset()
         else: 
@@ -201,6 +270,6 @@ class SimpleGame(lightgames.Game):
         vars['color_1']     = config['color_1']
         vars['color_2']     = config['color_2']
         vars['timelimit']   = max(0, int(config['timelimit']))  
-        super().set_options(config) 
+        return super().set_options(config) 
 
 

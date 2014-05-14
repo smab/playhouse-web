@@ -132,9 +132,6 @@ class GifAnimation(lightgames.Game):
         self.send_lamp_all({ 'on': False })
 
     def set_options(self, config):
-        self.template_vars['cell_w'] = max(2,min(500,int(config['cell_w'])))
-        self.template_vars['cell_h'] = max(2,min(500,int(config['cell_h'])))
-
         files = config['files']
         if 'animation_file' in files:
             fileinfo = files['animation_file'][0]
@@ -216,6 +213,8 @@ class GifAnimation(lightgames.Game):
                 self.template_vars['color_off'] = config['color_off']
             except ValueError:
                 print("Couldn't convert HTML color to RGB")
+
+        return super().set_options(config)
 
 
 class ImageSequence:

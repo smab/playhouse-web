@@ -63,15 +63,6 @@ class Paint(lightgames.Game):
         if handler in self.playerColors:
             del self.playerColors[handler]
 
-    def set_options(self, config):
-        m = 50
-        self.template_vars['grid_y'] = max(2,min(m,int(config['grid_y'])))
-        self.template_vars['grid_x'] = max(2,min(m,int(config['grid_x'])))
-        self.template_vars['cell_w'] = max(2,min(500,int(config['cell_w'])))
-        self.template_vars['cell_h'] = max(2,min(500,int(config['cell_h'])))
-        self.template_vars['color_empty'] = config['color_empty']
-
-        self.reset()
 
     def set_description(self, handler):
         message = '<p><p><b>Name:</b> Paint</p><p><b>Players:</b> Any</p><p><b>Rules & Goals:</b> No rules, no goals, only paint. By clicking a cell the player will fill it with their assigned colour, thus painting the grid. Refresh the page to get a new colour.</p></p>'
