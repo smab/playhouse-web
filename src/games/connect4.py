@@ -35,7 +35,7 @@ class Connect4(simplegame.SimpleGame):
             return 
 
         playerH   = self.get_player(self.player)
-        opponentH = self.get_player(1 - self.player)
+        #opponentH = self.get_player(1 - self.player)
 
         x, y = message['x'], message['y']
         hsl  = self.colors[self.player]
@@ -77,12 +77,12 @@ class Connect4(simplegame.SimpleGame):
                         winner_lamps.update(rights)
 
                 if len(winner_lamps) > 0:
-                    lightgames.game_over(self, playerH, coords = winner_lamps)
+                    simplegame.game_over(self, playerH, coords = winner_lamps)
                     return
 
                 # Check for full board
                 if all(all(i != 2 for i in j) for j in self.board):
-                    lightgames.game_over(self, None)
+                    simplegame.game_over(self, None)
                     self.reset()
                     return
 

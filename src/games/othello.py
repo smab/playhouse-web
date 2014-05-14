@@ -60,7 +60,7 @@ class Othello(simplegame.SimpleGame):
         elif scores[0] < scores[1]: winner = self.get_player(1)
         else: winner = None 
 
-        lightgames.game_over(self, winner)
+        simplegame.game_over(self, winner)
 
     def on_message(self, handler, coords):
         def search(x, y, dx, dy, pred):

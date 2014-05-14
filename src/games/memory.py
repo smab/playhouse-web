@@ -68,7 +68,7 @@ class Memory(simplegame.SimpleGame):
             return
 
         playerH   = self.get_player(self.player)
-        opponentH = self.get_player(1 - self.player)
+        #opponentH = self.get_player(1 - self.player)
 
         x, y = message['x'], message['y']
 
@@ -124,7 +124,7 @@ class Memory(simplegame.SimpleGame):
                 if   self.scores[0] > self.scores[1]: winner = self.get_player(0)
                 elif self.scores[0] < self.scores[1]: winner = self.get_player(1)
 
-                lightgames.game_over(self, winner)
+                simplegame.game_over(self, winner)
                 return
 
         else:

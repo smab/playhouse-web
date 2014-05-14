@@ -65,7 +65,7 @@ class MnkGame(simplegame.SimpleGame):
             return 
         
         playerH   = self.get_player(self.player)
-        opponentH = self.get_player(1 - self.player)
+        #opponentH = self.get_player(1 - self.player)
         
         x, y = coords['x'], coords['y']
         button_color = self.button_colors[self.player]
@@ -97,13 +97,13 @@ class MnkGame(simplegame.SimpleGame):
             self.turnover() 
 
     def set_options(self, config):
-        vars = self.template_vars
-        vars['winner_req']  = max(2, int(config['winner_req']))
+        tvars = self.template_vars
+        tvars['winner_req'] = max(2, int(config['winner_req']))
 
-        self.winning_req = vars['winner_req']
+        self.winning_req = tvars['winner_req']
 
         # Update title
-        vars['title'] = self.get_title(vars)
+        tvars['title'] = self.get_title(tvars)
 
         return super().set_options(config) 
 

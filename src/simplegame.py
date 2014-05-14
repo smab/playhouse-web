@@ -85,10 +85,10 @@ class SimpleGame(lightgames.Game):
 
         self.template_vars['timeleft'] = self.template_vars['timelimit']
 
-        lg, vars = lightgames, self.template_vars
-        self.colors = [ lg.rgb_to_hsl(*lg.parse_color(vars['color_1'])),
-                        lg.rgb_to_hsl(*lg.parse_color(vars['color_2'])),
-                        lg.rgb_to_hsl(*lg.parse_color(vars['color_empty'])) ]
+        lg, tvars = lightgames, self.template_vars
+        self.colors = [ lg.rgb_to_hsl(*lg.parse_color(tvars['color_1'])),
+                        lg.rgb_to_hsl(*lg.parse_color(tvars['color_2'])),
+                        lg.rgb_to_hsl(*lg.parse_color(tvars['color_empty'])) ]
 
         for h in self.connections:
             lightgames.send_msg(h, {'gamestate': 'reset'})
@@ -265,11 +265,11 @@ class SimpleGame(lightgames.Game):
         else: 
             self.turnover() 
 
-    def set_options(self, config):  
-        vars = self.template_vars 
-        vars['color_1']     = config['color_1']
-        vars['color_2']     = config['color_2']
-        vars['timelimit']   = max(0, int(config['timelimit']))  
+    def set_options(self, config):
+        tvars = self.template_vars 
+        tvars['color_1']   = config['color_1']
+        tvars['color_2']   = config['color_2']
+        tvars['timelimit'] = max(0, int(config['timelimit']))
         return super().set_options(config) 
 
 

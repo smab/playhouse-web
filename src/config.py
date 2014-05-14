@@ -12,11 +12,13 @@ password = None
 
 class GetException(Exception):
     def __init__(self, msg, response):
+        super().__init__()
         self.msg = msg
         self.response = response
 
 class ConfigException(Exception):
     def __init__(self, msg):
+        super().__init__()
         self.msg = msg
 
 def add_auth_cookie(headers):
@@ -324,7 +326,7 @@ class GridConfigHandler(RequestHandler):
 
         return lights
 
-    def sendRequest(light, change):
+    def sendRequest(self, light, change):
         headers = add_auth_cookie({'Content-Type': 'application/json'})
         request = tornado.escape.json_encode(
             [{'light' : light['lamp'],
@@ -382,7 +384,7 @@ class GridConfigHandler(RequestHandler):
             tvars['lamp'] = choosen
 
             # set color to white
-            GridConfigHandler.sendRequest(choosen,
+            self.sendRequest(choosen,
                 {'on':True, 'sat':0, 'hue':0, 'bri':255})
 
         tvars['free'] = free
@@ -446,7 +448,7 @@ class GridConfigHandler(RequestHandler):
                         GridConfigHandler.grid['grid'][y][x] = None
 
                         # set color to red
-                        GridConfigHandler.sendRequest(lamp,
+                        self.sendRequest(lamp,
                             {'on':True, 'sat':255, 'hue':0, 'bri':255})
 
                         print('Lamp removed from %s' % coords)
@@ -462,7 +464,7 @@ class GridConfigHandler(RequestHandler):
                             GridConfigHandler.grid['grid'][y][x] = lamp
 
                             # set color to blue
-                            GridConfigHandler.sendRequest(lamp,
+                            self.sendRequest(lamp,
                                 {'on':True, 'sat':255, 'hue':45000, 'bri':255})
 
                             print('Lamp %s placed at %s' % (lamp, coords))
@@ -480,7 +482,7 @@ class GridConfigHandler(RequestHandler):
                     lamp = tornado.escape.json_decode(
                         self.get_argument('lamp'))
                     GridConfigHandler.skipped.append(lamp)
-                    GridConfigHandler.sendRequest(lamp, {'on':False})  # turn off
+                    self.sendRequest(lamp, {'on':False})  # turn off
                     msg = 'Skipped lamp %s%%23%s' % (lamp['mac'], lamp['lamp'])
                 else:
                     skip_data = skip_name.split('#')
