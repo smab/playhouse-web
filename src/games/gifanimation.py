@@ -45,6 +45,8 @@ class GifAnimation(lightgames.Game):
         # keep track of if the animation file has changed
         self.changed_gif = False
 
+    def destroy(self):
+        self.play = False
 
     @gen.engine
     def play_animation(self):
