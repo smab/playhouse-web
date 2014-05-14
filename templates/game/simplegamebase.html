@@ -87,16 +87,10 @@ function changeTurn(p) {
     player = p 
     var pl   = document.getElementById("player"+p)
     var op = document.getElementById("player"+(1-p))
-  
-    // Set current player indication 
-    // TODO Set the opponent's border to 1px (so it does not jump around during turnover 
-    pl.className += " current"
-    op.className = op.className.replace(/ ?current/, "")
 
-    /*
-    pl.setAttribute(  "style", "border: 1px dashed #333!important"); 
-    op.setAttribute("style", "border: 0px dashed #333!important"); 
-    */
+    // Set current player indication
+    pl.className += " current"
+    op.className = op.className.replace(/ ?current/g, "")
 } 
 function changeTime(p, t) {
     time = t
