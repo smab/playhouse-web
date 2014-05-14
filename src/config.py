@@ -280,10 +280,11 @@ class BridgeConfigHandler(RequestHandler):
                 if not response['valid_username']: 
                     BridgeConfigHandler.bridges[mac]['lights'] = -1 
                 #self.write({'state': 'success'}) 
-                self.redirect('bridges') 
+                #self.redirect('bridges') 
             else: 
                 print(response['errorcode'], response['errormessage']) 
-                self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
+                #self.redirect("bridges?status=error&msg=%s" % response['errormessage'].capitalize()) 
+            self.write(response) 
 
         elif 'search' in data: 
             print('Search') 
