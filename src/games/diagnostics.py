@@ -16,12 +16,17 @@ class Diagnostics(lightgames.Game):
     }
 
     def init(self):
-        self.on = False
+        self.on = self.template_vars['run']
         self.grid = lightgames.get_grid_size()
         print(self.grid)
         self.delay = self.template_vars['delay']
         self.reset_lamp_all()
+        if self.on:
+            self.run()
 
+    def destroy(self):
+        super().destroy()
+        self.on = False
 
     @gen.engine
     def run(self):

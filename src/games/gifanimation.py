@@ -46,6 +46,7 @@ class GifAnimation(lightgames.Game):
         self.changed_gif = False
 
     def destroy(self):
+        super().destroy()
         self.play = False
 
     @gen.engine
