@@ -199,7 +199,7 @@ class SimpleGame(lightgames.Game):
             self.player = self.tmp_player 
             self.tmp_player = None 
 
-        if self.template_vars['timeleft'] > 0: 
+        if self.template_vars['timeleft'] != None and self.template_vars['timeleft'] > 0: 
             # The turnover was not because of exceeded timelimit; reset the 
             # number of passes that player has done 
             self.player_passes[self.player] = 0 
@@ -216,7 +216,7 @@ class SimpleGame(lightgames.Game):
 
         self.timer_counter = tornado.ioloop.PeriodicCallback(self.timelimit_counter, 1000)
         self.sync_all() 
-        if None not in self.get_players(): 
+        if None not in self.get_players() and self.template_vars['timelimit'] != None: 
             self.timer_counter.start() 
 
     def pause_turn(self): 
@@ -269,7 +269,10 @@ class SimpleGame(lightgames.Game):
         tvars = self.template_vars 
         tvars['color_1']   = config['color_1']
         tvars['color_2']   = config['color_2']
-        tvars['timelimit'] = max(0, int(config['timelimit']))
+        if int(config['timelimit']) <= 0: 
+            tvars['timelimit'] = None 
+        else: 
+            tvars['timelimit'] = int(config['timelimit'])
         return super().set_options(config) 
 
 
