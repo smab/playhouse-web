@@ -1,4 +1,5 @@
 import datetime
+import functools
 
 import tornado.ioloop
 
@@ -35,7 +36,11 @@ def game_over(game, winnerH, coords = frozenset()):
     game.send_lamp_multi(changes)
 
     game.player = None
-    lightgames.set_timeout(datetime.timedelta(seconds = len(coords) + 3), game.reset)
+    lightgames.set_timeout(datetime.timedelta(seconds = len(coords) + 5), game.reset)
+    lightgames.set_timeout(datetime.timedelta(seconds = len(coords) + 5), functools.partial(alert_lamps, game))
+
+def alert_lamps(game): 
+    game.send_lamp_all({'alert': 'select'}) 
 
 
 # A SimpleGame is a turnbased board game between two players who each may have 

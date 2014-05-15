@@ -121,6 +121,18 @@ def rgb_to_hsl(r, g, b):
 def to_lamp_hue(hsl):
     return int(hsl[0] * 65536 / 360)
 
+def validate_xy(f): 
+    def helper(self, handler, message):
+        if 'x' in message and 'y' in message:
+            x, y = message['x'], message['y']
+            width  = self.template_vars['grid_x']
+            height = self.template_vars['grid_y']
+            if x >= 0 and x < width and \
+               y >= 0 and y < height:
+                return f(self, handler, message)
+        send_msg(handler, {'error':'Invalid move!'})
+
+    return helper
 
 class Game:
     config_file = "defaultconfig.html"
@@ -159,15 +171,9 @@ class Game:
         print(self.client.getresponse().read().decode())
 
     def send_lamp(self, x, y, change):
-        if 'hue' in change: 
-            if type(change['hue']) is list: 
-                raise TypeError("Aoeu") 
         self.send_lamp_multi([ { 'x': x, 'y': y, 'change': change } ])
 
     def send_lamp_all(self, change):
-        if 'hue' in change: 
-            if type(change['hue']) is list: 
-                raise TypeError("Aoeu") 
         json    = tornado.escape.json_encode(change)
         headers = add_auth_cookie({'Content-Type': 'application/json'})
         self.client.request("POST", "/lights/all", json, headers)

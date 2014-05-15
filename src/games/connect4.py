@@ -30,12 +30,12 @@ class Connect4(simplegame.SimpleGame):
                 lightgames.send_msg(handler, {'x':x, 'y':y, 'hsl':hsl, 'power':powered, 'move':True})
 
 
+    @lightgames.validate_xy
     def on_message(self, handler, message):
         if not self.correct_player(handler): 
             return 
 
         playerH   = self.get_player(self.player)
-        #opponentH = self.get_player(1 - self.player)
 
         x, y = message['x'], message['y']
         hsl  = self.colors[self.player]
@@ -56,8 +56,6 @@ class Connect4(simplegame.SimpleGame):
 
         if self.board[y][x] == 2 and (y == self.height - 1 or self.board[y + 1][x] != 2):
             player = self.player
-            # self.player = None  # Temporarily set to None to prevent players
-                                # from making moves until animation has finished
             self.pause_turn()   # Pause the timecounter 
             self.board[y][x] = player
 
