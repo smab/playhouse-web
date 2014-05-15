@@ -16,15 +16,14 @@ def reply_wrong_player(game, handler):
 
 def game_over(game, winnerH, coords = frozenset()):
     if winnerH == None:
-        lightgames.send_msgs(game.get_players(), {'state': 'gameover'})
         lightgames.send_msgs(game.connections,   {'message': 'The game tied'})
         print("The game tied")
 
     else:
         winner = game.get_players().index(winnerH)
-        lightgames.send_msg(winnerH, {'state': 'gameover', 'message': 'You won!'})
+        lightgames.send_msg(winnerH, {'message': 'You won!'})
         lightgames.send_msgs((p for p in game.get_players() if p != winnerH),
-                          {'state': 'gameover', 'message': 'You lost!'})
+                          {'message': 'You lost!'})
         lightgames.send_msgs(game.get_spectators(), 
                           {'message': "Player %d won" % (winner + 1)})
         print("Player %d wins!" % winner)
@@ -35,12 +34,18 @@ def game_over(game, winnerH, coords = frozenset()):
                      { 'x': x, 'y': y, 'delay': 3, 'change': { 'alert': 'none'    } } ]
     game.send_lamp_multi(changes)
 
-    game.player = None
-    lightgames.set_timeout(datetime.timedelta(seconds = len(coords) + 5), game.reset)
-    lightgames.set_timeout(datetime.timedelta(seconds = len(coords) + 5), functools.partial(alert_lamps, game))
+    def helper():
+        lightgames.send_msgs(game.get_players(), {'state': 'gameover'})
+        game.reset()
+        game.send_lamp_all({'alert': 'select'}) 
 
-def alert_lamps(game): 
-    game.send_lamp_all({'alert': 'select'}) 
+    game.player = None
+    #game.queue.remove_all_players()
+    lightgames.set_timeout(datetime.timedelta(seconds = len(coords) + 5), helper)
+    #lightgames.set_timeout(datetime.timedelta(seconds = len(coords) + 5), functools.partial(alert_lamps, game))
+
+#def alert_lamps(game): 
+#    game.send_lamp_all({'alert': 'select'}) 
 
 
 # A SimpleGame is a turnbased board game between two players who each may have 
@@ -177,7 +182,8 @@ class SimpleGame(lightgames.Game):
     def on_enqueue(self, handler):
         super().on_enqueue(handler)
 
-        self.queue.try_get_new_players()
+        if None in self.get_players():
+            self.queue.try_get_new_players()
 
 
     # Returns True if it is this player's turn 

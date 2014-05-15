@@ -117,9 +117,9 @@ class Queue:
     def refresh(self):
         i = 0
         for queuer in self.queue:
-            i += 1
             if queuer not in self.players:
-                lightgames.send_msg(self.sessions[queuer], {'queuepos':i-len(self.players)})
+                i += 1
+                lightgames.send_msg(self.sessions[queuer], {'queuepos':i})
 
     def index(self, session):
         pos = 0
