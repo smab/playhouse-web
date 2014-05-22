@@ -97,6 +97,9 @@ class MnkGame(simplegame.SimpleGame):
             self.turnover() 
 
     def set_options(self, config):
+        res = super().set_options(config)
+        if res is not None: return res
+
         tvars = self.template_vars
         tvars['winner_req'] = max(2, int(config['winner_req']))
 
@@ -104,8 +107,6 @@ class MnkGame(simplegame.SimpleGame):
 
         # Update title
         tvars['title'] = self.get_title(tvars)
-
-        return super().set_options(config) 
 
 
     def set_description(self, handler):
