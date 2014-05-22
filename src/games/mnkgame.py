@@ -58,6 +58,7 @@ class MnkGame(simplegame.SimpleGame):
         return winner_lamps
 
 
+    @lightgames.validate_xy 
     def on_message(self, handler, coords):
 
         # Check it's the correct player 
@@ -65,7 +66,6 @@ class MnkGame(simplegame.SimpleGame):
             return 
         
         playerH   = self.get_player(self.player)
-        #opponentH = self.get_player(1 - self.player)
         
         x, y = coords['x'], coords['y']
         button_color = self.button_colors[self.player]
@@ -80,7 +80,7 @@ class MnkGame(simplegame.SimpleGame):
             lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'color':button_color})
 
             hue = lightgames.to_lamp_hue(self.colors[self.player])
-            self.send_lamp(x, y, {'sat':255, 'hue':hue})
+            self.send_lamp(x, y, {'sat':255, 'hue':hue, 'bri':255})
 
             # Check whether this was a winning move for the current player
             winner_lamps = self.search_winner_lamps(x, y)
@@ -110,7 +110,7 @@ class MnkGame(simplegame.SimpleGame):
 
 
     def set_description(self, handler):
-        rules = '<p><b>Name: '+self.template_vars['title']+'</b></p><p><b>Players:</b> 2</p><p><b>Description:</b> The goal of this game is to, on a ' + str(self.template_vars['grid_x'])+ ' by ' + str(self.template_vars['grid_y']) + ' grid, connect ' + str(self.template_vars['winner_req']) + ' dots. Each player takes turn to place a dot anywhere on the grid where there is not already another dot and the first player to get '+ str(self.template_vars['winner_req']) +' dots in a row horizontally, vertically or diagonally wins the game. </p>'
+        rules = '<p><b>Name: '+self.template_vars['title']+'</b></p><p><b>Players:</b> 2</p><p><b>Description:</b> The goal of this game is to, on a ' + str(self.template_vars['grid_x'])+ ' by ' + str(self.template_vars['grid_y']) + ' grid, connect ' + str(self.template_vars['winner_req']) + ' dots. The players takes turns to place a dot anywhere on the grid where there is not already another dot. The first player to get '+ str(self.template_vars['winner_req']) +' dots in a row horizontally, vertically or diagonally wins the game. </p>'
         lightgames.send_msg(handler, {'rulemessage': (rules)})
 
 

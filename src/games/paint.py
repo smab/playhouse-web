@@ -41,6 +41,7 @@ class Paint(lightgames.Game):
                 if self.board[y][x] != -1:
                     lightgames.send_msg(handler, {'x':x, 'y':y, 'color':self.board[y][x]})
 
+    @lightgames.validate_xy 
     def on_message(self, handler, coords):
         x = coords['x']
         y = coords['y']
