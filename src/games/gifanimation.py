@@ -132,7 +132,8 @@ class GifAnimation(lightgames.Game):
             except IOError:
                 print("Couldn't open image")
 
-        self.send_lamp_all({ 'on': False })
+        # Turning off the lamps here might affect other games
+        #self.send_lamp_all({ 'on': False })
 
     def set_options(self, config):
         files = config['files']
