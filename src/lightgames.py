@@ -114,6 +114,7 @@ def rgb_to_hsl(r, g, b):
     hue /= 6
     lum = M/2 + m/2
     divisor = 2 * (lum if lum < 128 else 256 - lum)
+    if divisor == 0: return (0, 0, 0)
     sat = c / divisor * 256
 
     return (int(hue), int(sat), int(lum))
