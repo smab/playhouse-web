@@ -9,7 +9,7 @@
         padding: 1em;
         border-radius: 1em;
         bottom: 3em;
-        height: 175px;
+        height: 200px;
         text-align: center;
         font-family: sans-serif;
         background: rgba(0,0,0, 0.2);
@@ -83,6 +83,7 @@
 {% end %}
 
 {% block timelimits %}
+var None = undefined 
 function changeTurn(p) {
     player = p 
     var pl   = document.getElementById("player"+p)
@@ -93,10 +94,15 @@ function changeTurn(p) {
     op.className = op.className.replace(/ ?current/g, "")
 } 
 function changeTime(p, t) {
+    if(t == undefined) 
+        return 
     time = t
     document.getElementById("player"+p+"time").innerHTML = "Time: " + time 
 }
 function decreaseTime() {
+    if(time <= 0) 
+        return; 
+
     time -= 1; 
     changeTime(player, time); 
 }

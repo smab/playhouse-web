@@ -62,6 +62,7 @@ class Othello(simplegame.SimpleGame):
 
         simplegame.game_over(self, winner)
 
+    @lightgames.validate_xy 
     def on_message(self, handler, coords):
         def search(x, y, dx, dy, pred):
             lamps = []

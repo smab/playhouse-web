@@ -63,6 +63,7 @@ class Queue:
                     lightgames.send_msg(handler, {'queuepos':self.size()})
                     if self.enqueue_callback != None:
                         self.enqueue_callback(handler)
+                self.refresh() 
 
         except KeyError:
             traceback.print_exc()
@@ -116,8 +117,8 @@ class Queue:
     def refresh(self):
         i = 0
         for queuer in self.queue:
-            i += 1
             if queuer not in self.players:
+                i += 1
                 lightgames.send_msg(self.sessions[queuer], {'queuepos':i})
 
     def index(self, session):
