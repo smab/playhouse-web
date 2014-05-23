@@ -298,7 +298,6 @@ class Game:
         if 'cell_w' in config: tvars['cell_w'] = max(0, int(config['cell_w']))
         if 'cell_h' in config: tvars['cell_h'] = max(0, int(config['cell_h']))
         if 'color_empty' in config: tvars['color_empty'] = config['color_empty']
-        #self.destroy() 
         self.reset() 
 
         

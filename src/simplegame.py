@@ -40,12 +40,7 @@ def game_over(game, winnerH, coords = frozenset()):
         game.send_lamp_all({'alert': 'select'}) 
 
     game.player = None
-    #game.queue.remove_all_players()
     lightgames.set_timeout(datetime.timedelta(seconds = len(coords) + 5), helper)
-    #lightgames.set_timeout(datetime.timedelta(seconds = len(coords) + 5), functools.partial(alert_lamps, game))
-
-#def alert_lamps(game): 
-#    game.send_lamp_all({'alert': 'select'}) 
 
 
 # A SimpleGame is a turnbased board game between two players who each may have 
@@ -201,7 +196,9 @@ class SimpleGame(lightgames.Game):
 
     def turnover(self, to_player=None): 
         """
-        Changes the turn to to_player and starts the timelimit if specified. 
+        Changes the turn to to_player if specified, otherwise it will change 
+        the player to the opponent. 
+        
         If the timelimit was paused, this function will start it again. 
         """
         self.timer_counter.stop() 
@@ -232,7 +229,7 @@ class SimpleGame(lightgames.Game):
 
     def pause_turn(self): 
         """
-        Tells the client to pause the timelimit counter. This should be used 
+        Tells the clients to pause the timelimit counter. This should be used 
         when doing animations. 
         """ 
         self.timer_counter.stop() 
