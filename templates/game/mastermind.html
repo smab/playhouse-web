@@ -1,0 +1,115 @@
+{#
+ Playhouse: Making buildings into interactive displays using remotely controllable lights.
+ Copyright (C) 2014  John Eriksson, Arvid Fahlström Myrman, Jonas Höglund,
+                     Hannes Leskelä, Christian Lidström, Mattias Palo, 
+                     Markus Videll, Tomas Wickman, Emil Öhman.
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#}
+
+{% extends "simplegamebase.html" %}
+
+{% block style %}
+    #grid .shadow, #grid .shadow:hover {
+        background-color: #555 !important;
+    }
+{% end %}
+
+
+{% block game_postgrid %}
+  <div class="hcenter" id="color-choice">
+    <ul class="grid"
+      ><li><img src="/static/lamp.png" draggable="false" style="background:#F00"></li
+      ><li><img src="/static/lamp.png" draggable="false" style="background:#0F0"></li
+      ><li><img src="/static/lamp.png" draggable="false" style="background:#00F"></li
+      ><li><img src="/static/lamp.png" draggable="false" style="background:#FF0"></li
+      ><li><img src="/static/lamp.png" draggable="false" style="background:#F0F"></li
+    ></ul>
+  </div>
+{% end %}
+
+
+{% block script %}
+    var activeCell = [ -1, -1 ]
+
+    window.addEventListener('load', function () {
+        var els = document.querySelectorAll('#color-choice img')
+        console.log(els.length)
+        for (var i = 0; i < els.length; i++) {
+            (function (choice) {
+                els[i].addEventListener('click', function () {
+                    reply({ x:      activeCell[0],
+                            y:      activeCell[1],
+                            choice: choice })
+                }, false)
+            })(i + 3)
+        }
+    }, false)
+
+    function reply(response) {
+        ws.send(JSON.stringify(extend({ gameaction: true }, response)))
+    }
+
+    function extend(target, source) {
+        for (var k in source) target[k] = source[k]
+        return target
+    }
+{% end %}
+
+{% block click %}
+    var x = parseInt(coords[0], 10),
+        y = parseInt(coords[1], 10)
+
+    activeCell = [ x, y ]
+{% end %}
+
+
+{% block message %}
+    switch (obj.gamestate) {
+        case 'reset':
+           activeCell = [ -1, -1 ]
+           break
+    }
+
+    if (obj.x != null) {
+        e = document.getElementById(obj.x + "-" + obj.y)
+
+        if (obj.delay != null) {
+          setTimeout(updateCell.bind(null,obj), obj.delay)
+        } else {
+          updateCell(obj)
+        }
+    }
+
+    function updateCell(obj) {
+      var el = document.getElementById(obj.x + "-" + obj.y)
+
+      if (obj.transitiontime != null) {
+        el.style.transition = 'background-color ' + (obj.transitiontime * 100) + 'ms'
+        setTimeout(function () {
+          el.style.transition = ''
+        }, obj.transitiontime * 100)
+      }
+
+   // var color = 'hsl(' + Math.floor(obj.hue / 255) + ',100%,50%)'
+      el.style.backgroundColor = obj.power? toHSL(obj.hsl) : ''
+      el.style.className       = obj.power? 'on'           : 'off'
+
+      function toHSL(a) {
+        return "hsl(" + a[0] + ","
+                      + Math.floor(a[1] / 256 * 100) + "%,"
+                      + Math.floor(a[2] / 256 * 100) + "%)"
+      }
+    }
+{% end %}
