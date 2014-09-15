@@ -39,9 +39,11 @@ def game_over(game, winnerH, coords = frozenset()):
 
     else:
         winner = game.get_players().index(winnerH)
-        lightgames.send_msg(winnerH, {'message': 'You won!'})
+        lightgames.send_msg(winnerH, {'overlaymessage': 'You won!',
+                                      'message': 'You are a spectator!' })
         lightgames.send_msgs((p for p in game.get_players() if p != winnerH),
-                          {'message': 'You lost!'})
+                          {'overlaymessage': 'You lost!',
+                           'message': 'You are a spectator!' })
         lightgames.send_msgs(game.get_spectators(), 
                           {'message': "Player %d won" % (winner + 1)})
         print("Player %d wins!" % winner)
