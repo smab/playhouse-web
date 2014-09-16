@@ -35,7 +35,11 @@ def reply_wrong_player(game, handler):
 def game_over(game, winnerH, coords = frozenset()):
     if winnerH == None:
         lightgames.send_msgs(game.connections,   {'message': 'The game tied'})
+        lightgames.send_msgs((p for p in game.get_players()),
+                          {'overlaymessage': 'The game tied!',
+                           'message': 'You are a spectator!' })
         print("The game tied")
+        
 
     else:
         winner = game.get_players().index(winnerH)
