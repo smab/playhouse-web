@@ -176,7 +176,7 @@ class SimpleGame(lightgames.Game):
         lightgames.send_msg(handler, { 
                             'state':   'playing',
                             'playerId': player+1, 
-                            'message': 'You are player %d' % (player + 1) })
+                            'message': 'You are player %d, waiting for another player...' % (player + 1) })
         self.sync(handler)
 
         if not self.game_started:
