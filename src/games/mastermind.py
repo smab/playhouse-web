@@ -181,16 +181,6 @@ class Mastermind(simplegame.SimpleGame):
 
 
     def set_description(self, handler):
-        message = """
-<p>Take turns trying to guess the opponent's hidden code!</p>
-<p>Each player makes a guess by inputting a colour combination into a column,
-one colour at a time.  The computer then responds by telling you how many of
-your guesses were completely correct (correct colour and position), and how
-many were of the right colour but in the wrong place.  This is indicated by
-red and blue lamps, respectively.</p>
-<p>When a lamp is pulsating, choose the colour that you want to input for your
-guess at that position from the set of colours above.  After a column is full,
-your guess is submitted and you are given a response.</p>
-"""
+        message = '<p><p><b>Name:</b> Mastermind</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> The rules in this variant vary slightly from those of standard Mastermind. The game starts with each player choosing a 3-color code from a pool of 6 colors. Both players then tries to guess what code the other player chose. After every turn, players receive feedback indicating how many of the colors they guess correctly. Blue means the color in that location is correct, red that the color exists in another location, and black the the color is not in the code. The player who finds the correct code in the fewest guesses wins. </p></p>'
         lightgames.send_msg(handler, {'rulemessage': (message)})
 
