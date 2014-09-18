@@ -25,18 +25,23 @@ var wsHost = document.location.hostname + ":" + socketport,
 var state = 'spectating'
 
 ws.onclose = function(evt) {
-    var over = document.getElementById("overlay") 
-    over.className = ""
+    if(state != 'destroyed') {
+        showOverlay("Game destroyed, reloading...")
+    }
+    setTimeout(function(){location.reload()},2000);
 }; 
 
 ws.onmessage = function (evt) {
     var obj = JSON.parse(evt.data)
 
+    if (obj.overlaymessage != null) {
+        showOverlay(obj.overlaymessage)
+    }
+
     if (obj.state != null) {
         state = obj.state
         if (state == 'destroyed') {
-            var over = document.getElementById("overlay")
-            over.className = ""
+                setTimeout(function(){location.reload()},2000);
         }
     }
 
@@ -72,6 +77,15 @@ for(var i=0; i < config.grid_y; i++) {
 
     // Add tr to DOM
     table.appendChild(tr);
+}
+
+
+//-- Overlay ------------------------------------
+function showOverlay(msg) {
+    document.getElementById('overlaymessage').innerHTML = msg
+    var over = document.getElementById("overlay")
+    over.className = ""
+    setTimeout(function(){over.className="hidden"}, 3000)
 }
 
 

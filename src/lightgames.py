@@ -286,7 +286,7 @@ class Game:
         print("lightgames: destroy", self.connections)
         for h in self.connections:
             send_msg(h, {'state'  : "destroyed",
-                         'message': "The game got destroyed!"})
+                         'overlaymessage': "Game changed, reloading..."})
 
     def on_message(self, handler, message):
         """

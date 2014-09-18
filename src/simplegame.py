@@ -35,13 +35,19 @@ def reply_wrong_player(game, handler):
 def game_over(game, winnerH, coords = frozenset()):
     if winnerH == None:
         lightgames.send_msgs(game.connections,   {'message': 'The game tied'})
+        lightgames.send_msgs((p for p in game.get_players()),
+                          {'overlaymessage': 'The game tied!',
+                           'message': 'You are a spectator!' })
         print("The game tied")
+        
 
     else:
         winner = game.get_players().index(winnerH)
-        lightgames.send_msg(winnerH, {'message': 'You won!'})
+        lightgames.send_msg(winnerH, {'overlaymessage': 'You won!',
+                                      'message': 'You are a spectator!' })
         lightgames.send_msgs((p for p in game.get_players() if p != winnerH),
-                          {'message': 'You lost!'})
+                          {'overlaymessage': 'You lost!',
+                           'message': 'You are a spectator!' })
         lightgames.send_msgs(game.get_spectators(), 
                           {'message': "Player %d won" % (winner + 1)})
         print("Player %d wins!" % winner)
@@ -170,7 +176,7 @@ class SimpleGame(lightgames.Game):
         lightgames.send_msg(handler, { 
                             'state':   'playing',
                             'playerId': player+1, 
-                            'message': 'You are player %d' % (player + 1) })
+                            'message': 'You are player %d, waiting for another player...' % (player + 1) })
         self.sync(handler)
 
         if not self.game_started:
