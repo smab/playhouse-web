@@ -168,6 +168,11 @@ if __name__ == "__main__":
 
     init_http()
 
-    tornado.ioloop.IOLoop.instance().start()
+    loop = tornado.ioloop.IOLoop.instance() 
+    try: 
+        loop.start()
+    except KeyboardInterrupt: 
+        print("Received interrupt, stopping server") 
+        loop.stop() 
 
 
