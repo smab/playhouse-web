@@ -32,16 +32,16 @@
                      only screen and (min-device-pixel-ratio: 2)"
               /><!-- Could move to game-base.css  with viewports instead of retina.css-->
         <style>
-            #grid td {
+            .grid td, .grid li {
                 min-width:  {{ cell_w }}px;
                 width:      {{ cell_w }}px;
                 min-height: {{ cell_h }}px;
                 height:     {{ cell_h }}px;
             }
 
-            #grid           { background: #000;                    }
-            #grid img       { background-color: {{ color_empty }}; }
-            #grid img:hover { background-color: {{ color_hover }}; }
+            .grid           { background: #000;                    }
+            .grid img       { background-color: {{ color_empty }}; }
+            .grid img:hover { background-color: {{ color_hover }}; }
 
             {% block style_simple %}
             {% end %}
@@ -84,7 +84,10 @@
             {% end %}
 
             {% block playground %}
-            <table id="grid"></table>
+            <table id="grid" class="grid"></table>
+            {% end %}
+
+            {% block game_postgrid %}
             {% end %}
 
             {% block postgrid %}
