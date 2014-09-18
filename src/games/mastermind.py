@@ -31,7 +31,8 @@ class Mastermind(simplegame.SimpleGame):
 
     colors  = None
 
-    turn    = 0
+    columns = [ None, None ]
+    row     = 0
     hiddens = [ None, None ]
 
     def __init__(self, client):
@@ -65,7 +66,8 @@ class Mastermind(simplegame.SimpleGame):
                         [ '#000000', tvars['color_correct'], tvars['color_almost'],
                           tvars['color_1'], tvars['color_2'], tvars['color_3'], tvars['color_4'], tvars['color_5'] ] ]
 
-        self.turn = 0
+        self.columns = [ 0, self.width - 1 ]
+        self.row  = 0
       # self.hiddens = [ [ random.randint(3, len(self.colors)) for y in range(self.height) ] for player in [0, 1] ]
         self.hiddens = [ [ 3, 4, 5 ] for player in [0, 1 ] ]
         self.sync_all()
@@ -74,6 +76,9 @@ class Mastermind(simplegame.SimpleGame):
         super().sync(handler)
         self.set_description(handler)
         print("Syncing %s" % handler)
+
+        self.update_flasher()
+
         for y in range(len(self.board)):
             for x in range(len(self.board[y])):
                 hsl = self.colors[self.board[y][x]]
@@ -81,8 +86,23 @@ class Mastermind(simplegame.SimpleGame):
                 lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hsl':hsl, 'power':self.board[y][x] != 0})
                 self.send_lamp(x, y, {'sat':255, 'hue':hue})
 
-    @lightgames.validate_xy 
-    def on_message(self, handler, coords):
+    def update_flasher(self):
+        if None in self.get_players() or self.columns[0] > self.columns[1]:
+            # If we don't have a current game, reset flashing status for everyone
+            lightgames.send_msgs(self.connections, {'x':None, 'y':None, 'flashing':True})
+            return
+
+        playerH = self.get_player(self.player)
+        x = self.columns[self.player]
+        y = self.row
+
+        lightgames.send_msgs(self.connections, {'x':None, 'y':None, 'flashing':True})
+        lightgames.send_msg(playerH, {'x':x, 'y':y, 'flashing':True})
+
+    def on_turnover(self):
+        self.update_flasher()
+
+    def on_message(self, handler, msg):
         if not self.correct_player(handler):
             return
 
@@ -90,15 +110,12 @@ class Mastermind(simplegame.SimpleGame):
         playerH   = self.get_player(self.player)
         opponentH = self.get_player(opponent)
 
-        x, y = coords['x'], coords['y']
-        choice = coords['choice']
+        choice = msg['choice']
 
-        expect_x = self.turn if self.player == 0 else self.width - self.turn - 1
+        x = self.columns[self.player]
+        y = self.row
 
-        if x != expect_x:
-            lightgames.send_msg(playerH, {'error':'Invalid move!'})
-
-        elif not (3 <= choice < len(self.colors)):
+        if not (3 <= choice < len(self.colors)):
             print("Test: %d %d" % (choice, len(self.colors)))
             lightgames.send_msg(playerH, {'error':'Invalid choice!'})
 
@@ -111,8 +128,12 @@ class Mastermind(simplegame.SimpleGame):
 
             hsl = self.colors[choice]
             hue = lightgames.to_lamp_hue(hsl)
+
             lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hsl':hsl, 'power':True})
             self.send_lamp(x, y, {'sat':255, 'hue':hue})
+
+            self.row += 1
+            self.update_flasher()
 
             # Check for full column
             guess  = [self.board[y_][x] for y_ in range(self.height)]
@@ -131,33 +152,35 @@ class Mastermind(simplegame.SimpleGame):
                         almosts += 1
 
                 if corrects == self.height:
+                    # player won
                     simplegame.game_over(self, playerH)
                     return
-                else:
-                    d = +1 if self.player == 0 else -1
 
-                    for y_ in range(corrects):
-                        self.board[y_           ][x + d] = 1
-                    for y_ in range(almosts):
-                        self.board[y_ + corrects][x + d] = 2
+                # player didn't win--provide response
+                d = +1 if self.player == 0 else -1 # the direction the player is progressing
 
-                    for y_ in range(self.height):
-                        v = self.board[y_][x + d]
-                        hsl = self.colors[v]
-                        hue = lightgames.to_lamp_hue(hsl)
-                        lightgames.send_msgs(self.connections, {'x':x, 'y':y_, 'hsl':hsl, 'power':v != 0})
-                        self.send_lamp(x, y_, {'sat':255, 'hue':hue})
+                for y_ in range(corrects):
+                    self.board[y_           ][x + d] = 1
+                for y_ in range(almosts):
+                    self.board[y_ + corrects][x + d] = 2
 
-                if self.player == 1:
-                    self.turn += 2
+                for y_ in range(self.height):
+                    v = self.board[y_][x + d]
+                    hsl = self.colors[v]
+                    hue = lightgames.to_lamp_hue(hsl)
+                    lightgames.send_msgs(self.connections, {'x':x, 'y':y_, 'hsl':hsl, 'power':v != 0})
+                    self.send_lamp(x, y_, {'sat':255, 'hue':hue})
+
+                self.columns[self.player] += d * 2
+                self.row = 0
                 self.turnover()
 
                 # Check if last turn and last player
-                if self.turn == self.width / 2 and self.player == 1:
+                if self.columns[0] > self.columns[1]:
                     simplegame.game_over(self, None)
 
 
     def set_description(self, handler):
-        message = 'TODO'
+        message = '<p><p><b>Name:</b> Mastermind</p><p><b>Players:</b> 2</p><p><b>Rules & Goals:</b> The rules in this variant vary slightly from those of standard Mastermind. The game starts with each player choosing a 3-color code from a pool of 6 colors. Both players then tries to guess what code the other player chose. After every turn, players receive feedback indicating how many of the colors they guess correctly. Blue means the color in that location is correct, red that the color exists in another location, and black the the color is not in the code. The player who finds the correct code in the fewest guesses wins. </p></p>'
         lightgames.send_msg(handler, {'rulemessage': (message)})
 

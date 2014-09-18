@@ -21,8 +21,22 @@
 {% extends "simplegamebase.html" %}
 
 {% block style %}
-    #grid .shadow, #grid .shadow:hover {
-        background-color: #555 !important;
+    .grid img:hover {
+        background-color: #222;
+    }
+
+    #color-choice img {
+        opacity: 0.7;
+    }
+    #color-choice img:hover {
+        opacity: 1.0;
+    }
+
+    .flashing-on { background-color: #AAA !important; }
+    .flashing-off { background-color: #444 !important; }
+    .flashing-on, .flashing-off {
+        transition-property: background-color;
+        transition-duration: 1000ms;
     }
 {% end %}
 
@@ -41,7 +55,7 @@
 
 
 {% block script %}
-    var activeCell = [ -1, -1 ]
+ // var activeCell = [ -1, -1 ]
 
     window.addEventListener('load', function () {
         var els = document.querySelectorAll('#color-choice img')
@@ -49,8 +63,8 @@
         for (var i = 0; i < els.length; i++) {
             (function (choice) {
                 els[i].addEventListener('click', function () {
-                    reply({ x:      activeCell[0],
-                            y:      activeCell[1],
+                    reply({ /* x:      activeCell[0],
+                            y:      activeCell[1], */
                             choice: choice })
                 }, false)
             })(i + 3)
@@ -65,21 +79,58 @@
         for (var k in source) target[k] = source[k]
         return target
     }
+
+
+    var flashingEl = null,
+        flashingEnabled = false
+    function setFlashing(enabled, x, y) {
+        if (flashingEl != null) {
+            flashingEl.classList.remove('flashing-on')
+            flashingEl.classList.remove('flashing-off')
+        }
+        if (enabled) flashingEl = document.getElementById(x + '-' + y)
+        flashingEnabled = enabled
+    }
+
+    setInterval(function () {
+        if (flashingEnabled && flashingEl != null) {
+            if (flashingEl.classList.contains('flashing-on')) {
+                flashingEl.classList.remove('flashing-on')
+                flashingEl.classList.add('flashing-off')
+            } else {
+                flashingEl.classList.remove('flashing-off')
+                flashingEl.classList.add('flashing-on')
+            }
+        }
+    }, 1000)
 {% end %}
 
 {% block click %}
+    /*
     var x = parseInt(coords[0], 10),
         y = parseInt(coords[1], 10)
 
     activeCell = [ x, y ]
+    */
 {% end %}
 
 
 {% block message %}
+    /*
     switch (obj.gamestate) {
         case 'reset':
-           activeCell = [ -1, -1 ]
+        // activeCell = [ -1, -1 ]
            break
+    }
+    */
+
+    if (obj.flashing != null) {
+        if (obj.x != null) {
+            setFlashing(true, obj.x, obj.y)
+        } else {
+            setFlashing(false)
+        }
+        return
     }
 
     if (obj.x != null) {

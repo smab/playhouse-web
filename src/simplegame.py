@@ -251,6 +251,11 @@ class SimpleGame(lightgames.Game):
         if None not in self.get_players() and self.template_vars['timelimit'] != None: 
             self.timer_counter.start() 
 
+        self.on_turnover()
+
+    def on_turnover(self):
+        pass
+
     def pause_turn(self): 
         """
         Tells the clients to pause the timelimit counter. This should be used 
