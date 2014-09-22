@@ -21,7 +21,9 @@ import functools
 
 import tornado.ioloop
 
-import lightgames 
+import manager
+import lightgames
+import animator
 
 
 def reply_wrong_player(game, handler):
@@ -73,6 +75,16 @@ def game_over(game, winnerH, coords = frozenset()):
 class SimpleGame(lightgames.Game): 
     config_file = "simplegameconfig.html" 
 
+    def startIdle(self):
+        print("simplegame: idle")
+        self.reset_lamp_all()
+        self.animator.play_animation()
+
+    def stopIdle(self):
+        print("simplegame: active")
+        self.animator.pause_animation()
+        self.reset_lamp_all()
+
     def __init__(self, client): 
         lightgames.Game.__init__(self, client) 
 
@@ -95,12 +107,24 @@ class SimpleGame(lightgames.Game):
         self.queue.removeplayer_callback = self.on_remove_player
         self.queue.set_num_players(2)
 
+    def destroy(self):
+        super().destroy()
+
+        # Stop idle animation
+        self.stopIdle()
+
     def reset(self): 
         """
         Sets up everything with timelimits, turn indications, etc. 
 
         If you override this, you likely want to invoke this method manually!
         """
+        #self.animator = animator.Animator()
+        #self.animator.init(self, manager.config['idle'])
+
+        # Start idle animation
+        self.startIdle()
+
         # Sets up the board and tries to fetch two new players. 
         self.game_started = False
         self.timer_counter.stop() 
@@ -183,11 +207,19 @@ class SimpleGame(lightgames.Game):
             # A player has been added. If this is the second player, 
             # we start the timer. 
             if handler in self.get_players() and None not in self.get_players(): 
+                # Stop idle animation
+                self.stopIdle()
+
                 self.game_started = True
                 if self.player == None: 
                     self.turnover(self.tmp_player) 
                 else: 
                     self.turnover(self.player) 
+
+                self.on_game_start()
+
+    def on_game_start(self):
+        pass
 
     def on_remove_player(self, player):
         if self.game_started:
@@ -247,7 +279,7 @@ class SimpleGame(lightgames.Game):
         lightgames.send_msg(self.get_player(1-self.player), {'message':'Waiting on other player...'})
 
         self.timer_counter = tornado.ioloop.PeriodicCallback(self.timelimit_counter, 1000)
-        self.sync_all() 
+        #self.sync_all() 
         if None not in self.get_players() and self.template_vars['timelimit'] != None: 
             self.timer_counter.start() 
 

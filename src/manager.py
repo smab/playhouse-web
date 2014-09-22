@@ -34,7 +34,13 @@ config = {
     'serverport': 8080,
     'configport': 8081,
 
-    'stream_embedcode':''
+    'stream_embedcode': '',
+
+    'idle':{
+        'animation_file': '',
+        'color_off': '#000000',
+        'transition_time': 4
+    }
 }
 
 CONFIG_FILE = 'config.json'

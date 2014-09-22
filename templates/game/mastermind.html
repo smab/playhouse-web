@@ -116,13 +116,21 @@
 
 
 {% block message %}
-    /*
+    switch (obj.state) {
+        case 'playing':
+            buildGrid(config.grid_y, 1)
+            break
+    }
     switch (obj.gamestate) {
+        case 'select':
+            break
+        case 'guess':
+            buildGrid(config.grid_x, config.grid_y)
+            break
         case 'reset':
         // activeCell = [ -1, -1 ]
            break
     }
-    */
 
     if (obj.flashing != null) {
         if (obj.x != null) {

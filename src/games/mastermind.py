@@ -66,10 +66,12 @@ class Mastermind(simplegame.SimpleGame):
                         [ '#000000', tvars['color_correct'], tvars['color_almost'],
                           tvars['color_1'], tvars['color_2'], tvars['color_3'], tvars['color_4'], tvars['color_5'] ] ]
 
+        self.state = 0 # game state: not started
         self.columns = [ 0, self.width - 1 ]
         self.row  = 0
       # self.hiddens = [ [ random.randint(3, len(self.colors)) for y in range(self.height) ] for player in [0, 1] ]
-        self.hiddens = [ [ 3, 4, 5 ] for player in [0, 1 ] ]
+      # self.hiddens = [ [ 3, 4, 5 ] for player in [0, 1 ] ]
+        self.hiddens = [ [ 0 for y in range(self.height) ] for player in [0, 1 ] ]
         self.sync_all()
 
     def sync(self, handler):
@@ -102,18 +104,67 @@ class Mastermind(simplegame.SimpleGame):
     def on_turnover(self):
         self.update_flasher()
 
+    def on_game_start(self):
+        self.state = 1 # game state: select hiddens
+        lightgames.send_msgs(self.get_players(),   {'message':'Select pattern'}) 
+
+    def turnover(self, to_player=None):
+        if self.state == 1:
+            for y in range(len(self.hiddens)):
+                for x in range(len(self.hiddens[y])):
+                    if not self.hiddens[y][x]:
+                        self.hiddens[y][x] = random.randint(3, len(self.colors))
+            self.start_guessing()
+            return
+
+        #if self.state > 1:
+        super().turnover(to_player)
+
+    def start_guessing(self):
+        self.state = 2 # game state: guess hiddens
+        lightgames.send_msgs(self.get_players(), {'gamestate':'guess'})
+        self.turnover(0)
+        print("Mastermind: Hiddens selected")
+
+
+    def on_add_player(self, player):
+        super().on_add_player(player)
+        lightgames.send_msg(self.get_players()[player], {'x':0, 'y':0, 'flashing':True})
+
+
     def on_message(self, handler, msg):
+        if handler not in self.get_players():
+            self.correct_player(handler)
+            return
+
+        choice = msg['choice']
+
+        x = self.columns[self.player]
+        y = self.row
+
+        hsl = self.colors[choice]
+        hue = lightgames.to_lamp_hue(hsl)
+
+        # Handle state 'select hiddens'
+        if self.state <= 1:
+            playerIdx = self.get_players().index(handler)
+            if 0 in self.hiddens[1-playerIdx]:
+                col = self.hiddens[1-playerIdx].index(0)
+                #col = self.columns[playerIdx]
+                #self.columns[playerIdx] += 1
+                self.hiddens[1-playerIdx][col] = choice
+                lightgames.send_msg(handler, {'x':col, 'y':0, 'hsl':hsl, 'power':True})
+                lightgames.send_msg(handler, {'x':col+1, 'y':0, 'flashing':True})
+            if all([all(x) for x in self.hiddens]):
+                self.start_guessing()
+            return
+
         if not self.correct_player(handler):
             return
 
         opponent  = 1 - self.player
         playerH   = self.get_player(self.player)
         opponentH = self.get_player(opponent)
-
-        choice = msg['choice']
-
-        x = self.columns[self.player]
-        y = self.row
 
         if not (3 <= choice < len(self.colors)):
             print("Test: %d %d" % (choice, len(self.colors)))
@@ -125,9 +176,6 @@ class Mastermind(simplegame.SimpleGame):
         else:
             # "Tile" unoccupied; register the guess
             self.board[y][x] = choice
-
-            hsl = self.colors[choice]
-            hue = lightgames.to_lamp_hue(hsl)
 
             lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hsl':hsl, 'power':True})
             self.send_lamp(x, y, {'sat':255, 'hue':hue})
@@ -168,7 +216,7 @@ class Mastermind(simplegame.SimpleGame):
                     v = self.board[y_][x + d]
                     hsl = self.colors[v]
                     hue = lightgames.to_lamp_hue(hsl)
-                    lightgames.send_msgs(self.connections, {'x':x, 'y':y_, 'hsl':hsl, 'power':v != 0})
+                    lightgames.send_msgs(self.connections, {'x':x+d, 'y':y_, 'hsl':hsl, 'power':v != 0})
                     self.send_lamp(x, y_, {'sat':255, 'hue':hue})
 
                 self.columns[self.player] += d * 2
