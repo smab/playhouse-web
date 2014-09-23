@@ -119,8 +119,8 @@ class SimpleGame(lightgames.Game):
 
         If you override this, you likely want to invoke this method manually!
         """
-        #self.animator = animator.Animator()
-        #self.animator.init(self, manager.config['idle'])
+        self.animator = animator.Animator()
+        self.animator.init(self, manager.config['idle'])
 
         # Start idle animation
         self.startIdle()
