@@ -59,7 +59,7 @@ class Animator():
                 self.grid = (width, height)
                 self.transp_color = HTMLColorToRGB(self.config['color_off'])
 
-                for frame in range(0,10):#ImageSequence(gif):
+                for frame in ImageSequence(gif):
                     # Break if animation turned off.
                     # Change this accordingly to wait for animation
                     # to finish before turning off/changing animation
