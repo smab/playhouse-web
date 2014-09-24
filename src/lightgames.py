@@ -348,6 +348,9 @@ class GIFAnimation:
     @tornado.gen.coroutine
     def run_animation(self, gif_data, bounds, offset=(0, 0), loop=float('inf'),
                       transitiontime=0, transparentcolor=None, on_frame=None):
+        if self.running:
+            return False
+
         self.running = True
 
         image = PIL.Image.open(gif_data)
@@ -368,7 +371,9 @@ class GIFAnimation:
                             if not 0 <= x <= bounds[0] or not 0 <= y <= bounds[1]:
                                 continue
 
-                            on_frame((x, y), color, color == transparentcolor)
+                            if on_frame is not None:
+                                on_frame((x, y), color, color == transparentcolor)
+
                             message_buffer.append({
                                 "x": x,
                                 "y": y,
