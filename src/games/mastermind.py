@@ -43,8 +43,8 @@ class Mastermind(simplegame.SimpleGame):
         self.template_vars['grid_x'] = 12
         self.template_vars['grid_y'] = 3
 
-        self.template_vars['color_correct'] = '#FF0000'
-        self.template_vars['color_almost']  = '#0000FF'
+        self.template_vars['color_correct'] = '#FFFFFF'
+        self.template_vars['color_almost']  = '#00FFFF'
 
         self.template_vars['color_1'] = '#FF0000'
         self.template_vars['color_2'] = '#00FF00'
