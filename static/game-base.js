@@ -56,28 +56,33 @@ function ignoreEvent(ev) {
   return false
 }
 
-var table = document.getElementById("grid");
-for(var i=0; i < config.grid_y; i++) {
-    // Create tr
-    var tr = document.createElement("tr");
-    for(var ii=0; ii < config.grid_x; ii++) {
-        // Add td and function onclick
-        var td = document.createElement("td");
-        tr.appendChild(td);
+function buildGrid(w, h) {
+    var table = document.getElementById("grid");
+    table.innerHTML = ""
 
-        var img = document.createElement('img')
-        img.src         = '/static/lamp.png'
-        img.draggable   = false
-        img.id          = ii + '-' + i
-        img.onclick     = play
-        img.ondragstart = ignoreEvent
-        img.classList.add('tile')
-        td.appendChild(img)
+    for(var i=0; i < h; i++) {
+        // Create tr
+        var tr = document.createElement("tr");
+        for(var ii=0; ii < w; ii++) {
+            // Add td and function onclick
+            var td = document.createElement("td");
+            tr.appendChild(td);
+
+            var img = document.createElement('img')
+            img.src         = '/static/lamp.png'
+            img.draggable   = false
+            img.id          = ii + '-' + i
+            img.onclick     = play
+            img.ondragstart = ignoreEvent
+            img.classList.add('tile')
+            td.appendChild(img)
+        }
+
+        // Add tr to DOM
+        table.appendChild(tr);
     }
-
-    // Add tr to DOM
-    table.appendChild(tr);
 }
+buildGrid(config.grid_x, config.grid_y)
 
 
 //-- Overlay ------------------------------------

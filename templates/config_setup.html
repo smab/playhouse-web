@@ -91,6 +91,30 @@
                 <textarea type="text" id="stream" name="stream_embedcode">{{ config('stream_embedcode') }}</textarea>
             </div>
         </div>
+        <div class="subsection">
+            <h1>Idle Animation</h1>
+            <div class="content">
+                <dl>
+                    <dt>Animation:</dt>
+                    <dd><input name="animation_file" value="{{ config('idle')['animation_file'] }}" /></dd>
+
+                    <dt>Transition time:</dt>
+                    <dd>
+                        <label>
+                            <input type="number" size="4" name="transition_time" value="{{ config('idle')['transition_time'] }}" />
+                            (in 10ths of a second)
+                        </label>
+                    </dd>
+
+                    <dt>Off color:</dt>
+                    <dd>
+                        <label>
+                            <input type="color" size="8" name="color_off" value="{{ config('idle')['color_off'] }}" />
+                        </label>
+                    </dd>
+                </dl>
+            </div>
+        </div>
 
         <ul id="buttons">
             <li><input type="submit" id="savebutton" value="Save Setup"></li>

@@ -155,8 +155,7 @@ class SetupConfigHandler(RequestHandler):
 
         status = "message"
         msg = "Setup saved"
-        if update_config(manager.config, cfg, 'lampdest') or \
-            update_config(manager.config, cfg, 'lampport'):
+        if any([update_config(manager.config, cfg, x) for x in ['lampdest', 'lampport']]):
             manager.client = manager.connect_lampserver()
             try:
                 manager.fetch_grid_size()
@@ -179,6 +178,10 @@ class SetupConfigHandler(RequestHandler):
 
 
         update_config(manager.config, cfg, 'stream_embedcode')
+
+        if any([update_config(manager.config['idle'], cfg, x)
+                for x in ['animation_file', 'transition_time', 'color_off']]):
+            msg = 'Idle animation changed, requires reloading the game'
 
         manager.save_config()
 
