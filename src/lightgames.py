@@ -16,11 +16,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
 import imp
 import os
+import traceback
+
+import tornado.concurrent
 import tornado.escape
+import tornado.gen
 import tornado.ioloop
-import datetime
+
+import PIL.Image
 
 
 def load(name, path, client):
@@ -325,3 +331,97 @@ class Game:
         Sends the game description to the client.
         """
         pass 
+
+
+class _CancelledError(Exception):
+    pass
+
+class GIFAnimation:
+
+    def __init__(self, game):
+        self.game = game
+        self.running = False
+        self.io_loop = tornado.ioloop.IOLoop.current()
+        self.timeout_handle = None
+        self.wait_future = None
+
+    @tornado.gen.coroutine
+    def run_animation(self, gif_data, bounds, offset=(0, 0), loop=float('inf'),
+                      transitiontime=0, transparentcolor=None, on_frame=None):
+        if self.running:
+            return False
+
+        self.running = True
+
+        image = PIL.Image.open(gif_data)
+        offset_x, offset_y = offset
+        try:
+            while loop >= 0:
+                try:
+                    frame = 0
+                    while True:
+                        image.seek(frame)
+                        rgb_image = image.convert('RGB')
+                        width, height = rgb_image.size
+
+                        message_buffer = []
+                        for i, color in enumerate(rgb_image.getdata()):
+                            x, y = i % width + offset_x, i // width + offset_y
+
+                            if not 0 <= x <= bounds[0] or not 0 <= y <= bounds[1]:
+                                continue
+
+                            if on_frame is not None:
+                                on_frame((x, y), color, color == transparentcolor)
+
+                            message_buffer.append({
+                                "x": x,
+                                "y": y,
+                                "change": {
+                                    "rgb": color,
+                                    "transitiontime": transitiontime,
+                                    "on": color != transparentcolor
+                                }
+                            })
+
+                        if message_buffer:
+                            self.game.send_lamp_multi(message_buffer)
+
+                        self.wait_future = tornado.concurrent.Future()
+                        self.timeout_handle = self.io_loop.add_timeout(
+                            datetime.timedelta(milliseconds=image.info['duration']),
+                            lambda: self.wait_future.set_result(None))
+                        yield self.wait_future
+                        self.timeout_handle = None
+
+                        frame += 1
+                except EOFError:
+                    pass
+
+                loop -= 1
+        except _CancelledError:
+            return False
+        except Exception:
+            traceback.print_exc()
+            raise
+        else:
+            return True
+        finally:
+            image.close()
+            self.running = False
+
+    def cancel(self):
+        if not self.running:
+            return False
+
+        self.running = False
+        if self.timeout_handle is not None:
+            self.io_loop.remove_timeout(self.timeout_handle)
+            self.timeout_handle = None
+        if self.wait_future is not None and not self.wait_future.done():
+            self.wait_future.set_exception(_CancelledError)
+        return True
+
+    def close(self):
+        self.cancel()
+
