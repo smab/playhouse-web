@@ -32,12 +32,29 @@
         opacity: 1.0;
     }
 
-    .flashing-on { background-color: #AAA !important; }
-    .flashing-off { background-color: #444 !important; }
-    .flashing-on, .flashing-off {
+    .cursor {
+        transition-property: background-color;
+        transition-duration: 1000ms;
+        background-color: #444 !important;
+    }
+    .cursor.on { background-color: #AAA !important; }
+
+    .flashing {
+        transition-property: background-color;
+        transition-duration: 300ms;
+    }
+    .flashing.on {
+        background-color: #444 !important;
+    }
+
+    /*
+    .pulsating-on { background-color: #AAA !important; }
+    .pulsating-off { background-color: #444 !important; }
+    .pulsating-on, .pulsating-off {
         transition-property: background-color;
         transition-duration: 1000ms;
     }
+    */
 {% end %}
 
 
@@ -55,8 +72,6 @@
 
 
 {% block script %}
- // var activeCell = [ -1, -1 ]
-
     window.addEventListener('load', function () {
         var els = document.querySelectorAll('#color-choice img')
         console.log(els.length)
@@ -81,28 +96,37 @@
     }
 
 
-    var flashingEl = null,
-        flashingEnabled = false
-    function setFlashing(enabled, x, y) {
-        if (flashingEl != null) {
-            flashingEl.classList.remove('flashing-on')
-            flashingEl.classList.remove('flashing-off')
-        }
-        if (enabled) flashingEl = document.getElementById(x + '-' + y)
-        flashingEnabled = enabled
+    var cursorEl = null
+    function setPulsatingCursor(enabled, x, y) {
+        if (cursorEl != null) cursorEl.classList.remove('cursor')
+        cursorEl = enabled? document.getElementById(x + '-' + y) : null
+        if (cursorEl != null) cursorEl.classList.add('cursor')
+    }
+    function addPulsating(x, y) {
+        var el = document.getElementById(x + '-' + y)
+        el.classList.add('flashing')
+    }
+    function removePulsating(x, y) {
+        var el = document.getElementById(x + '-' + y)
+        el.classList.remove('flashing')
     }
 
     setInterval(function () {
-        if (flashingEnabled && flashingEl != null) {
-            if (flashingEl.classList.contains('flashing-on')) {
-                flashingEl.classList.remove('flashing-on')
-                flashingEl.classList.add('flashing-off')
-            } else {
-                flashingEl.classList.remove('flashing-off')
-                flashingEl.classList.add('flashing-on')
-            }
+        var els = document.getElementsByClassName('cursor')
+        for (var i = 0; i < els.length; i++) {
+            els[i].classList.toggle('on')
         }
     }, 1000)
+
+    var toggle400 = false
+    setInterval(function () {
+        toggle400 = !toggle400
+        var els = document.getElementsByClassName('flashing')
+        for (var i = 0; i < els.length; i++) {
+            if (toggle400) els[i].classList.add('on')
+            else els[i].classList.remove('on')
+        }
+    }, 400)
 {% end %}
 
 {% block click %}
@@ -134,9 +158,9 @@
 
     if (obj.flashing != null) {
         if (obj.x != null) {
-            setFlashing(true, obj.x, obj.y)
+            setPulsatingCursor(true, obj.x, obj.y)
         } else {
-            setFlashing(false)
+            setPulsatingCursor(false)
         }
         return
     }
@@ -164,6 +188,9 @@
    // var color = 'hsl(' + Math.floor(obj.hue / 255) + ',100%,50%)'
       el.style.backgroundColor = obj.power? toHSL(obj.hsl) : ''
       el.style.className       = obj.power? 'on'           : 'off'
+
+      if (obj.blink) addPulsating(obj.x, obj.y)
+      else removePulsating(obj.x, obj.y)
 
       function toHSL(a) {
         return "hsl(" + a[0] + ","

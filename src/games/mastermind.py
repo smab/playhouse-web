@@ -44,7 +44,7 @@ class Mastermind(simplegame.SimpleGame):
         self.template_vars['grid_y'] = 3
 
         self.template_vars['color_correct'] = '#FFFFFF'
-        self.template_vars['color_almost']  = '#00FFFF'
+        self.template_vars['color_almost']  = '#FFFFFF'
 
         self.template_vars['color_1'] = '#FF0000'
         self.template_vars['color_2'] = '#00FF00'
@@ -85,7 +85,9 @@ class Mastermind(simplegame.SimpleGame):
             for x in range(len(self.board[y])):
                 hsl = self.colors[self.board[y][x]]
                 hue = lightgames.to_lamp_hue(hsl)
-                lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hsl':hsl, 'power':self.board[y][x] != 0})
+                lightgames.send_msgs(self.connections, { 'x':x, 'y':y, 'hsl':hsl,
+                                                         'power': self.board[y][x] != 0,
+                                                         'blink': self.board[y][x] == 2 })
               # self.send_lamp(x, y, {'sat':255, 'hue':hue})
 
     def update_flasher(self):
@@ -218,9 +220,9 @@ class Mastermind(simplegame.SimpleGame):
                     v = self.board[y_][x + d]
                     hsl = self.colors[v]
                     hue = lightgames.to_lamp_hue(hsl)
-                    lightgames.send_msgs(self.connections, {'x':x + d, 'y':y_, 'hsl':hsl, 'power':v != 0})
+                    lightgames.send_msgs(self.connections, {'x':x + d, 'y':y_, 'hsl':hsl, 'power':v != 0, 'blink':v == 2})
                     if v != 0:
-                        changes += [{'x':x, 'y':y, 'change': {'sat':255, 'hue':hue}}]
+                        changes += [{'x':x, 'y':y, 'change': {'sat':255, 'hue':hue, 'blink':v == 2}}]
                 self.send_lamp_multi(changes)
 
                 self.columns[self.player] += d * 2
