@@ -1,11 +1,17 @@
 {
-    "configport": 8081, 
-    "game_name": "off", 
+    "configport": 8081,
+    "game_name": "mastermind",
     "game_path": [
         "src/games"
-    ], 
-    "lampdest": "localhost", 
-    "lampport": 4711, 
-    "serverport": 8080, 
+    ],
+    "idle": {
+        "animation_file": "animations/test3x3.gif",
+        "color_off": "#000000",
+        "transition_time": "4"
+    },
+    "lampdest": "localhost",
+    "lampport": 4711,
+    "serverport": 8080,
+    "websocketport": 80,
     "stream_embedcode": ""
 }
