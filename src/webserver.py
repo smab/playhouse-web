@@ -1,6 +1,6 @@
 # Playhouse: Making buildings into interactive displays using remotely controllable lights.
 # Copyright (C) 2014  John Eriksson, Arvid Fahlström Myrman, Jonas Höglund,
-#                     Hannes Leskelä, Christian Lidström, Mattias Palo, 
+#                     Hannes Leskelä, Christian Lidström, Mattias Palo,
 #                     Markus Videll, Tomas Wickman, Emil Öhman.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ class MainHandler(tornado.web.RequestHandler):
 
         template_vars = {
                 'stream_embedcode': manager.config['stream_embedcode'],
-                'socketport': manager.config['serverport']
+                'socketport': manager.config['websocketport']
             }
         template_vars.update(lightgames.Game.template_vars)  # Game defaults
         template_vars.update(manager.game.template_vars)
@@ -168,11 +168,11 @@ if __name__ == "__main__":
 
     init_http()
 
-    loop = tornado.ioloop.IOLoop.instance() 
-    try: 
+    loop = tornado.ioloop.IOLoop.instance()
+    try:
         loop.start()
-    except KeyboardInterrupt: 
-        print("Received interrupt, stopping server") 
-        loop.stop() 
+    except KeyboardInterrupt:
+        print("Received interrupt, stopping server")
+        manager.load_specific_game("off", manager.config["game_path"]) 
 
 
