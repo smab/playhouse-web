@@ -1,0 +1,165 @@
+body {
+  background: #000;
+  padding: 2em;
+
+  color: #FFF;
+  font-family: sans-serif;
+  font-variant: small-caps;
+  line-height: 135%;
+}
+
+#site {
+  max-width: 100em;
+  margin: 0 auto;
+}
+
+/*** logo **********************************/
+#logo img, #logo h1 {
+  display: inline-block;
+  vertical-align: middle;
+}
+#logo img {
+  margin-right: 1em;
+}
+#logo {
+  margin-bottom: 2em;
+  text-transform: uppercase;
+}
+#logo a {
+  text-decoration: none;
+  border: 0 none;
+  transition: opacity 300ms ease-in-out;
+}
+
+a, .link {
+  color: inherit;
+  transition: opacity 400ms ease-in-out;
+  cursor: pointer;
+
+  text-decoration: none;
+  border-bottom: 1px dotted #FFF;
+}
+a:hover, .link:hover {
+  opacity: 0.5;
+}
+
+/*** info-pane *****************************/
+.left div {
+  margin: 3em 0;
+}
+.left div > p {
+  margin: 0;
+}
+.left div > dl {
+  margin: 0;
+}
+.left div > dl dt {
+  float: left;
+  margin-right: 0.5em;
+  font-weight: bold;
+}
+
+.link-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+.link-list li.mail {
+  margin-top: 1em;
+}
+
+/*** main-pane *****************************/
+@media (min-width: 1050px) {
+  .main {
+    float: right;
+    margin-left: 1em;
+    width: 70%;
+    max-width: 80em;
+  }
+}
+
+#game-area {
+  margin-bottom: 3em;
+}
+#grid-cont {
+  position: relative;
+}
+#game-area .overlay {
+  display: block;
+  position: relative;
+  z-index: 5;
+  width: 100%;
+}
+
+#palette-cont {
+  position: relative;
+  text-align: center;
+}
+
+#palette-cont > .overlay {
+  position: absolute;
+  z-index: -5;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+#palette {
+  display: inline-block;
+  border: 2px solid white;
+  padding: 0.5em;
+  margin: 0;
+  background: #000;
+}
+#palette > li {
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  margin: 0.2em;
+  border: 2px solid white;
+  background: red;
+}
+
+#grid-cont > .grid {
+  opacity: 0.5;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-spacing: 0;
+}
+
+/* Temporary */
+/*
+#grid-cont > .grid td {
+  background: green;
+}
+#grid-cont > .grid tr:nth-child(even) > td:nth-child(even),
+#grid-cont > .grid tr:nth-child(odd)  > td:nth-child(odd) {
+  background: red;
+}
+*/
+
+#grid-cont > .grid td:nth-child(1), #grid-cont > .grid td:nth-child(20) { width: 5.0%; }
+#grid-cont > .grid td:nth-child(2), #grid-cont > .grid td:nth-child(19) { width: 2.9%; }
+#grid-cont > .grid td:nth-child(3), #grid-cont > .grid td:nth-child(18) { width: 3.3%; }
+#grid-cont > .grid td:nth-child(4), #grid-cont > .grid td:nth-child(17) { width: 3.7%; }
+#grid-cont > .grid td:nth-child(5), #grid-cont > .grid td:nth-child(16) { width: 4.3%; }
+#grid-cont > .grid td:nth-child(6), #grid-cont > .grid td:nth-child(15) { width: 4.8%; }
+#grid-cont > .grid td:nth-child(7), #grid-cont > .grid td:nth-child(14) { width: 5.5%; }
+
+#grid-cont > .grid tr:first-child { height: 43%; }
+#grid-cont > .grid tr:last-child { height: 35%; }
+
+#stream-cont > * {
+  border: 3px solid #FFF;
+}
+#stream-cont > img {
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+img.placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
