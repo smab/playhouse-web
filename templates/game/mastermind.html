@@ -25,10 +25,10 @@
         background-color: #222;
     }
 
-    #color-choice img {
+    #color-choice .choice {
         opacity: 0.7;
     }
-    #color-choice img:hover {
+    #color-choice .choice:hover {
         opacity: 1.0;
     }
 
@@ -60,20 +60,27 @@
 
 {% block game_postgrid %}
   <div class="hcenter" id="color-choice">
-    <ul class="grid"
-      ><li><img src="/static/lamp.png" draggable="false" style="background:#F00"></li
-      ><li><img src="/static/lamp.png" draggable="false" style="background:#0F0"></li
-      ><li><img src="/static/lamp.png" draggable="false" style="background:#00F"></li
-      ><li><img src="/static/lamp.png" draggable="false" style="background:#FF0"></li
-      ><li><img src="/static/lamp.png" draggable="false" style="background:#F0F"></li
-    ></ul>
+    <ul class="grid" id="palette"></ul>
+    <script>
+    var palette   = [ "{{ colors[0] }}", "{{ colors[1] }}", "{{ colors[2] }}",
+                      "{{ colors[3] }}", "{{ colors[4] }}" ],
+        paletteEl = document.getElementById('palette')
+    palette.forEach(function (color, i) {
+      var tmp = createLampEl('li'),
+          li  = tmp[0],
+          el  = tmp[1]
+      paletteEl.appendChild(li)
+      el.className = 'choice'
+      el.style.background = color
+    })
+    </script>
   </div>
 {% end %}
 
 
 {% block script %}
     window.addEventListener('load', function () {
-        var els = document.querySelectorAll('#color-choice img')
+        var els = document.querySelectorAll('#color-choice .choice')
         console.log(els.length)
         for (var i = 0; i < els.length; i++) {
             (function (choice) {

@@ -40,17 +40,23 @@ class Mastermind(simplegame.SimpleGame):
 
         self.template_vars['module_name'] = 'Mastermind'
         self.template_vars['title'] = 'Mastermind'
-        self.template_vars['grid_x'] = 12
+        self.template_vars['grid_x'] = 18
         self.template_vars['grid_y'] = 3
 
         self.template_vars['color_correct'] = '#FFFFFF'
         self.template_vars['color_almost']  = '#FFFFFF'
 
-        self.template_vars['color_1'] = '#FF0000'
-        self.template_vars['color_2'] = '#00FF00'
-        self.template_vars['color_3'] = '#0000FF'
-        self.template_vars['color_4'] = '#FFFF00'
-        self.template_vars['color_5'] = '#FF00FF'
+        self.template_vars['colors'] = [ '#FF0000',
+                                         '#00FF00',
+                                         '#0000FF',
+                                         '#FFFF00',
+                                         '#FF00FF' ]
+
+      # self.template_vars['color_1'] = '#FF0000'
+      # self.template_vars['color_2'] = '#00FF00'
+      # self.template_vars['color_3'] = '#0000FF'
+      # self.template_vars['color_4'] = '#FFFF00'
+      # self.template_vars['color_5'] = '#FF00FF'
 
         self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
 
@@ -62,9 +68,11 @@ class Mastermind(simplegame.SimpleGame):
                 self.board[y][x] = 0
 
         lg, tvars = lightgames, self.template_vars
+      # self.colors = [ lg.rgb_to_hsl(*lg.parse_color(color)) for color in
+      #                 [ '#000000', tvars['color_correct'], tvars['color_almost'],
+      #                   tvars['color_1'], tvars['color_2'], tvars['color_3'], tvars['color_4'], tvars['color_5'] ] ]
         self.colors = [ lg.rgb_to_hsl(*lg.parse_color(color)) for color in
-                        [ '#000000', tvars['color_correct'], tvars['color_almost'],
-                          tvars['color_1'], tvars['color_2'], tvars['color_3'], tvars['color_4'], tvars['color_5'] ] ]
+                        [ '#000000', tvars['color_correct'], tvars['color_almost'] ] + tvars['colors'] ]
 
         self.state = 0 # game state: not started
         self.columns = [ 0, self.width - 1 ]
@@ -109,7 +117,8 @@ class Mastermind(simplegame.SimpleGame):
 
     def on_game_start(self):
         self.state = 1 # game state: select hiddens
-        lightgames.send_msgs(self.get_players(),   {'message':'Select pattern'}) 
+        lightgames.send_msgs(self.get_players(), {'message':'Select pattern'})
+        lightgames.send_msgs(self.get_players(), {'x':0, 'y':0, 'flashing':True})
 
     def turnover(self, to_player=None):
         if self.state == 1:
@@ -120,7 +129,18 @@ class Mastermind(simplegame.SimpleGame):
             self.start_guessing()
             return
 
-        #if self.state > 1:
+        # reset column
+        if self.row > 0:
+            x = self.columns[self.player]
+            changes = []
+            for y in range(self.row):
+                self.board[y][x] = 0
+                lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hsl':[0,0,0], 'power':False})
+                changes += [{'x':x, 'y':y, 'change': {'sat':0, 'hue':0, 'bri':0}}]
+            self.send_lamp_multi(changes)
+
+            self.row = 0
+
         super().turnover(to_player)
 
     def start_guessing(self):
@@ -132,7 +152,6 @@ class Mastermind(simplegame.SimpleGame):
 
     def on_add_player(self, player):
         super().on_add_player(player)
-        lightgames.send_msg(self.get_players()[player], {'x':0, 'y':0, 'flashing':True})
 
 
     def on_message(self, handler, msg):
@@ -149,15 +168,24 @@ class Mastermind(simplegame.SimpleGame):
         hue = lightgames.to_lamp_hue(hsl)
 
         # Handle state 'select hiddens'
-        if self.state <= 1:
+     #  if self.state <= 1:
+        if self.state == 0:
+            return
+
+        if self.state == 1:
             playerIdx = self.get_players().index(handler)
+
             if 0 in self.hiddens[1-playerIdx]:
                 col = self.hiddens[1-playerIdx].index(0)
-                #col = self.columns[playerIdx]
+              # col = self.columns[playerIdx]
                 #self.columns[playerIdx] += 1
                 self.hiddens[1-playerIdx][col] = choice
                 lightgames.send_msg(handler, {'x':col, 'y':0, 'hsl':hsl, 'power':True})
                 lightgames.send_msg(handler, {'x':col+1, 'y':0, 'flashing':True})
+
+                if 0 not in self.hiddens[1-playerIdx]:
+                    lightgames.send_msg(handler, {'message':'Waiting on other player...'})
+
             if all([all(x) for x in self.hiddens]):
                 self.start_guessing()
             return
@@ -197,7 +225,11 @@ class Mastermind(simplegame.SimpleGame):
                 for i in range(self.height):
                     if guess[i] == hidden[i]:
                         corrects += 1
-                        counts[guess[i]] -= 1
+                        if counts[guess[i]] > 0:
+                            counts[guess[i]] -= 1
+                        else:
+                            almosts -= 1
+
                     elif counts[guess[i]] > 0:
                         counts[guess[i]] -= 1
                         almosts += 1
@@ -222,7 +254,7 @@ class Mastermind(simplegame.SimpleGame):
                     hue = lightgames.to_lamp_hue(hsl)
                     lightgames.send_msgs(self.connections, {'x':x + d, 'y':y_, 'hsl':hsl, 'power':v != 0, 'blink':v == 2})
                     if v != 0:
-                        changes += [{'x':x, 'y':y, 'change': {'sat':255, 'hue':hue, 'blink':v == 2}}]
+                        changes += [{'x':x, 'y':y_, 'change': {'sat':255, 'hue':hue, 'blink':v == 2}}]
                 self.send_lamp_multi(changes)
 
                 self.columns[self.player] += d * 2
