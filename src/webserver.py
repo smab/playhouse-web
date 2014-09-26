@@ -173,6 +173,6 @@ if __name__ == "__main__":
         loop.start()
     except KeyboardInterrupt:
         print("Received interrupt, stopping server")
-        loop.stop()
+        manager.load_specific_game("off", manager.config["game_path"]) 
 
 

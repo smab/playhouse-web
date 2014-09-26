@@ -111,11 +111,15 @@ def check_client_status():
     return False
 
 
-def load_game():
+def load_game(): 
+    load_specific_game(config["game_name"], config["game_path"]) 
+
+
+def load_specific_game(game_name, game_path):
     global game
     global connections
 
-    new_game = lightgames.load(config["game_name"], config["game_path"], client)
+    new_game = lightgames.load(game_name, game_path, client)
 
     if game != None:
         game.destroy()
