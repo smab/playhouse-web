@@ -206,7 +206,7 @@ class Game:
         print(self.client.getresponse().read().decode())
 
     def reset_lamp_all(self):
-        self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0 })
+        self.send_lamp_all({ 'on': True, 'sat':0, 'hue':0, 'bri':0, 'blink':False })
 
     def send_lamp_animation(self, coords, change, callback = None, revert = False,
                             ms_between = 500, ms_transition = 600, ms_revert = 500):

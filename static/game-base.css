@@ -49,50 +49,6 @@ h1 {
     background: rgba(180,210,230, 0.8);
 }
 
-#message-box {
-    top: 0;
-    transition: background-color 600ms;
-}
-#message-box.type-message {
-    /* no overriding necessary */
-}
-#message-box.type-error {
-    font-weight: bold;
-    background: #A12;
-}
-
-#overlay {
-    display: table;
-    position: fixed;
-    z-index: 100;
-    height :100%;
-    width: 100%;
-    left: 0;
-    top: 0;
-    background-color: black;
-    opacity: 0.7;
-}
-
-#overlay div {
-    display: table-cell;
-    width: 100%;
-    text-align: center;
-    vertical-align: middle;
-    color: white;
-    font-size: 250%;
-}
-
-.hidden {
-    visibility: hidden;
-}
-
-#queue {
-    top: 1;
-}
-#queuemsg {
-    margin: 2px;
-}
-
 /*** Rules ************************/
 .rules {
     margin: 0 auto; /* centers, provided there's a width set */
@@ -142,8 +98,4 @@ ul.grid {
 }
 ul.grid li {
   display: inline-block;
-}
-
-.hcenter {
-  text-align: center;
 }

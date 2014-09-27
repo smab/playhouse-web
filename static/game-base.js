@@ -51,11 +51,6 @@ ws.onmessage = function (evt) {
     on_message(obj)
 };
 
-function ignoreEvent(ev) {
-  ev.preventDefault()
-  return false
-}
-
 function buildGrid(w, h) {
     var table = document.getElementById("grid");
     table.innerHTML = ""
@@ -63,25 +58,33 @@ function buildGrid(w, h) {
     for(var i=0; i < h; i++) {
         // Create tr
         var tr = document.createElement("tr");
+
+        if (templateConfig.paddingCells) {
+            tr.appendChild(document.createElement('td'))
+        }
+
         for(var ii=0; ii < w; ii++) {
             // Add td and function onclick
-            var td = document.createElement("td");
-            tr.appendChild(td);
+            var tmp = createLampEl('td'),
+                td  = tmp[0],
+                el  = tmp[1]
 
-            var img = document.createElement('img')
-            img.src         = '/static/lamp.png'
-            img.draggable   = false
-            img.id          = ii + '-' + i
-            img.onclick     = play
-            img.ondragstart = ignoreEvent
-            img.classList.add('tile')
-            td.appendChild(img)
+            el.id          = ii + '-' + i
+            el.onclick     = play
+            el.classList.add('tile')
+
+            tr.appendChild(td);
+        }
+
+        if (templateConfig.paddingCells) {
+            tr.appendChild(document.createElement('td'))
         }
 
         // Add tr to DOM
         table.appendChild(tr);
     }
 }
+
 buildGrid(config.grid_x, config.grid_y)
 
 
