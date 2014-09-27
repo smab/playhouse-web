@@ -73,7 +73,6 @@
 
 
 {% block message %}
-    console.log(JSON.stringify(obj))
     switch (obj.state) {
       case 'playing':
         console.log("Enabling shadow...")
@@ -122,14 +121,19 @@
           updateShadow()
       }
 
-   // var color = 'hsl(' + Math.floor(obj.hue / 255) + ',100%,50%)'
-      el.style.backgroundColor = obj.power? toHSL(obj.hsl) : ''
-      el.style.className       = obj.power? 'on'           : 'off'
+      el.style.backgroundColor = obj.power? obj.hsl   != null?  toHSL(obj.hsl)
+                                          : obj.color != null?  toRGB(obj.color)
+                                          :                     ''
+                                        :                       ''
 
       function toHSL(a) {
         return "hsl(" + a[0] + ","
                       + Math.floor(a[1] / 256 * 100) + "%,"
                       + Math.floor(a[2] / 256 * 100) + "%)"
+      }
+
+      function toRGB(a) {
+        return "rgb(" + a.join(",") + ")"
       }
     }
 {% end %}

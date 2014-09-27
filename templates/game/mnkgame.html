@@ -22,8 +22,8 @@
 
 
 {% block style %}
-    #grid img.player_1 { background-color: {{ color_1 }}; }
-    #grid img.player_2 { background-color: {{ color_2 }}; }
+    #grid .tile.player_1 { background-color: {{ color_1 }}; }
+    #grid .tile.player_2 { background-color: {{ color_2 }}; }
 {% end %}
 
 
@@ -37,6 +37,13 @@
 {% block message %}
     if (obj.x != null) {
         var el = document.getElementById(obj.x + "-" + obj.y)
-        el.className = obj.color;
+        if (typeof obj.color != 'string') return
+
+        if (obj.color != "") {
+            el.classList.add(obj.color)
+        } else {
+            el.classList.remove('player_1')
+            el.classList.remove('player_2')
+        }
     }
 {% end %}
