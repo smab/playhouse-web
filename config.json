@@ -5,7 +5,7 @@
         "src/games"
     ],
     "idle": {
-        "animation_file": "animations/test3x3.gif",
+        "animation_file": "animations/nod-playthehouse-com.gif",
         "color_off": "#000000",
         "transition_time": "4"
     },
@@ -13,5 +13,5 @@
     "lampport": 4711,
     "serverport": 8080,
     "websocketport": 80,
-    "stream_embedcode": ""
+    "stream_embedcode": "<img class=\"placeholder\" src=\"/static/img/placeholder_stream.png\" />"
 }

@@ -47,14 +47,11 @@
         background-color: #444 !important;
     }
 
-    /*
-    .pulsating-on { background-color: #AAA !important; }
-    .pulsating-off { background-color: #444 !important; }
-    .pulsating-on, .pulsating-off {
-        transition-property: background-color;
-        transition-duration: 1000ms;
+
+    #game-popup {
+        width: 16em;
+        margin-left: -8.5em;
     }
-    */
 {% end %}
 
 
@@ -78,7 +75,35 @@
 {% end %}
 
 
+{% block game_popup %}
+  <div class="hcenter">
+    <p>Choose your code</p>
+    <ul class="grid" id="code-input"></ul>
+  </div>
+  <script>
+  var codeEl = document.getElementById('code-input')
+
+  for (var i = 0; i < config.grid_y; i++) {
+    var tmp = createLampEl('li'),
+        li  = tmp[0],
+        el  = tmp[1]
+    codeEl.appendChild(li)
+    el.id = i + '-x'
+  }
+  </script>
+{% end %}
+
+
 {% block script %}
+    var gamestate = 'guess'
+
+    function get(x_, y_) {
+      var x = x_,
+          y = gamestate == 'select'? 'x' : y_
+
+      return document.getElementById(x + "-" + y)
+    }
+
     window.addEventListener('load', function () {
         var els = document.querySelectorAll('#color-choice .choice')
         console.log(els.length)
@@ -106,16 +131,14 @@
     var cursorEl = null
     function setPulsatingCursor(enabled, x, y) {
         if (cursorEl != null) cursorEl.classList.remove('cursor')
-        cursorEl = enabled? document.getElementById(x + '-' + y) : null
+        cursorEl = enabled? get(x, y) : null
         if (cursorEl != null) cursorEl.classList.add('cursor')
     }
     function addPulsating(x, y) {
-        var el = document.getElementById(x + '-' + y)
-        el.classList.add('flashing')
+        get(x, y).classList.add('flashing')
     }
     function removePulsating(x, y) {
-        var el = document.getElementById(x + '-' + y)
-        el.classList.remove('flashing')
+        get(x, y).classList.remove('flashing')
     }
 
     setInterval(function () {
@@ -137,31 +160,37 @@
 {% end %}
 
 {% block click %}
-    /*
-    var x = parseInt(coords[0], 10),
-        y = parseInt(coords[1], 10)
-
-    activeCell = [ x, y ]
-    */
 {% end %}
 
 
 {% block message %}
+    var gamePopupEl = document.getElementById('game-popup')
+
+    function resetPopup() {
+        gamePopupEl.style.display = 'none'
+
+        var els = document.querySelectorAll('#code-input > li')
+        for (var i = 0; i < els.length; i++) {
+            els[i].style.background = ""
+        }
+    }
+
     switch (obj.state) {
         case 'playing':
-            buildGrid(config.grid_y, 1)
+         // gamePopupEl.style.display = 'block'
+         // buildGrid(config.grid_y, 1)
             break
     }
+
     switch (obj.gamestate) {
         case 'select':
+            gamePopupEl.style.display = 'block'
             break
-        case 'guess':
-            buildGrid(config.grid_x, config.grid_y)
+        case 'guess': case 'reset':
+            resetPopup()
             break
-        case 'reset':
-        // activeCell = [ -1, -1 ]
-           break
     }
+    if (obj.gamestate != null) gamestate = obj.gamestate
 
     if (obj.flashing != null) {
         if (obj.x != null) {
@@ -183,7 +212,7 @@
     }
 
     function updateCell(obj) {
-      var el = document.getElementById(obj.x + "-" + obj.y)
+      var el = get(obj.x, obj.y)
 
       if (obj.transitiontime != null) {
         el.style.transition = 'background-color ' + (obj.transitiontime * 100) + 'ms'
@@ -193,7 +222,13 @@
       }
 
    // var color = 'hsl(' + Math.floor(obj.hue / 255) + ',100%,50%)'
-      el.style.backgroundColor = obj.power? toHSL(obj.hsl) : ''
+      if (obj.hsl) {
+          el.style.backgroundColor = obj.power? toHSL(obj.hsl) : ''
+      } else if (obj.color) {
+          el.style.backgroundColor = obj.power? toRGB(obj.color) : ''
+      } else {
+          throw new Error("No colour information?!")
+      }
       el.style.className       = obj.power? 'on'           : 'off'
 
       if (obj.blink) addPulsating(obj.x, obj.y)
@@ -203,6 +238,10 @@
         return "hsl(" + a[0] + ","
                       + Math.floor(a[1] / 256 * 100) + "%,"
                       + Math.floor(a[2] / 256 * 100) + "%)"
+      }
+
+      function toRGB(a) {
+        return "rgb(" + a.join(",") + ")"
       }
     }
 {% end %}

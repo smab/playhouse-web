@@ -22,6 +22,7 @@
 
 
 {% block style_simple %}
+    {#
     .player-cont {
         position: absolute;
         z-index: 4;
@@ -55,6 +56,7 @@
         box-shadow: 0 0 16px rgba(32,32,32, 0.7);
         background: #000;
     }
+    #}
 
     {% if color_1 != None %}
     #player0color { background-color: {{ color_1 }} }
@@ -76,6 +78,7 @@
 {% end %}
 
 
+{#
 {% block playground %}
 <div class="wrapper-outer">
     <div class="wrapper">
@@ -101,22 +104,36 @@
     </div>
 </div>
 {% end %}
+#}
 
 {% block timelimits %}
 var None = undefined 
 function changeTurn(p) {
     player = p 
-    var pl   = document.getElementById("player"+p)
-    var op = document.getElementById("player"+(1-p))
+
+    if (p == 2) return
+
+    var pl = document.getElementById("player" + p)
+    var op = document.getElementById("player" + (1 - p))
 
     // Set current player indication
-    pl.className += " current"
-    op.className = op.className.replace(/ ?current/g, "")
+    if (pl != null) pl.classList.add('current')
+    if (op != null) op.classList.remove('current')
+ // pl.className += " current"
+ // op.className = op.className.replace(/ ?current/g, "")
 } 
-function changeTime(p, t) {
+function changeTime(p, t, noUpdateTime) {
     if(t == undefined) 
         return 
-    time = t
+
+    if (!noUpdateTime) time = t
+
+    if (p == 2) {
+        changeTime(0, t, true)
+        changeTime(1, t, true)
+        return
+    }
+
     document.getElementById("player"+p+"time").innerHTML = "Time: " + time 
 }
 function decreaseTime() {
@@ -158,6 +175,17 @@ if(obj.timeleft != undefined) {
     }
     changeTime(player, obj.timeleft) 
     handler = window.setInterval(decreaseTime, 1000); 
+}
+
+
+if (obj['reset-player'] != null) {
+    if (obj['reset-player'] != 2) {
+        player = 1 - obj['reset-player']
+        changeTime(1 - player, {{ timelimit }}, true)
+
+    } else {
+        changeTime(2, {{ timelimit }}, true)
+    }
 }
 
 
