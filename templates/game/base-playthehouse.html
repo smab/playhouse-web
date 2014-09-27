@@ -66,15 +66,36 @@
       <section class="main">
         <div id="game-area">
           <div id="palette-cont">
-            <div>
-              {% block message-area %}
-              <div id="message-box" class="box">
-                <div id="message">Connecting...</div>
+            <div id="game-status">
+
+              {% block simple_p0cont %}
+              <div id="player0" class="player-cont current">
+                <p style="text-align: center; font-weight: bold">Player 1</p>
+                <p id="player0score">Score: {{ score_1 }}</p>
+                <p id="player0time">Time: {{ timelimit }}</p>
               </div>
               {% end %}
-              {% block game_postgrid %}
+
+              <div class="middle">
+                {% block message-area %}
+                <div id="message-box" class="box">
+                  <div id="message">Connecting...</div>
+                </div>
+                {% end %}
+                {% block game_postgrid %}
+                {% end %}
+              </div>
+
+              {% block simple_p1cont %}
+              <div id="player1" class="player-cont">
+                <p style="text-align: center; font-weight: bold">Player 2</p>
+                <p id="player1score">Score: {{ score_2 }}</p>
+                <p id="player1time">Time: {{ timelimit }}</p>
+              </div>
               {% end %}
+
             </div>
+
             <img class="overlay" src="/static/img/palette.png" />
           </div>
           <div id="grid-cont">
@@ -84,41 +105,14 @@
             <table id="grid" class="grid"></table>
             {% end %}
 
-            {#
-            <table class="grid">
-              <tr>
-                <td></td>
-                <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td>
-                <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td>
-                <td></td>
-              </tr>
-              <tr>
-                <td></td>
-                <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td>
-                <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td>
-                <td></td>
-              </tr>
-              <tr>
-                <td></td>
-                <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td>
-                <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td>
-                <td></td>
-              </tr>
-            </table>
-            #}
-
+            <div class="popup" id="game-popup">
+            {% block game_popup %}
+            {% end %}
+            </div>
           </div>
         </div>
         <div id="stream-cont">
-
-          {#
-          {% block postgrid %}
-          <div style="text-align:center">
-              {% raw stream_embedcode %}
-          </div>
-          {% end %}
-          #}
-          <img class="placeholder" src="/static/img/placeholder_stream.png" />
+          {% raw stream_embedcode %}
         </div>
       </section>
 
@@ -127,15 +121,17 @@
           <p>
             The world's biggest online Mastermind game,<br/>
             Play the Nod building in real life, in real time.
+            Queue up by <span class="link" id="queuebtn">clicking HERE</span><br/>
           </p>
         </div>
         <div>
           <p>
-            Queue up by <span class="link" id="queuebtn">clicking here</span><br/>
-            {#<input type="button" id="queuebtn" value="Join queue" />#}
             Soon you will be coupled with another player<br/>
+            The pulsating window indicates where your colour choice will go<br/>
+            <br/>
             Choose colours from the colour palette to create your secret code<br/>
             When both players are ready, the game begins<br/>
+            <br/>
             Guess your opponent's colour combination<br/>
             Every even column is a guess, and every other is a clue
           </p>
@@ -169,7 +165,7 @@
           </p>
         </div>
         <div>
-          <img src="/static/img/sponsors.png" />
+          <img src="/static/img/loggor.jpg" />
         </div>
       </aside>
     </div>
@@ -184,7 +180,8 @@
         function on_message(obj) {
             {% block rulemessage %}
                 if (obj.rulemessage != null) {
-                    document.getElementById('therules').innerHTML = obj.rulemessage;
+                    console.log("Ignoring rule update...")
+                 // document.getElementById('therules').innerHTML = obj.rulemessage;
                 }
             {% end %}
 

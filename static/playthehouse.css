@@ -43,6 +43,10 @@ a:hover, .link:hover {
   opacity: 0.5;
 }
 
+#queuebtn {
+  font-weight: bold;
+}
+
 /*** info-pane *****************************/
 .left div {
   margin: 3em 0;
@@ -88,11 +92,23 @@ a:hover, .link:hover {
   position: relative;
   z-index: 5;
   width: 100%;
+  pointer-events: none;
 }
 
 #palette-cont {
   position: relative;
+}
+
+#game-status {
+  display: table;
+  width: 100%;
+}
+#game-status > * {
+  display: table-cell;
   text-align: center;
+}
+#game-status > .middle {
+  width: 60%;
 }
 
 #palette-cont > .overlay {
@@ -104,40 +120,30 @@ a:hover, .link:hover {
 }
 
 #palette {
-  display: inline-block;
   border: 2px solid white;
+}
+ul.grid {
+  display: inline-block;
   padding: 0.5em;
   margin: 0;
   background: #000;
 }
-#palette > li {
+ul.grid > li {
   display: inline-block;
   width: 2em;
   height: 2em;
   margin: 0.2em;
   border: 2px solid white;
-  background: red;
 }
 
 #grid-cont > .grid {
-  opacity: 0.5;
+  opacity: 0.8;
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   border-spacing: 0;
 }
-
-/* Temporary */
-/*
-#grid-cont > .grid td {
-  background: green;
-}
-#grid-cont > .grid tr:nth-child(even) > td:nth-child(even),
-#grid-cont > .grid tr:nth-child(odd)  > td:nth-child(odd) {
-  background: red;
-}
-*/
 
 #grid-cont > .grid td:nth-child(1), #grid-cont > .grid td:nth-child(20) { width: 5.0%; }
 #grid-cont > .grid td:nth-child(2), #grid-cont > .grid td:nth-child(19) { width: 2.9%; }
@@ -149,6 +155,15 @@ a:hover, .link:hover {
 
 #grid-cont > .grid tr:first-child { height: 43%; }
 #grid-cont > .grid tr:last-child { height: 35%; }
+
+
+.popup {
+  background: #000;
+  border: 2px solid white;
+  border-radius: 0.5em;
+  padding: 0.5em;
+}
+
 
 #stream-cont > * {
   border: 3px solid #FFF;
