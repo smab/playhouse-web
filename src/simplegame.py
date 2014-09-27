@@ -150,21 +150,24 @@ class SimpleGame(lightgames.Game):
         self.reset_lamp_all()
         self.queue.try_get_new_players()
 
-    def sync_turn(self, handler): 
+    def sync_turn(self, handler, turn_override = None): 
         """
         Syncs turn-data (timelimit, score, current turn) 
 
         If you override this, you likely want to invoke this method manually!
         """
         msg = { 
-            'turn': self.player, 
+            'turn': turn_override if turn_override != None else self.player, 
             'score_1': self.template_vars['score_1'], 
             'score_2': self.template_vars['score_2']
         }
         if None not in self.get_players(): 
             msg['timeleft'] = self.template_vars['timeleft'] 
         lightgames.send_msg(handler, msg) 
-        
+
+    def sync_turn_all(self, turn_override = None):
+        for h in self.connections:
+            self.sync_turn(h, turn_override)
 
     def sync(self, handler):  
         # TODO Should be implemented here in some kind of standard format to 
@@ -279,7 +282,10 @@ class SimpleGame(lightgames.Game):
         lightgames.send_msg(self.get_player(1-self.player), {'message':'Waiting on other player...'})
 
         self.timer_counter = tornado.ioloop.PeriodicCallback(self.timelimit_counter, 1000)
-        #self.sync_all() 
+
+        #self.sync_all()
+        self.sync_turn_all()
+
         if None not in self.get_players() and self.template_vars['timelimit'] != None: 
             self.timer_counter.start() 
 

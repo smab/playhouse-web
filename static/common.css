@@ -64,3 +64,16 @@
 .hcenter {
   text-align: center;
 }
+
+
+.popup {
+  position: absolute;
+  z-index: 100;
+  top: 40%;
+  left: 50%;
+
+  width: 19em;
+  margin-left: -10em;
+
+  display: none;
+}

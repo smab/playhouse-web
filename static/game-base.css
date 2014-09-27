@@ -99,3 +99,48 @@ ul.grid {
 ul.grid li {
   display: inline-block;
 }
+
+
+.popup {
+  background: #000;
+  border-radius: 0.5em;
+  padding: 0.5em;
+  box-shadow: 0 0 16px rgba(32,32,32, 0.8);
+  color: #EEE;
+}
+
+
+/*** For simple-game *************************/
+.player-cont {
+    position: absolute;
+    z-index: 4;
+    width: 130px;
+    padding: 1em;
+    border-radius: 1em;
+    bottom: 3em;
+    height: 200px;
+    text-align: center;
+    font-family: sans-serif;
+    background: rgba(0,0,0, 0.2);
+}
+.player-cont.current {
+    background: rgba(0,200,32, 0.7);
+}
+#player0 { left: -190px; }
+#player1 { right: -190px; }
+
+.wrapper-outer {
+    text-align: center;
+}
+.wrapper {
+    display: inline-block;
+    position: relative;
+}
+
+.player-cont > .lamp {
+    display: inline-block;
+    padding: 0.6em 0.7em;
+    border-radius: 8px;
+    box-shadow: 0 0 16px rgba(32,32,32, 0.7);
+    background: #000;
+}
