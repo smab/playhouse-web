@@ -1,5 +1,5 @@
 
 # CHANGE PATHS! 
-0 19 * * * ~/programmering/playhouse/playhouse-web/startwebserver start 
-0 5 * * * ~/programmering/playhouse/playhouse-web/startidleserver stop 
+0 19 * * * ~/playhouse/playhouse-web/startwebserver start 
+0 5 * * * ~/playhouse/playhouse-web/startidleserver stop 
 
