@@ -52,12 +52,6 @@ class Mastermind(simplegame.SimpleGame):
                                          '#FFFF00',
                                          '#FF00FF' ]
 
-      # self.template_vars['color_1'] = '#FF0000'
-      # self.template_vars['color_2'] = '#00FF00'
-      # self.template_vars['color_3'] = '#0000FF'
-      # self.template_vars['color_4'] = '#FFFF00'
-      # self.template_vars['color_5'] = '#FF00FF'
-
         self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
 
     def reset(self):
@@ -84,7 +78,7 @@ class Mastermind(simplegame.SimpleGame):
 
     def sync(self, handler):
         super().sync(handler)
-        self.set_description(handler)
+      # self.set_description(handler)
         print("Syncing %s" % handler)
 
         self.update_flasher()
@@ -117,7 +111,8 @@ class Mastermind(simplegame.SimpleGame):
 
     def on_game_start(self):
         self.state = 1 # game state: select hiddens
-        lightgames.send_msgs(self.get_players(), {'message':'Select pattern'})
+        self.sync_turn_all(2)
+        lightgames.send_msgs(self.get_players(), {'gamestate':'select', 'message':'Select code'})
         lightgames.send_msgs(self.get_players(), {'x':0, 'y':0, 'flashing':True})
 
     def turnover(self, to_player=None):
@@ -145,6 +140,7 @@ class Mastermind(simplegame.SimpleGame):
 
     def start_guessing(self):
         self.state = 2 # game state: guess hiddens
+        lightgames.send_msgs(self.connections, {'reset-player': 2})
         lightgames.send_msgs(self.get_players(), {'gamestate':'guess'})
         self.turnover(0)
         print("Mastermind: Hiddens selected")
@@ -185,6 +181,7 @@ class Mastermind(simplegame.SimpleGame):
 
                 if 0 not in self.hiddens[1-playerIdx]:
                     lightgames.send_msg(handler, {'message':'Waiting on other player...'})
+                    lightgames.send_msgs(self.connections, {'reset-player': playerIdx})
 
             if all([all(x) for x in self.hiddens]):
                 self.start_guessing()
