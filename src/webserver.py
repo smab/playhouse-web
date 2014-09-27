@@ -23,6 +23,7 @@ import tornado.websocket
 
 import uuid
 import traceback
+import signal 
 
 import lightgames
 import manager
@@ -169,10 +170,13 @@ if __name__ == "__main__":
     init_http()
 
     loop = tornado.ioloop.IOLoop.instance()
-    try:
-        loop.start()
-    except KeyboardInterrupt:
-        print("Received interrupt, stopping server")
+
+    def on_shutdown(): 
+        print("Received interrupt, stopping server") 
         manager.load_specific_game("off", manager.config["game_path"]) 
+        loop.stop() 
+
+    signal.signal(signal.SIGINT, lambda sig, frame: loop.add_callback_from_signal(on_shutdown))
+    loop.start() 
 
 
