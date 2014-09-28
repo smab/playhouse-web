@@ -74,11 +74,6 @@ class GifAnimation(lightgames.Game):
         self.reset_lamp_all()
         self.play = True
 
-        def on_frame(xy, color, is_transparent):
-            x, y = xy
-            lightgames.send_msgs(self.connections, \
-                        {'x': x, 'y': y, 'color': color, 'power': not is_transparent})
-
         try:
             #for y in range(0, min(height,self.grid[1])):
                 #for x in range(0, min(width,self.grid[0])):
@@ -108,8 +103,7 @@ class GifAnimation(lightgames.Game):
             self.data.seek(0)
             self.gif_animator.run_animation(
                 self.data, bounds=self.grid, offset=(self.offset_x, self.offset_y),
-                transitiontime=self.transition_time, transparentcolor=self.transp_color,
-                on_frame=on_frame)
+                transitiontime=self.transition_time, transparentcolor=self.transp_color)
         except IOError:
             print("Couldn't open image")
 
@@ -170,21 +164,9 @@ class GifAnimation(lightgames.Game):
             except ValueError:
                 print("Couldn't convert string to int")
 
-        # Taken from http://code.activestate.com/recipes/266466/
-        # Edited for Python 3
-        def HTMLColorToRGB(colorstring):
-            """ convert #RRGGBB to an (R, G, B) tuple """
-            colorstring = colorstring.strip()
-            if colorstring[0] == '#': colorstring = colorstring[1:]
-            if len(colorstring) != 6:
-                raise ValueError("input #%s is not in #RRGGBB format" % colorstring)
-            r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
-            r, g, b = [int(n, 16) for n in (r, g, b)]
-            return (r, g, b)
-
         if 'color_off' in config:
             try:
-                self.transp_color = HTMLColorToRGB(config['color_off'])
+                self.transp_color = lightgames.HTMLColorToRGB(config['color_off'])
                 self.template_vars['color_off'] = config['color_off']
             except ValueError:
                 print("Couldn't convert HTML color to RGB")
