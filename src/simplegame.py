@@ -112,8 +112,6 @@ class SimpleGame(lightgames.Game):
         self.animator_file = None
 
     def init(self):
-        super().init()
-
         self.queue.addplayer_callback = self.on_add_player
         self.queue.removeplayer_callback = self.on_remove_player
         self.queue.set_num_players(2)
@@ -123,8 +121,10 @@ class SimpleGame(lightgames.Game):
         except OSError:
             self.animator_file = None
 
+        super().init()
+
         # Start idle animation
-        self.startIdle()
+      # self.startIdle()
 
     def destroy(self):
         super().destroy()
@@ -138,6 +138,8 @@ class SimpleGame(lightgames.Game):
 
         If you override this, you likely want to invoke this method manually!
         """
+        self.startIdle()
+
         # Sets up the board and tries to fetch two new players. 
         self.game_started = False
         self.timer_counter.stop() 
