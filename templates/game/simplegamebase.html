@@ -187,6 +187,9 @@ if (obj['reset-player'] != null) {
         changeTime(2, {{ timelimit }}, true)
     }
 }
+if (obj['timer-freeze'] != null) {
+    if (handler != null) clearInterval(handler)
+}
 
 
 if(obj.pause != undefined) {

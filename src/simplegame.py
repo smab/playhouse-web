@@ -35,6 +35,8 @@ def reply_wrong_player(game, handler):
         lightgames.send_msg(handler, {'error':'You are not a player!'})
 
 def game_over(game, winnerH, coords = frozenset()):
+    lightgames.send_msgs(game.connections, {'timer-freeze': 2})
+
     if winnerH == None:
         lightgames.send_msgs(game.connections,   {'message': 'The game tied'})
         lightgames.send_msgs((p for p in game.get_players()),
