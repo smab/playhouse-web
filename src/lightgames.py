@@ -146,6 +146,18 @@ def rgb_to_hsl(r, g, b):
 def to_lamp_hue(hsl):
     return int(hsl[0] * 65536 / 360)
 
+# Taken from http://code.activestate.com/recipes/266466/
+# Edited for Python 3
+def HTMLColorToRGB(colorstring):
+    """ convert #RRGGBB to an (R, G, B) tuple """
+    colorstring = colorstring.strip()
+    if colorstring[0] == '#': colorstring = colorstring[1:]
+    if len(colorstring) != 6:
+        raise ValueError("input #%s is not in #RRGGBB format" % colorstring)
+    r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
+    r, g, b = [int(n, 16) for n in (r, g, b)]
+    return (r, g, b)
+
 def validate_xy(f): 
     def helper(self, handler, message):
         if 'x' in message and 'y' in message:
@@ -346,12 +358,18 @@ class GIFAnimation:
         self.wait_future = None
 
     @tornado.gen.coroutine
-    def run_animation(self, gif_data, bounds, offset=(0, 0), loop=float('inf'),
+    def run_animation(self, gif_data, bounds=None, offset=(0, 0), loop=float('inf'),
                       transitiontime=0, transparentcolor=None, on_frame=None):
         if self.running:
             return False
 
         self.running = True
+
+        if on_frame is None:
+            def on_frame(xy, color, is_transparent):
+                x, y = xy
+                send_msgs(self.game.connections,
+                          {'x': x, 'y': y, 'color': color, 'power': not is_transparent})
 
         image = PIL.Image.open(gif_data)
         offset_x, offset_y = offset
@@ -368,7 +386,8 @@ class GIFAnimation:
                         for i, color in enumerate(rgb_image.getdata()):
                             x, y = i % width + offset_x, i // width + offset_y
 
-                            if not 0 <= x <= bounds[0] or not 0 <= y <= bounds[1]:
+                            if (bounds is not None
+                                    and (not 0 <= x <= bounds[0] or not 0 <= y <= bounds[1])):
                                 continue
 
                             if on_frame is not None:

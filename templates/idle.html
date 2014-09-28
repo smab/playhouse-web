@@ -1,4 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Play the House</title>
+    <link rel="stylesheet" href="/static/playthehouse.css" />
+    <link rel="stylesheet" href="/static/common.css" />
+  </head>
+  <body>
+    {# Facebook #}
+    <div id="fb-root"></div>
+        <script>
+        (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "//connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.0";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
 
+    <div id="site">
+      <header id="logo">
+        <a href="/"><img src="/static/img/logo.png" /></a>
+        <h1><a href="/">Play the House</a></h1>
+      </header>
 
-<p>Idle website here</p> 
+      <section class="main">
+        <div id="game-area">
+          <div id="grid-cont" style="border: 1px dashed white">
+            <p style="text-align:center; font-size:24pt;">Play between 19-05</p> 
+            <img style="visibility: hidden;" class="overlay" src="/static/img/playfield.png" /-->
+
+          </div>
+        </div>
+      </section>
+
+      <section class="left">
+        <div>
+          <p>
+            The world's biggest online Mastermind game,<br/>
+            Play the Nod building in real life, in real time.
+          </p>
+        </div>
+      </section>
+
+      <aside class="left">
+        <div>
+          <ul class="link-list">
+            <li>Read about <a href="http://hakanlidbo.com/archives/3740">Play the House</a></li>
+            <li>This project is created with <a href="http://www2.meethue.com/en-US/">Philips Hue</a></li>
+            <li><a href="http://kistanod.se/en/">Read about Nod</a></li>
+            <li><a href="http://www.atriumljungberg.se/en/">Read about Atrium Ljungberg</a></li>
+            <li>With kind help from <a href="http://www.intertek.se/">Intertek</a></li>
+            <li><a href="#">Team SMAB / KTH</a></li>
+            <li><a href="http://hakanlidbo.com/">Håkan Lidbo</a></li>
+            <li class="mail">@ <a href="mailto:hakan@hakanlidbo.com">Contact</a></li>
+          </ul>
+          </p>
+        </div>
+        <div>
+          <p>
+            Share on Facebook and Twitter
+          </p>
+        </div>
+        <div>
+          <img src="/static/img/loggor.jpg" />
+        </div>
+      </aside>
+    </div>
+
+  </body>
+</html>
 

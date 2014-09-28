@@ -23,7 +23,6 @@ import tornado.ioloop
 
 import manager
 import lightgames
-import animator
 
 
 def reply_wrong_player(game, handler):
@@ -80,11 +79,18 @@ class SimpleGame(lightgames.Game):
     def startIdle(self):
         print("simplegame: idle")
         self.reset_lamp_all()
-        self.animator.play_animation()
+
+        if self.animator_file is not None:
+            self.animator_file.seek(0)
+            self.animator.run_animation(self.animator_file,
+                                        transparentcolor=lightgames.HTMLColorToRGB(
+                                            manager.config['idle']['color_off']),
+                                        transitiontime=int(
+                                            manager.config['idle']['transition_time']))
 
     def stopIdle(self):
         print("simplegame: active")
-        self.animator.pause_animation()
+        self.animator.cancel()
         self.reset_lamp_all()
 
     def __init__(self, client): 
@@ -102,6 +108,9 @@ class SimpleGame(lightgames.Game):
         # timelimit counter server side. 
         self.timer_counter = tornado.ioloop.PeriodicCallback(self.timelimit_counter, 1000)
 
+        self.animator = lightgames.GIFAnimation(self)
+        self.animator_file = None
+
     def init(self):
         super().init()
 
@@ -109,8 +118,10 @@ class SimpleGame(lightgames.Game):
         self.queue.removeplayer_callback = self.on_remove_player
         self.queue.set_num_players(2)
 
-        self.animator = animator.Animator()
-        self.animator.init(self, manager.config['idle'])
+        try:
+            self.animator_file = open(manager.config['idle']['animation_file'], 'rb')
+        except OSError:
+            self.animator_file = None
 
         # Start idle animation
         self.startIdle()
