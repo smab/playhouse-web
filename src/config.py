@@ -85,7 +85,7 @@ def use_statusmessage(func):
 
 class RequestHandler(tornado.web.RequestHandler):
     def get_current_user(self):
-        if password == None:
+        if password is None:
             return "disabled"
 
         user_json = self.get_secure_cookie("user")
@@ -335,7 +335,7 @@ class GridConfigHandler(RequestHandler):
     changed = False
 
     def get_lights(self, client):
-        if GridConfigHandler.bridges == None:
+        if GridConfigHandler.bridges is None:
             response = get_data(client, '/bridges')
             GridConfigHandler.bridges = response['bridges']
         bridges = GridConfigHandler.bridges
@@ -371,7 +371,7 @@ class GridConfigHandler(RequestHandler):
         tvars['json_encode'] = tornado.escape.json_encode
         tvars['changed'] = GridConfigHandler.changed
         try:
-            if GridConfigHandler.grid == None:
+            if GridConfigHandler.grid is None:
                 response = get_data(client, '/grid')
                 GridConfigHandler.grid = {
                     k: response[k] for k in ('width', 'height', 'grid')
@@ -611,7 +611,7 @@ class GameConfigHandler(RequestHandler):
                 traceback.print_exc()
         else:
             ret = manager.game.set_options(cfg)
-            if ret == None:
+            if ret is None:
                 msg = "Settings saved"
             else:
                 status = "error"
