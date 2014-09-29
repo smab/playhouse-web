@@ -379,16 +379,21 @@ class GIFAnimation:
                     frame = 0
                     while True:
                         image.seek(frame)
-                        rgb_image = image.convert('RGB')
+                        rgb_image = image.convert('RGBA')
                         width, height = rgb_image.size
 
                         message_buffer = []
-                        for i, color in enumerate(rgb_image.getdata()):
+                        for i, (r, g, b, a) in enumerate(rgb_image.getdata()):
+                            if a == 0:
+                                continue
+
                             x, y = i % width + offset_x, i // width + offset_y
 
                             if (bounds is not None
                                     and (not 0 <= x <= bounds[0] or not 0 <= y <= bounds[1])):
                                 continue
+
+                            color = r, g, b
 
                             if on_frame is not None:
                                 on_frame((x, y), color, color == transparentcolor)
