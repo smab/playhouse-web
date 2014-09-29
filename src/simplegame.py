@@ -18,6 +18,9 @@
 
 import datetime
 import functools
+import pathlib
+import random
+import traceback
 
 import tornado.ioloop
 import tornado.concurrent
@@ -85,20 +88,39 @@ def game_over(game, winnerH, coords = frozenset(), post_game_over=None):
 class SimpleGame(lightgames.Game): 
     config_file = "simplegameconfig.html" 
 
+    def _next_animation(self):
+        def _do_animation(_):
+            try:
+                self.previous_animation = self.animator.run_animation(random.choice(
+                    list(pathlib.Path(manager.config['idle']['animation_directory']).glob(
+                        "*.gif"))).open('rb'),
+                    transparentcolor=lightgames.HTMLColorToRGB(
+                        manager.config['idle']['color_off']),
+                    transitiontime=int(manager.config['idle']['transition_time']))
+            except Exception:
+                traceback.print_exc()
+
+        if self.previous_animation is not None:
+            self.animator.cancel()
+            # make sure animation has time to finish, to ensure
+            # that it is possible to start a new animation
+            self.previous_animation.add_done_callback(_do_animation)
+        else:
+            _do_animation(None)
+
+
     def startIdle(self):
         print("simplegame: idle")
         self.reset_lamp_all()
+        self.animator_handle.start()
+        self._next_animation()
 
-        if self.animator_file is not None:
-            self.animator.run_animation(self.animator_file,
-                                        transparentcolor=lightgames.HTMLColorToRGB(
-                                            manager.config['idle']['color_off']),
-                                        transitiontime=int(
-                                            manager.config['idle']['transition_time']))
 
     def stopIdle(self):
         print("simplegame: active")
         self.animator.cancel()
+        self.animator_handle.stop()
+
         self.reset_lamp_all()
 
     def __init__(self, client): 
@@ -117,17 +139,14 @@ class SimpleGame(lightgames.Game):
         self.timer_counter = tornado.ioloop.PeriodicCallback(self.timelimit_counter, 1000)
 
         self.animator = lightgames.GIFAnimation(self)
-        self.animator_file = None
+        self.animator_handle = tornado.ioloop.PeriodicCallback(
+            self._next_animation, int(manager.config['idle']['cycle_interval'])*1000)
+        self.previous_animation = None
 
     def init(self):
         self.queue.addplayer_callback = self.on_add_player
         self.queue.removeplayer_callback = self.on_remove_player
         self.queue.set_num_players(2)
-
-        try:
-            self.animator_file = open(manager.config['idle']['animation_file'], 'rb')
-        except OSError:
-            self.animator_file = None
 
         super().init()
 

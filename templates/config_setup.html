@@ -95,30 +95,19 @@
             <h1>Idle Animation</h1>
             <div class="content">
                 <dl>
-                    <dt>Animation:</dt>
-                    <dd class="animation-choice">
-                      <ul>
-                        {% import os %}
-                        {% for file in sorted(os.listdir('animations/')) %}
-                          <li>
-                            <label>
-                              <input name="animation_file" value="animations/{{ file }}"
-                                     {{ "checked" if 'animations/' + file == config('idle')['animation_file'] else "" }}
-                                     type="radio" />
-                              {{ file }}
-                            </label>
-                          </li>
-                        {% end %}
-                      </ul>
-                    </dd>
-                    <!--
-                    <dd><input name="animation_file" value="{{ config('idle')['animation_file'] }}" /></dd>
-                    -->
+                    <dt>Animation directory:</dt>
+                    <dd><input name="animation_directory"
+                               value="{{ config('idle')['animation_directory'] }}" /></dd>
+
+                    <dt>Cycle interval</dt>
+                    <dd><input type="number" name="cycle_interval" min="0"
+                               value="{{ config('idle')['cycle_interval'] }}" /> seconds</dd>
 
                     <dt>Transition time:</dt>
                     <dd>
                         <label>
-                            <input type="number" size="4" name="transition_time" value="{{ config('idle')['transition_time'] }}" />
+                            <input type="number" size="4" name="transition_time"
+                                   value="{{ config('idle')['transition_time'] }}" />
                             (in 10ths of a second)
                         </label>
                     </dd>
@@ -126,7 +115,8 @@
                     <dt>Off color:</dt>
                     <dd>
                         <label>
-                            <input type="color" size="8" name="color_off" value="{{ config('idle')['color_off'] }}" />
+                            <input type="color" size="8" name="color_off"
+                                   value="{{ config('idle')['color_off'] }}" />
                         </label>
                     </dd>
                 </dl>

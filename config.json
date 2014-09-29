@@ -5,13 +5,14 @@
         "src/games"
     ],
     "idle": {
-        "animation_file": "animations/nod-playthehouse-com.gif",
+        "animation_directory": "animations/idle",
         "color_off": "#000000",
+        "cycle_interval": "30",
         "transition_time": "4"
     },
     "lampdest": "localhost",
     "lampport": 4711,
     "serverport": 8080,
-    "websocketport": 80,
-    "stream_embedcode": "<img class=\"placeholder\" src=\"/static/img/placeholder_stream.png\" />"
+    "stream_embedcode": "<img class=\"placeholder\" src=\"/static/img/placeholder_stream.png\" />",
+    "websocketport": 8080
 }

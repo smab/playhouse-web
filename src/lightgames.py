@@ -444,7 +444,6 @@ class GIFAnimation:
         if not self.running:
             return False
 
-        self.running = False
         if self.timeout_handle is not None:
             self.io_loop.remove_timeout(self.timeout_handle)
             self.timeout_handle = None

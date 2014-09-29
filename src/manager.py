@@ -37,7 +37,8 @@ config = {
     'stream_embedcode': '',
 
     'idle':{
-        'animation_file': '',
+        'animation_directory': 'animations/idle',
+        'cycle_interval': 30,
         'color_off': '#000000',
         'transition_time': 4
     }

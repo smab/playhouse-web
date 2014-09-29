@@ -180,7 +180,8 @@ class SetupConfigHandler(RequestHandler):
         update_config(manager.config, cfg, 'stream_embedcode')
 
         if any([update_config(manager.config['idle'], cfg, x)
-                for x in ['animation_file', 'transition_time', 'color_off']]):
+                for x in ['animation_directory', 'cycle_interval',
+                          'transition_time', 'color_off']]):
             msg = 'Idle animation changed, requires reloading the game'
 
         manager.save_config()
