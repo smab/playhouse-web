@@ -180,6 +180,12 @@
         var handler, time
 
         function on_message(obj) {
+            if (obj instanceof Array) {
+                // Handle sequence of joined messages
+                obj.forEach(on_message)
+                return
+            }
+
             {% block rulemessage %}
                 if (obj.rulemessage != null) {
                     console.log("Ignoring rule update...")
