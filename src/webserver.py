@@ -173,7 +173,10 @@ if __name__ == "__main__":
 
     def on_shutdown(): 
         print("Received interrupt, stopping server") 
-        manager.load_specific_game("off", manager.config["game_path"]) 
+        try: 
+            manager.load_specific_game("off", manager.config["game_path"]) 
+        except: 
+            pass 
         loop.stop() 
 
     signal.signal(signal.SIGINT, lambda sig, frame: loop.add_callback_from_signal(on_shutdown))
