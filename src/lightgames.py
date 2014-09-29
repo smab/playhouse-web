@@ -371,11 +371,12 @@ class GIFAnimation:
 
             self.running = True
 
+            web_buffer = []
+
             if on_frame is None:
                 def on_frame(xy, color, is_transparent):
                     x, y = xy
-                    send_msgs(self.game.connections,
-                            {'x': x, 'y': y, 'color': color, 'power': not is_transparent})
+                    web_buffer.append({'x': x, 'y': y, 'color': color, 'power': not is_transparent})
 
             image = PIL.Image.open(copied_data)
             offset_x, offset_y = offset
@@ -387,6 +388,8 @@ class GIFAnimation:
                         image.seek(frame)
                         rgb_image = image.convert('RGBA')
                         width, height = rgb_image.size
+
+                        del web_buffer[:]
 
                         message_buffer = []
                         for i, (r, g, b, a) in enumerate(rgb_image.getdata()):
@@ -416,6 +419,9 @@ class GIFAnimation:
 
                         if message_buffer:
                             self.game.send_lamp_multi(message_buffer)
+
+                        if web_buffer:
+                            send_msgs(self.game.connections, web_buffer)
 
                         self.wait_future = tornado.concurrent.Future()
                         self.timeout_handle = self.io_loop.add_timeout(
