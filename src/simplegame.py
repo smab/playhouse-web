@@ -20,6 +20,7 @@ import datetime
 import functools
 
 import tornado.ioloop
+import tornado.concurrent
 
 import manager
 import lightgames
@@ -33,7 +34,7 @@ def reply_wrong_player(game, handler):
         print("Spectator")
         lightgames.send_msg(handler, {'error':'You are not a player!'})
 
-def game_over(game, winnerH, coords = frozenset()):
+def game_over(game, winnerH, coords = frozenset(), post_game_over=None):
     lightgames.send_msgs(game.connections, {'timer-freeze': 2})
 
     if winnerH is None:
@@ -67,6 +68,14 @@ def game_over(game, winnerH, coords = frozenset()):
         game.send_lamp_all({'alert': 'select'}) 
 
     game.player = None
+    game.timer_counter.stop()
+
+    if post_game_over is not None:
+        maybe_future = post_game_over()
+        if tornado.concurrent.is_future(maybe_future):
+            tornado.ioloop.IOLoop.current().add_future(maybe_future, lambda fut: helper())
+            return
+
     lightgames.set_timeout(datetime.timedelta(seconds = len(coords) + 5), helper)
 
 

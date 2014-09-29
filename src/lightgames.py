@@ -359,22 +359,23 @@ class GIFAnimation:
 
     @tornado.gen.coroutine
     def run_animation(self, gif_data, bounds=None, offset=(0, 0), loop=float('inf'),
-                      transitiontime=0, transparentcolor=None, on_frame=None):
+                      transitiontime=0, transparentcolor=(0, 0, 0), on_frame=None):
         if self.running:
             return False
 
-        gif_data.seek(0)
-        self.running = True
-
-        if on_frame is None:
-            def on_frame(xy, color, is_transparent):
-                x, y = xy
-                send_msgs(self.game.connections,
-                          {'x': x, 'y': y, 'color': color, 'power': not is_transparent})
-
-        image = PIL.Image.open(gif_data)
-        offset_x, offset_y = offset
         try:
+            gif_data.seek(0)
+            self.running = True
+
+            if on_frame is None:
+                def on_frame(xy, color, is_transparent):
+                    x, y = xy
+                    send_msgs(self.game.connections,
+                            {'x': x, 'y': y, 'color': color, 'power': not is_transparent})
+
+            image = PIL.Image.open(gif_data)
+            offset_x, offset_y = offset
+
             while loop >= 0:
                 try:
                     frame = 0

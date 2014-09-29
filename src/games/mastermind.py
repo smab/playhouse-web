@@ -16,11 +16,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
+
+import tornado.gen
+
 import lightgames
 import simplegame
 import random
 from collections import Counter
-
 
 def create(client):
     print("Creating Mastermind game")
@@ -53,6 +56,9 @@ class Mastermind(simplegame.SimpleGame):
                                          '#FF00FF' ]
 
         self.width, self.height = self.template_vars['grid_x'], self.template_vars['grid_y']
+
+        self.win_animation = open("animations/winner.gif", 'rb')
+        self.win_animator = lightgames.GIFAnimation(self)
 
     def reset(self):
         super().reset()
@@ -151,7 +157,7 @@ class Mastermind(simplegame.SimpleGame):
 
 
     def on_message(self, handler, msg):
-        if handler not in self.get_players():
+        if handler not in self.get_players() or self.player is None:
             self.correct_player(handler)
             return
 
@@ -233,7 +239,13 @@ class Mastermind(simplegame.SimpleGame):
 
                 if corrects == self.height:
                     # player won
-                    simplegame.game_over(self, playerH)
+                    @tornado.gen.coroutine
+                    def do_game_over():
+                        yield tornado.gen.Task(lightgames.set_timeout,
+                                               datetime.timedelta(seconds=5))
+                        yield self.win_animator.run_animation(self.win_animation, loop=0)
+
+                    simplegame.game_over(self, playerH, post_game_over=do_game_over)
                     return
 
                 # player didn't win--provide response
