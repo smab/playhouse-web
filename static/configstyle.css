@@ -195,3 +195,13 @@ h1,h2 { color: #555; }
 #smAB {
     margin: 40px 0px 0px 0px;
 }
+
+
+.subsection dd.animation-choice {
+  width: 50em;
+}
+.animation-choice ul {
+  -moz-columns: 3;
+  list-style-type: none;
+  padding-left: 0;
+}

@@ -96,7 +96,24 @@
             <div class="content">
                 <dl>
                     <dt>Animation:</dt>
+                    <dd class="animation-choice">
+                      <ul>
+                        {% import os %}
+                        {% for file in sorted(os.listdir('animations/')) %}
+                          <li>
+                            <label>
+                              <input name="animation_file" value="animations/{{ file }}"
+                                     {{ "checked" if 'animations/' + file == config('idle')['animation_file'] else "" }}
+                                     type="radio" />
+                              {{ file }}
+                            </label>
+                          </li>
+                        {% end %}
+                      </ul>
+                    </dd>
+                    <!--
                     <dd><input name="animation_file" value="{{ config('idle')['animation_file'] }}" /></dd>
+                    -->
 
                     <dt>Transition time:</dt>
                     <dd>
