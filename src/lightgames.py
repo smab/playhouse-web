@@ -18,6 +18,7 @@
 
 import datetime
 import imp
+import io
 import os
 import traceback
 
@@ -364,7 +365,10 @@ class GIFAnimation:
             return False
 
         try:
-            gif_data.seek(0)
+            cur_pos = gif_data.tell()
+            copied_data = io.BytesIO(gif_data.read())
+            gif_data.seek(cur_pos)
+
             self.running = True
 
             if on_frame is None:
@@ -373,7 +377,7 @@ class GIFAnimation:
                     send_msgs(self.game.connections,
                             {'x': x, 'y': y, 'color': color, 'power': not is_transparent})
 
-            image = PIL.Image.open(gif_data)
+            image = PIL.Image.open(copied_data)
             offset_x, offset_y = offset
 
             while loop >= 0:
