@@ -100,7 +100,6 @@ class GifAnimation(lightgames.Game):
                     #elif self.offset_y != 0 and height > self.grid[1]:
                         #y_im -= self.offset_y
 
-            self.data.seek(0)
             self.gif_animator.run_animation(
                 self.data, bounds=self.grid, offset=(self.offset_x, self.offset_y),
                 transitiontime=self.transition_time, transparentcolor=self.transp_color)

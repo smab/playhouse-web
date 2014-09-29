@@ -363,6 +363,7 @@ class GIFAnimation:
         if self.running:
             return False
 
+        gif_data.seek(0)
         self.running = True
 
         if on_frame is None:

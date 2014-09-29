@@ -81,7 +81,6 @@ class SimpleGame(lightgames.Game):
         self.reset_lamp_all()
 
         if self.animator_file is not None:
-            self.animator_file.seek(0)
             self.animator.run_animation(self.animator_file,
                                         transparentcolor=lightgames.HTMLColorToRGB(
                                             manager.config['idle']['color_off']),
