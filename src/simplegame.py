@@ -36,7 +36,7 @@ def reply_wrong_player(game, handler):
 def game_over(game, winnerH, coords = frozenset()):
     lightgames.send_msgs(game.connections, {'timer-freeze': 2})
 
-    if winnerH == None:
+    if winnerH is None:
         lightgames.send_msgs(game.connections,   {'message': 'The game tied'})
         lightgames.send_msgs((p for p in game.get_players()),
                           {'overlaymessage': 'The game tied!',
@@ -228,7 +228,7 @@ class SimpleGame(lightgames.Game):
                 self.stopIdle()
 
                 self.game_started = True
-                if self.player == None: 
+                if self.player is None:
                     self.turnover(self.tmp_player) 
                 else: 
                     self.turnover(self.player) 
@@ -260,7 +260,7 @@ class SimpleGame(lightgames.Game):
         Checks if this handler corresponds with the current player. Returns 
         true if that is the case, or sends an error to the client otherwise. 
         """
-        if self.player == None:
+        if self.player is None:
             return False 
         elif handler != self.get_player(self.player): 
             reply_wrong_player(self, handler)
@@ -276,7 +276,7 @@ class SimpleGame(lightgames.Game):
         """
         self.timer_counter.stop() 
 
-        if self.player == None: 
+        if self.player is None:
             self.player = self.tmp_player 
             self.tmp_player = None 
 
@@ -287,7 +287,7 @@ class SimpleGame(lightgames.Game):
             
         self.template_vars['timeleft'] = self.template_vars['timelimit'] 
 
-        if to_player == None:  
+        if to_player is None:
             self.player = 1 - self.player 
         else: 
             self.player = to_player 
@@ -322,7 +322,7 @@ class SimpleGame(lightgames.Game):
         """
         Tells the client to start the timelimit counter again. 
         """ 
-        if self.player == None: 
+        if self.player is None:
             self.player = self.tmp_player 
         lightgames.send_msgs(self.connections, {'timeleft': self.template_vars['timeleft']})
         self.timer_counter.start() 

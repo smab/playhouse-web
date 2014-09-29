@@ -33,7 +33,7 @@ import config as configinterface
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         gamesession = self.get_cookie("gamesession")
-        if gamesession == None:
+        if gamesession is None:
             gamesession = str(uuid.uuid4())
             self.set_cookie("gamesession", gamesession)
 

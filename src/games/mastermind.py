@@ -93,7 +93,7 @@ class Mastermind(simplegame.SimpleGame):
               # self.send_lamp(x, y, {'sat':255, 'hue':hue})
 
     def update_flasher(self):
-        if None in self.get_players() or self.columns[0] == None \
+        if None in self.get_players() or self.columns[0] is None \
                                       or self.columns[0] > self.columns[1]:
             # If we don't have a current game, reset flashing status for everyone
             lightgames.send_msgs(self.connections, {'x':None, 'y':None, 'flashing':True})
