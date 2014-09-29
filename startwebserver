@@ -15,23 +15,28 @@ if [ $1 = "start" ]; then
 
     # Start the lightserver if it is not running 
     if [ $(pgrep -f "python3 src/lightserver.py" | wc -l) -eq 0 ] ; then 
+        pkill -f "python3 src/webserver.py" 
         cd ~/playhouse/playhouse-lights/ # This path 
         python3 src/lightserver.py & 
         sleep 5 
     fi 
 
-    # Start the webserver 
-    cd ~/playhouse/playhouse-web # And this path 
-    python3 src/webserver.py &
+    # Start the webserver if it is not running 
+    if [ $(pgrep -f "python3 src/webserver.py" | wc -l) -eq 0 ] ; then 
+        cd ~/playhouse/playhouse-web # And this path 
+        python3 src/webserver.py &
+    fi 
 
 elif [ $1 = "stop" ]; then 
     # Stop the webserver 
     pkill --signal sigint -f "python3 src/webserver.py" 
     sleep 5
 
-    # Start the idle server 
-    cd ~/playhouse/playhouse-web # And this path 
-    python3 src/idleserver.py & 
+    # Start the idle server if it is not running 
+    if [ $(pgrep -f "python3 src/idleserver.py" | wc -l) -eq 0 ] ; then 
+        cd ~/playhouse/playhouse-web # And this path 
+        python3 src/idleserver.py & 
+    fi 
 fi 
 
 
