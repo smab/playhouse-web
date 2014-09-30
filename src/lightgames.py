@@ -205,8 +205,10 @@ class Game:
         json    = tornado.escape.json_encode(changes)
         headers = add_auth_cookie({'Content-Type': 'application/json'})
         self.client.request("POST", "/lights", json, headers)
-        # Print response
-        print(self.client.getresponse().read().decode())
+      # # Print response
+      # print(self.client.getresponse().read().decode())
+        # Get response
+        self.client.getresponse().read().decode()
 
     def send_lamp(self, x, y, change):
         self.send_lamp_multi([ { 'x': x, 'y': y, 'change': change } ])

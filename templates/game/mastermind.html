@@ -95,18 +95,15 @@
 
 
 {% block script %}
-    var gamestate = 'guess'
-
-    function get(x_, y_) {
-      var x = x_,
-          y = gamestate == 'select'? 'x' : y_
+    function get(obj) {
+      var x = obj.x,
+          y = obj['select-area']? 'x' : obj.y
 
       return document.getElementById(x + "-" + y)
     }
 
     window.addEventListener('load', function () {
         var els = document.querySelectorAll('#color-choice .choice')
-        console.log(els.length)
         for (var i = 0; i < els.length; i++) {
             (function (choice) {
                 els[i].addEventListener('click', function () {
@@ -129,16 +126,16 @@
 
 
     var cursorEl = null
-    function setPulsatingCursor(enabled, x, y) {
+    function setPulsatingCursor(enabled, obj) {
         if (cursorEl != null) cursorEl.classList.remove('cursor')
-        cursorEl = enabled? get(x, y) : null
+        cursorEl = enabled? get(obj) : null
         if (cursorEl != null) cursorEl.classList.add('cursor')
     }
-    function addPulsating(x, y) {
-        get(x, y).classList.add('flashing')
+    function addPulsating(obj) {
+        get(obj).classList.add('flashing')
     }
-    function removePulsating(x, y) {
-        get(x, y).classList.remove('flashing')
+    function removePulsating(obj) {
+        get(obj).classList.remove('flashing')
     }
 
     setInterval(function () {
@@ -175,13 +172,6 @@
         }
     }
 
-    switch (obj.state) {
-        case 'playing':
-         // gamePopupEl.style.display = 'block'
-         // buildGrid(config.grid_y, 1)
-            break
-    }
-
     switch (obj.gamestate) {
         case 'select':
             gamePopupEl.style.display = 'block'
@@ -190,11 +180,10 @@
             resetPopup()
             break
     }
-    if (obj.gamestate != null) gamestate = obj.gamestate
 
     if (obj.flashing != null) {
         if (obj.x != null) {
-            setPulsatingCursor(true, obj.x, obj.y)
+            setPulsatingCursor(true, obj)
         } else {
             setPulsatingCursor(false)
         }
@@ -212,7 +201,7 @@
     }
 
     function updateCell(obj) {
-      var el = get(obj.x, obj.y)
+      var el = get(obj)
 
       if (obj.transitiontime != null) {
         el.style.transition = 'background-color ' + (obj.transitiontime * 100) + 'ms'
@@ -221,7 +210,6 @@
         }, obj.transitiontime * 100)
       }
 
-   // var color = 'hsl(' + Math.floor(obj.hue / 255) + ',100%,50%)'
       if (obj.hsl) {
           el.style.backgroundColor = obj.power? toHSL(obj.hsl) : ''
       } else if (obj.color) {
@@ -231,8 +219,8 @@
       }
       el.style.className       = obj.power? 'on'           : 'off'
 
-      if (obj.blink) addPulsating(obj.x, obj.y)
-      else removePulsating(obj.x, obj.y)
+      if (obj.blink) addPulsating(obj)
+      else removePulsating(obj)
 
       function toHSL(a) {
         return "hsl(" + a[0] + ","

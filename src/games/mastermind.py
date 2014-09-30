@@ -61,6 +61,10 @@ class Mastermind(simplegame.SimpleGame):
         self.win_animator = lightgames.GIFAnimation(self)
 
     def reset(self):
+        # this needs to happen first of all, because ther super call might
+        # start a new game!
+        self.state = 0 # game state: not started
+
         super().reset()
 
         for y in range(self.height):
@@ -74,7 +78,6 @@ class Mastermind(simplegame.SimpleGame):
         self.colors = [ lg.rgb_to_hsl(*lg.parse_color(color)) for color in
                         [ '#000000', tvars['color_correct'], tvars['color_almost'] ] + tvars['colors'] ]
 
-        self.state = 0 # game state: not started
         self.columns = [ 0, self.width - 1 ]
         self.row  = 0
       # self.hiddens = [ [ random.randint(3, len(self.colors)) for y in range(self.height) ] for player in [0, 1] ]
@@ -98,6 +101,7 @@ class Mastermind(simplegame.SimpleGame):
                                                          'blink': self.board[y][x] == 2 })
               # self.send_lamp(x, y, {'sat':255, 'hue':hue})
 
+    # Updates the flashing cursor visible for the players where the next input is
     def update_flasher(self):
         if None in self.get_players() or self.columns[0] is None \
                                       or self.columns[0] > self.columns[1]:
@@ -105,12 +109,14 @@ class Mastermind(simplegame.SimpleGame):
             lightgames.send_msgs(self.connections, {'x':None, 'y':None, 'flashing':True})
             return
 
-        playerH = self.get_player(self.player)
-        x = self.columns[self.player]
-        y = self.row
+        if self.state == 2:
+            # If we are in the guessing phase, update flashing status for players
+            playerH = self.get_player(self.player)
+            x = self.columns[self.player]
+            y = self.row
 
-        lightgames.send_msgs(self.connections, {'x':None, 'y':None, 'flashing':True})
-        lightgames.send_msg(playerH, {'x':x, 'y':y, 'flashing':True})
+            lightgames.send_msgs(self.connections, {'x':None, 'y':None, 'flashing':True})
+            lightgames.send_msg(playerH, {'x':x, 'y':y, 'flashing':True})
 
     def on_turnover(self):
         self.update_flasher()
@@ -119,7 +125,7 @@ class Mastermind(simplegame.SimpleGame):
         self.state = 1 # game state: select hiddens
         self.sync_turn_all(2)
         lightgames.send_msgs(self.get_players(), {'gamestate':'select', 'message':'Select code'})
-        lightgames.send_msgs(self.get_players(), {'x':0, 'y':0, 'flashing':True})
+        lightgames.send_msgs(self.get_players(), {'x':0, 'y':0, 'flashing':True, 'select-area':True})
 
     def turnover(self, to_player=None):
         if self.state == 1:
@@ -182,8 +188,8 @@ class Mastermind(simplegame.SimpleGame):
               # col = self.columns[playerIdx]
                 #self.columns[playerIdx] += 1
                 self.hiddens[1-playerIdx][col] = choice
-                lightgames.send_msg(handler, {'x':col, 'y':0, 'hsl':hsl, 'power':True})
-                lightgames.send_msg(handler, {'x':col+1, 'y':0, 'flashing':True})
+                lightgames.send_msg(handler, {'x':col, 'y':0, 'hsl':hsl, 'power':True, 'select-area':True})
+                lightgames.send_msg(handler, {'x':col+1, 'y':0, 'flashing':True, 'select-area':True})
 
                 if 0 not in self.hiddens[1-playerIdx]:
                     lightgames.send_msg(handler, {'message':'Waiting on other player...'})
@@ -201,7 +207,6 @@ class Mastermind(simplegame.SimpleGame):
         opponentH = self.get_player(opponent)
 
         if not (3 <= choice < len(self.colors)):
-            print("Test: %d %d" % (choice, len(self.colors)))
             lightgames.send_msg(playerH, {'error':'Invalid choice!'})
 
         elif self.board[y][x] != 0:

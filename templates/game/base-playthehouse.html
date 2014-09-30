@@ -179,8 +179,12 @@
         var player = 0
         var handler, time
 
-        function on_message(obj) {
-            if (obj instanceof Array) {
+        function on_message(obj, i) {
+         // if (i == null && !Array.isArray(obj)) {
+         //   console.warn(obj)
+         // }
+
+            if (Array.isArray(obj)) {
                 // Handle sequence of joined messages
                 obj.forEach(on_message)
                 return
