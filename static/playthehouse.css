@@ -62,7 +62,7 @@ button#queuebtn:disabled {
 }
 
 /*** info-pane *****************************/
-.left div {
+.left > div {
   margin: 3em 0;
 }
 .left div > p {
@@ -84,6 +84,11 @@ button#queuebtn:disabled {
 .link-list li.mail {
   margin-top: 1em;
 }
+
+#twitter-widget-0 {
+    position: relative; 
+    top: 5px; 
+} 
 
 /*** main-pane *****************************/
 @media (min-width: 1050px) {
