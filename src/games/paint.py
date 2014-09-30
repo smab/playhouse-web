@@ -74,7 +74,7 @@ class Paint(lightgames.Game):
         for handler in self.playerColors:
             lightgames.send_msg(handler, {'x':x, 'y':y, 'color':color})
 
-        self.send_lamp(x, y, { 'rgb': color })
+        self.send_lamp(x, y, { 'bri': 255, 'rgb': color })
 
     def on_close(self, handler):
         super(Paint, self).on_close(handler)
