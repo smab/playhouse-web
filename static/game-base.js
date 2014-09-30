@@ -130,13 +130,13 @@ function handle_queue_msg(obj) {
         qbtn.onclick = function() {}
 
     } else if (state == 'playing') {
-        qbtn.value = "In game";
+        qbtn.innerHTML = "In game";
         qbtn.onclick = function() {}
 
     } else if (obj.queuepos > 0) {
         setMessage("Your place in queue: " + obj.queuepos, 'message')
         state = 'spectating'
-        qbtn.value = "Leave queue";
+        qbtn.innerHTML = "Leave queue";
         qbtn.onclick = function() {
             ws.send(JSON.stringify({ session : session, queueaction : 0 }));
         }
@@ -146,7 +146,7 @@ function handle_queue_msg(obj) {
             setMessage("You are a spectator!", 'message')
             state = 'spectating'
         }
-        qbtn.value = "Join queue";
+        qbtn.innerHTML = "Join queue";
         qbtn.onclick = function() {
             ws.send(JSON.stringify({ session : session, queueaction : 1 }));
         }

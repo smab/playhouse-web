@@ -46,6 +46,20 @@ a:hover, .link:hover {
 #queuebtn {
   font-weight: bold;
 }
+button#queuebtn {
+  display: block;
+  margin: 0.2em auto;
+  height: 3em;
+
+  color: #FFF;
+  background: #000;
+  border: 2px solid #FFF;
+}
+button#queuebtn:disabled {
+  background: #111;
+  color: #999;
+  border-color: #999;
+}
 
 /*** info-pane *****************************/
 .left div {
@@ -78,6 +92,30 @@ a:hover, .link:hover {
     margin-left: 1em;
     width: 70%;
     max-width: 80em;
+  }
+}
+@media (max-width: 1050px) {
+  ul.grid > li {
+    width: 4em !important;
+    height: 4em !important;
+  }
+
+  .left {
+    width: 100%;
+    font-size: 180%;
+    line-height: 1.5;
+  }
+}
+@media (max-width: 800px) {
+  ul.grid > li {
+    width: 3em !important;
+    height: 3em !important;
+  }
+}
+@media (max-width: 600px) {
+  ul.grid > li {
+    width: 2em !important;
+    height: 2em !important;
   }
 }
 
@@ -130,8 +168,8 @@ ul.grid {
 }
 ul.grid > li {
   display: inline-block;
-  width: 2em;
-  height: 2em;
+  width: 3em;
+  height: 3em;
   margin: 0.2em;
   border: 2px solid white;
 }
@@ -165,12 +203,12 @@ ul.grid > li {
 }
 
 
-#stream-cont > * {
-  border: 3px solid #FFF;
-}
-#stream-cont > img {
+#stream-cont {
   margin: 0 auto;
   max-width: 600px;
+}
+#stream-cont > * {
+  border: 3px solid #FFF;
 }
 
 img.placeholder {
