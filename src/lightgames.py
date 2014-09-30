@@ -413,9 +413,11 @@ class GIFAnimation:
                                 "x": x,
                                 "y": y,
                                 "change": {
-                                    "rgb": color,
-                                    "transitiontime": transitiontime,
-                                    "on": color != transparentcolor
+                                    # set bri=255 for set pixels and bri=0 for transparent ones
+                                    "rgb": color if color != transparentcolor else [0,0,0],
+                                    "bri": 255 if color != transparentcolor else 0,
+                                    "transitiontime": transitiontime
+                                  # "on": color != transparentcolor
                                 }
                             })
 

@@ -217,7 +217,7 @@ class Mastermind(simplegame.SimpleGame):
             self.board[y][x] = choice
 
             lightgames.send_msgs(self.connections, {'x':x, 'y':y, 'hsl':hsl, 'power':True})
-            self.send_lamp(x, y, {'sat':255, 'hue':hue})
+            self.send_lamp(x, y, {'sat':255, 'hue':hue, 'bri':255})
 
             self.row += 1
             self.update_flasher()
@@ -268,7 +268,7 @@ class Mastermind(simplegame.SimpleGame):
                     hue = lightgames.to_lamp_hue(hsl)
                     lightgames.send_msgs(self.connections, {'x':x + d, 'y':y_, 'hsl':hsl, 'power':v != 0, 'blink':v == 2})
                     if v != 0:
-                        changes += [{'x':x, 'y':y_, 'change': {'sat':255, 'hue':hue, 'blink':v == 2}}]
+                        changes += [{'x':x + d, 'y':y_, 'change': {'sat':0, 'hue':hue, 'bri':255, 'blink':v == 2}}]
                 self.send_lamp_multi(changes)
 
                 self.columns[self.player] += d * 2
