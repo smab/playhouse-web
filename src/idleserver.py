@@ -10,7 +10,7 @@ import manager
 class SimpleHandler(tornado.web.RequestHandler): 
     def get(self): 
         template_vars = {
-
+            'stream_embedcode': manager.config['stream_embedcode'], 
         }
         self.render('idle.html', **template_vars) 
 

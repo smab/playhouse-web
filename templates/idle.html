@@ -9,7 +9,7 @@
   <body>
     {# Facebook #}
     <div id="fb-root"></div>
-        <script>
+    <script>
         (function(d, s, id) {
             var js, fjs = d.getElementsByTagName(s)[0];
             if (d.getElementById(id)) return;
@@ -32,6 +32,9 @@
             <img style="visibility: hidden;" class="overlay" src="/static/img/playfield.png" /-->
 
           </div>
+        </div>
+        <div id="stream-cont">
+          {% raw stream_embedcode %}
         </div>
       </section>
 
@@ -59,9 +62,12 @@
           </p>
         </div>
         <div>
-          <p>
-            Share on Facebook and Twitter
-          </p>
+          <p>Share on Facebook and Twitter</p>
+          <div style="margin: 0">
+            <div class="fb-like" data-href="http://playthehouse.com/" data-layout="button" data-action="like" data-show-faces="false" data-share="true"></div>
+            <a href="https://twitter.com/intent/tweet?button_hashtag=playthehouse" class="twitter-hashtag-button" data-url="http://playthehouse.com">Tweet #playthehouse</a>
+            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+          </div> 
         </div>
         <div>
           <img src="/static/img/loggor.jpg" />

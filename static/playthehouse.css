@@ -48,7 +48,7 @@ a:hover, .link:hover {
 }
 
 /*** info-pane *****************************/
-.left div {
+.left > div {
   margin: 3em 0;
 }
 .left div > p {
@@ -70,6 +70,11 @@ a:hover, .link:hover {
 .link-list li.mail {
   margin-top: 1em;
 }
+
+#twitter-widget-0 {
+    position: relative; 
+    top: 5px; 
+} 
 
 /*** main-pane *****************************/
 @media (min-width: 1050px) {
