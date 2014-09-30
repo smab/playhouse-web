@@ -72,6 +72,7 @@ def game_over(game, winnerH, coords = frozenset(), post_game_over=None):
 
     game.player = None
     game.timer_counter.stop()
+    game.game_started = False
 
     if post_game_over is not None:
         maybe_future = post_game_over()
