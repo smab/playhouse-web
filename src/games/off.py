@@ -27,6 +27,7 @@ def create(client):
 class Off(lightgames.Game):
     """A 'game' used to easily turn off the lights when not needed"""
 
+    template_file = "off.html"
     template_vars = { 'module_name': 'Off' }
 
     def reset(self):

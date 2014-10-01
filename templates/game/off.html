@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block style %}
+#game-area {
+  position: relative;
+  border: 2px solid #FFF;
+}
+
+#game-area > .extra {
+  position: absolute;
+  text-align: center;
+  width: 100%;
+  top: 50%;
+  margin-top: -3em;
+  vertical-align: middle;
+}
+
+#game-area > *:not(.extra) {
+  visibility: hidden;
+}
+
+
+{% end %}
+
+{% block game-extra %}
+  <h1>Play the House is currently offline</h1>
+  <p>We will be back soon</p>
+{% end %}
