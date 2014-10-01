@@ -90,8 +90,6 @@ class Mastermind(simplegame.SimpleGame):
       # self.set_description(handler)
         print("Syncing %s" % handler)
 
-        self.update_flasher()
-
         for y in range(len(self.board)):
             for x in range(len(self.board[y])):
                 hsl = self.colors[self.board[y][x]]
@@ -167,6 +165,9 @@ class Mastermind(simplegame.SimpleGame):
             self.correct_player(handler)
             return
 
+        if self.state == 0:
+            return
+
         choice = msg['choice']
 
         x = self.columns[self.player]
@@ -177,8 +178,6 @@ class Mastermind(simplegame.SimpleGame):
 
         # Handle state 'select hiddens'
      #  if self.state <= 1:
-        if self.state == 0:
-            return
 
         if self.state == 1:
             playerIdx = self.get_players().index(handler)
