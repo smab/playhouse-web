@@ -1,80 +1,42 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Play the House</title>
-    <link rel="stylesheet" href="/static/playthehouse.css" />
-    <link rel="stylesheet" href="/static/common.css" />
-  </head>
-  <body>
-    {# Facebook #}
-    <div id="fb-root"></div>
-    <script>
-        (function(d, s, id) {
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) return;
-            js = d.createElement(s); js.id = id;
-            js.src = "//connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.0";
-            fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'facebook-jssdk'));
-    </script>
+{% extends "game/mastermind.html" %}
 
-    <div id="site">
-      <header id="logo">
-        <a href="/"><img src="/static/img/logo.png" /></a>
-        <h1><a href="/">Play the House</a></h1>
-      </header>
+{% block style %}
+#game-area {
+  position: relative;
+/*border: 2px solid #FFF;*/
+}
 
-      <section class="main">
-        <div id="game-area">
-          <div id="grid-cont" style="border: 1px dashed white">
-            <p style="text-align:center; font-size:24pt;">Play between 19-06</p> 
-            <img style="visibility: hidden;" class="overlay" src="/static/img/playfield.png" /-->
+#game-area > .extra {
+  position: absolute;
+  text-align: center;
+  width: 100%;
+  top: 50%;
+  margin-top: -3em;
+  z-index: 1000;
+  vertical-align: middle;
+}
 
-          </div>
-        </div>
-        <div id="stream-cont">
-          {% raw stream_embedcode %}
-        </div>
-      </section>
+#game-area > *:not(.extra) {
+  opacity: 0.2;
+}
 
-      <section class="left">
-        <div>
-          <p>
-            The world's biggest online Mastermind game,<br/>
-            Play the Nod building in real life, in real time.
-          </p>
-        </div>
-      </section>
 
-      <aside class="left">
-        <div>
-          <ul class="link-list">
-            <li>Read about <a href="http://hakanlidbo.com/archives/3740">Play the House</a></li>
-            <li>This project is created with <a href="http://www2.meethue.com/en-US/">Philips Hue</a></li>
-            <li><a href="http://kistanod.se/en/">Read about Nod</a></li>
-            <li><a href="http://www.atriumljungberg.se/en/">Read about Atrium Ljungberg</a></li>
-            <li>With kind help from <a href="http://www.intertek.se/">Intertek</a></li>
-            <li><a href="#">Team SMAB / KTH</a></li>
-            <li><a href="http://hakanlidbo.com/">Håkan Lidbo</a></li>
-            <li class="mail">@ <a href="mailto:hakan@hakanlidbo.com">Contact</a></li>
-          </ul>
-          </p>
-        </div>
-        <div>
-          <p>Share on Facebook and Twitter</p>
-          <div style="margin: 0">
-            <div class="fb-like" data-href="http://playthehouse.com/" data-layout="button" data-action="like" data-show-faces="false" data-share="true"></div>
-            <a href="https://twitter.com/intent/tweet?button_hashtag=playthehouse" class="twitter-hashtag-button" data-url="http://playthehouse.com">Tweet #playthehouse</a>
-            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-          </div> 
-        </div>
-        <div>
-          <img src="/static/img/loggor.jpg" />
-        </div>
-      </aside>
-    </div>
+{% end %}
 
-  </body>
-</html>
+{% block simple_p0cont %}
+{% end %}
 
+{% block simple_p1cont %}
+{% end %}
+
+{% block game-extra %}
+  <h1>Play the House is currently offline</h1>
+  <p>Please return between 18:00 and 06:00 CEST (Stockholm)</p>
+{% end %}
+
+{% block script %}
+document.getElementById('message').innerHTML = '&nbsp;'
+{% end %}
+
+{% block game_base %}
+{% end %}

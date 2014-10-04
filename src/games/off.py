@@ -28,8 +28,30 @@ class Off(lightgames.Game):
     """A 'game' used to easily turn off the lights when not needed"""
 
     template_file = "off.html"
-    template_vars = { 'module_name': 'Off' }
+    template_vars = { 'module_name': 'Off',
+			'color_1': '#FF0000',
+			'color_2': '#FF0000',
+			'color_empty': '#FF0000',
+			'timelimit': 0,
+			'score_1': 0,
+			'score_2': 0
+		       	}
 
+
+    def __init__(self, client):
+        super().__init__(client)
+
+        self.template_vars['grid_x'] = 18
+        self.template_vars['grid_y'] = 3
+
+        self.template_vars['color_correct'] = '#FFFFFF'
+        self.template_vars['color_almost']  = '#FFFFFF'
+
+        self.template_vars['colors'] = [ '#FF0000',
+                                         '#00FF00',
+                                         '#0000FF',
+                                         '#FFFF00',
+                                         '#FF00FF' ]
     def reset(self):
         self.send_lamp_all({ "on": False })
 

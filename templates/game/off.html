@@ -1,9 +1,9 @@
-{% extends "base.html" %}
+{% extends "mastermind.html" %}
 
 {% block style %}
 #game-area {
   position: relative;
-  border: 2px solid #FFF;
+/*border: 2px solid #FFF;*/
 }
 
 #game-area > .extra {
@@ -12,17 +12,31 @@
   width: 100%;
   top: 50%;
   margin-top: -3em;
+  z-index: 1000;
   vertical-align: middle;
 }
 
 #game-area > *:not(.extra) {
-  visibility: hidden;
+  opacity: 0.2;
 }
 
 
 {% end %}
 
+{% block simple_p0cont %}
+{% end %}
+
+{% block simple_p1cont %}
+{% end %}
+
 {% block game-extra %}
   <h1>Play the House is currently offline</h1>
   <p>We will be back soon</p>
+{% end %}
+
+{% block script %}
+document.getElementById('message').innerHTML = '&nbsp;'
+{% end %}
+
+{% block game_base %}
 {% end %}

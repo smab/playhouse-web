@@ -11,6 +11,28 @@ class SimpleHandler(tornado.web.RequestHandler):
     def get(self): 
         template_vars = {
             'stream_embedcode': manager.config['stream_embedcode'], 
+            'module_name': 'Off',
+		'color_1': '#FF0000',
+		'color_2': '#FF0000',
+		'color_empty': '#FF0000',
+		'color_hover': '#FF0000',
+		'timelimit': 0,
+		'score_1': 0,
+		'score_2': 0,
+		'grid_x': 18,
+		'grid_y': 3,
+
+        'color_correct': '#FFFFFF',
+        'color_almost': '#FFFFFF',
+
+        'colors' : [ '#FF0000',
+                     '#00FF00',
+                     '#0000FF',
+                     '#FFFF00',
+                     '#FF00FF' ],
+
+	'socketport': manager.config['websocketport'],
+	'gamesession': ""
         }
         self.render('idle.html', **template_vars) 
 
