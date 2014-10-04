@@ -102,7 +102,7 @@
       return document.getElementById(x + "-" + y)
     }
 
-    window.addEventListener('load', function () {
+ // window.addEventListener('load', function () {
         var els = document.querySelectorAll('#color-choice .choice')
         for (var i = 0; i < els.length; i++) {
             (function (choice) {
@@ -113,7 +113,7 @@
                 }, false)
             })(i + 3)
         }
-    }, false)
+ // }, false)
 
     function reply(response) {
         ws.send(JSON.stringify(extend({ gameaction: true }, response)))
