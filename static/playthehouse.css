@@ -50,6 +50,7 @@ button#queuebtn {
   display: block;
   margin: 0.2em auto;
   height: 3em;
+  font-variant: small-caps;
 
   color: #FFF;
   background: #000;
@@ -75,6 +76,13 @@ button#queuebtn:disabled {
   float: left;
   margin-right: 0.5em;
   font-weight: bold;
+}
+
+.left div > ul {
+  padding-left: 0;
+}
+.left div > ul li {
+  margin-top: 0.5em;
 }
 
 .link-list {

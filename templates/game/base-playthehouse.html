@@ -2,7 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Play the House</title>
+    <meta name="application-name" value="Play the House" />
+    <meta name="description" value="Play the world's largest game of online Mastermind! Play the House lets you play the classic game of Mastermind against your friends using the Nod building in Kista, Stockholm." />
+    <meta name="keywords" value="play the house,mastermind,online,game,nod,kista,exhibition,art,livestream,play" />
+    <meta name="publisher" value="Håkan Lidbo" />
+    <meta name="google-site-verification" content="aZcuda65CHsKw4KqS9JOH0tX0eJMSDxSfa4HwMXwDpo" />
+    <title>Play the House!</title>
     <link rel="stylesheet" href="/static/playthehouse.css" />
     <link rel="stylesheet" href="/static/common.css" />
     <script src="/static/game-shared.js"></script>
@@ -13,7 +18,7 @@
       gridEl.style.height = window.getComputedStyle(overlayEl).height
     }
     window.addEventListener('resize', updateGridSize, false)
-    window.addEventListener('load', updateGridSize, false)
+ // window.addEventListener('load', updateGridSize, false)
     </script>
     <style>
     .grid           { background: #000;                    }
@@ -132,14 +137,29 @@
             When both players are ready, the game begins<br/>
             <br/>
             Guess your opponent's colour combination<br/>
-            Every even column is a guess, and every other is a clue
+            Every even column is a guess, and every other is a clue<br/>
+
+          <ul>
+            <li>
+              The number of <strong>white lights</strong> is the number of <strong>right colours</strong> in the <strong>right place</strong>
+            </li>
+            <li>
+              The number of <strong>flashing lights</strong> is the number of <strong>right colours</strong> in the <strong>wrong place</strong>
+            </li>
+
+		<!--
           </p>
           <dl>
             <dt>White light:</dt><dd>Right colour, right place</dd>
             <dt>Flashing light:</dt><dd>Right colour, wrong place</dd>
           </dl>
           <p>
-            The first player to guess the opponent's colour code wins!<br/>
+		-->
+
+            <li>
+		    The first player to guess the opponent's colour code wins!
+            </li>
+          </ul>
             <br/>
             Learn more about <a href="http://en.wikipedia.org/wiki/Mastermind_(board_game)">Mastermind on Wikipedia</a>
           </p>
@@ -175,6 +195,8 @@
     </div>
 
     <script>
+        document.querySelector('#grid-cont > .overlay').addEventListener('load', updateGridSize, false)
+
         var socketport = {{ socketport }}
 
         // For use in simplegame
@@ -230,6 +252,8 @@
         {% block script %}
         {% end %}
     </script>
+    {% block game_base %}
     <script src="/static/game-base.js"></script>
+    {% end %}
   </body>
 </html>
